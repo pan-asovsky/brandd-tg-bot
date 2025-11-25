@@ -1,0 +1,36 @@
+services:
+
+  brandd_bot:
+    build: .
+    container_name: brandd_bot
+    restart: unless-stopped
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      ADMIN_CHAT_ID: []
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      WEBHOOK_PATH: ${WEBHOOK_PATH}
+      HTTP_ADDRESS: 0.0.0.0:8118
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: brandd_2
+      DB_USER: brandd_user
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL_MODE: disable
+      REDIS_URL: cache:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_DB: 0
+      SESSION_TTL: 3600
+      LOG_LEVEL: info
+      ENVIRONMENT: production
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:8-alpine
+    container_name: brandd_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
