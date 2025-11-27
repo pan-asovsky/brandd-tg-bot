@@ -3,6 +3,8 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
@@ -22,6 +24,8 @@ func (s *slotRepo) IsTodayAvailable() bool {
 }
 
 func (s *slotRepo) GetAvailableSlots(date string) ([]model.Slot, error) {
+	log.Printf("[get_available_slots] started: %s", date)
+
 	rows, err := s.db.Query(GetZonesByDate, date)
 	if err != nil {
 		return nil, fmt.Errorf("get available slots request failed: %v", err)
@@ -31,19 +35,37 @@ func (s *slotRepo) GetAvailableSlots(date string) ([]model.Slot, error) {
 	var slots []model.Slot
 	for rows.Next() {
 		var slot model.Slot
+		var (
+			sqlDate time.Time
+			start   time.Time
+			end     time.Time
+			created time.Time
+		)
 		if err := rows.Scan(
 			&slot.ID,
-			&slot.Date,
-			&slot.StartTime,
-			&slot.EndTime,
+			&sqlDate,
+			&start,
+			&end,
 			&slot.IsAvailable,
-			&slot.CreatedAt,
+			&created,
 		); err != nil {
 			return nil, fmt.Errorf("row scan error: %w", err)
 		}
+
+		slot.Date = sqlDate.Format("2006-01-02")
+		slot.StartTime = start.Format("15:04")
+		slot.EndTime = end.Format("15:04")
+		slot.CreatedAt = created.Format("2006-01-02 15:04")
+
+		//log.Printf("[get_available_slots] mapped slot: %+v", slot)
 		slots = append(slots, slot)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %v", err)
+	}
+
+	log.Printf("[get_available_slots] date: %s, slots: %d", date, len(slots))
 	return slots, nil
 }
 

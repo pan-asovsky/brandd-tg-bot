@@ -9,5 +9,6 @@ import (
 type KeyboardService interface {
 	GreetingKeyboard() tg.InlineKeyboardMarkup
 	DateKeyboard([]slot.AvailableBooking) tg.InlineKeyboardMarkup
-	ZoneKeyboard(zone model.Zone) tg.InlineKeyboardMarkup
+	ZoneKeyboard(zone model.Zone, date string) tg.InlineKeyboardMarkup
+	TimeKeyboard([]model.Timeslot) tg.InlineKeyboardMarkup
 }

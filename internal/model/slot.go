@@ -1,19 +1,17 @@
 package model
 
-import "time"
-
 type Slot struct {
-	ID          int64     `db:"id"`
-	Date        time.Time `db:"date"`
-	StartTime   time.Time `db:"start_time"`
-	EndTime     time.Time `db:"end_time"`
-	IsAvailable bool      `db:"is_available"`
-	CreatedAt   time.Time `db:"created_at"`
+	ID          int64  `db:"id"`
+	Date        string `db:"date"`
+	StartTime   string `db:"start_time"`
+	EndTime     string `db:"end_time"`
+	IsAvailable bool   `db:"is_available"`
+	CreatedAt   string `db:"created_at"`
 }
 
 type Timeslot struct {
-	Start time.Time
-	End   time.Time
+	Start string
+	End   string
 }
 
 type Zone map[string][]Timeslot

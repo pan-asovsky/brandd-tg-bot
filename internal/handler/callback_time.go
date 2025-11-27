@@ -1,7 +1,12 @@
 package handler
 
-import api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+import (
+	"log"
 
-func (c *callbackHandler) handleTime(cb *api.CallbackQuery, date string) error {
+	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+)
+
+func (c *callbackHandler) handleTime(q *api.CallbackQuery, cd string) error {
+	log.Printf("[handle_time] callback: %s", cd)
 	return nil
 }

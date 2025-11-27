@@ -1,32 +1,28 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleDate(cb *api.CallbackQuery, date string) error {
-	log.Printf("Handle date callback: %s", date)
+func (c *callbackHandler) handleDate(q *api.CallbackQuery, cd string) error {
+	log.Printf("[handle_date] callback: %s", cd)
 
-	zones, err := c.slot.GetAvailableZones(date)
+	zones, err := c.slot.GetAvailableZones(cd)
 	if err != nil {
-		log.Printf("Error getting zones: %s", err)
+		return fmt.Errorf("error getting zones: %s", err)
 	}
 
-	if err = c.cache.SetZones(rd.KeyForDate(date), zones); err != nil {
-		log.Printf("Error caching zones: %s", err)
+	if err = c.cache.CacheZones(cd, zones); err != nil {
+		return fmt.Errorf("error caching zones: %s", err)
 	}
 
-	kb := c.kb.ZoneKeyboard(zones)
-	msg := api.NewMessage(cb.Message.Chat.ID, consts.ZoneChoosingMsg)
-	msg.ReplyMarkup = kb
-
-	if _, err := c.api.Send(msg); err != nil {
-		log.Printf("Error sending message to chat: %s", err)
-	}
+	kb := c.kb.ZoneKeyboard(zones, cd)
+	utils.SendKeyboardMessage(q.Message.Chat.ID, consts.ZoneChoosingMsg, kb, c.api)
 
 	return nil
 }

@@ -9,6 +9,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o bot ./cmd/bot
 
 FROM alpine:3.18
 
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Moscow
+
 WORKDIR /app
 COPY --from=builder /app/bot .
 COPY --from=builder /app/migrations/ ./migrations/

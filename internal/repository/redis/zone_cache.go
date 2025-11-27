@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
@@ -23,7 +24,7 @@ func NewZoneCache(r *cache.Client, ttl time.Duration) *ZoneCache {
 	}
 }
 
-func (c *ZoneCache) SetZones(key string, zones model.Zone) error {
+func (c *ZoneCache) CacheZones(key string, zones model.Zone) error {
 	data, err := json.Marshal(zones)
 	if err != nil {
 		return fmt.Errorf("failed to marshal zones: %w", err)
@@ -32,6 +33,8 @@ func (c *ZoneCache) SetZones(key string, zones model.Zone) error {
 	if err := c.cache.Set(key, data, c.ttl); err != nil {
 		return fmt.Errorf("failed to set key in redis: %w", err)
 	}
+
+	log.Printf("[cache_zones] ok. key: %s ttl: %s", key, c.ttl)
 	return nil
 }
 
@@ -49,9 +52,10 @@ func (c *ZoneCache) GetZones(key string) (model.Zone, error) {
 		return nil, fmt.Errorf("failed to unmarshal zones: %w", err)
 	}
 
+	log.Printf("[get_zones] ok. key: %s ttl: %s", key, c.ttl)
 	return zones, nil
 }
 
-func KeyForDate(date string) string {
-	return fmt.Sprintf("zones:%s", date)
+func FormatKey(key string, data string) string {
+	return fmt.Sprintf("%s:%s", key, data)
 }

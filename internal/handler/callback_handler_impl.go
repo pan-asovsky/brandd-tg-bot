@@ -51,17 +51,17 @@ func (c *callbackHandler) register(prefix string, handler CallbackFunc) {
 	c.handlers[prefix] = handler
 }
 
-func (c *callbackHandler) Handle(ctx context.Context, cb *api.CallbackQuery) error {
-	c.cleanup(cb)
+func (c *callbackHandler) Handle(ctx context.Context, query *api.CallbackQuery) error {
+	c.cleanup(query)
 
 	for prefix, handler := range c.handlers {
-		if strings.HasPrefix(cb.Data, prefix) {
-			data := strings.TrimPrefix(cb.Data, prefix)
-			return handler(cb, data)
+		if strings.HasPrefix(query.Data, prefix) {
+			cb := strings.TrimPrefix(query.Data, prefix)
+			return handler(query, cb)
 		}
 	}
 
-	log.Printf("callback handler not found for %s", cb.Data)
+	log.Printf("callback handler not found for %s", query.Data)
 	return nil
 }
 

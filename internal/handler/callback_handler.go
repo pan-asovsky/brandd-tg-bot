@@ -7,5 +7,5 @@ import (
 )
 
 type CallbackHandler interface {
-	Handle(ctx context.Context, callback *tgbotapi.CallbackQuery) error
+	Handle(ctx context.Context, query *tgbotapi.CallbackQuery) error
 }

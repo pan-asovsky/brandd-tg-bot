@@ -52,24 +52,28 @@ func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 		return nil, fmt.Errorf("error getting available slots: %w", err)
 	}
 
-	log.Printf("Retrieved %d slots for date %s", len(slots), date)
-
 	return s.groupByZones(slots), nil
 }
 
 func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
 	zones := make(model.Zone)
+
 	for _, slot := range slots {
 		if !slot.IsAvailable {
 			continue
 		}
 
-		slotHour := time.Date(0, 1, 1, slot.StartTime.Hour(), slot.StartTime.Minute(), 0, 0, time.UTC)
+		slotTime, err := time.Parse("15:04", slot.StartTime)
+		if err != nil {
+			log.Printf("[group_by_zones] error parsing slot time %s: %v", slot.StartTime, err)
+			continue
+		}
+
 		for _, z := range model.ZonesDefinition {
 			startTime, _ := time.Parse("15:04", z.Start)
 			endTime, _ := time.Parse("15:04", z.End)
 
-			if !slotHour.Before(startTime) && slotHour.Before(endTime) {
+			if !slotTime.Before(startTime) && slotTime.Before(endTime) {
 				zones[z.Name] = append(zones[z.Name], model.Timeslot{
 					Start: slot.StartTime,
 					End:   slot.EndTime,
@@ -78,7 +82,5 @@ func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
 			}
 		}
 	}
-
-	log.Printf("groupByZones summary zones: %d", len(zones))
 	return zones
 }

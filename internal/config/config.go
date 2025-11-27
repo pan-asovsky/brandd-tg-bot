@@ -49,7 +49,7 @@ func Load() (*Config, error) {
 		RedisURL:      utils.GetEnv("REDIS_URL", "cache:6379"),
 		RedisPassword: utils.GetEnvRequired("REDIS_PASSWORD"),
 		RedisDB:       utils.GetEnv("REDIS_DB", 0),
-		SessionTTL:    utils.GetEnv("SESSION_TTL", time.Duration(3600)*time.Second),
+		SessionTTL:    utils.GetEnv("SESSION_TTL", time.Duration(900)*time.Second),
 
 		LogLevel:    utils.GetEnv("LOG_LEVEL", "info"),
 		Environment: utils.GetEnv("ENVIRONMENT", "production"),
