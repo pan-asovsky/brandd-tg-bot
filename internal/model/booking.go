@@ -5,11 +5,12 @@ import "time"
 type BookingStatus string
 
 const (
-	Pending   BookingStatus = "PENDING"
-	Confirmed BookingStatus = "CONFIRMED"
-	Completed BookingStatus = "COMPLETED"
-	Cancelled BookingStatus = "CANCELLED"
-	NoShow    BookingStatus = "NO_SHOW"
+	Pending      BookingStatus = "PENDING"
+	NotConfirmed BookingStatus = "NOT_CONFIRMED"
+	Confirmed    BookingStatus = "CONFIRMED"
+	Completed    BookingStatus = "COMPLETED"
+	Cancelled    BookingStatus = "CANCELLED"
+	NoShow       BookingStatus = "NO_SHOW"
 )
 
 type Booking struct {
