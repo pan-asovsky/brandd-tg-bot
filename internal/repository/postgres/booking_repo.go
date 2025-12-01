@@ -17,18 +17,16 @@ type bookingRepo struct {
 }
 
 func (b *bookingRepo) Create(booking *model.Booking) error {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (b *bookingRepo) FindActiveByTelegramID(telegramID int64) (*model.Booking, error) {
 	//TODO implement me
-	panic("implement me")
+	return nil, nil
 }
 
 func (b *bookingRepo) UpdateStatus(id int64, status model.BookingStatus) error {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func NewBookingRepo(db *sql.DB) BookingRepo {

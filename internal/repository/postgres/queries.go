@@ -16,4 +16,5 @@ const (
 	`
 	GetAllServiceTypes = `SELECT * FROM service_types`
 	GetAllRimSizes     = `SELECT DISTINCT rim_size FROM prices`
+	IsAutoConfirm      = `SELECT auto_confirm from config`
 )

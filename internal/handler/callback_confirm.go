@@ -8,5 +8,6 @@ import (
 
 func (c *callbackHandler) handleConfirm(q *api.CallbackQuery, cd string) error {
 	log.Printf("[handle_confirm] callback: %s", cd)
+
 	return nil
 }

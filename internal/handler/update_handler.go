@@ -19,12 +19,11 @@ func NewUpdateHandler(
 	kb kb.KeyboardService,
 	slot slot.SlotService,
 	lockSvc service.LockService,
-	svcRepo pg.ServiceRepo,
-	priceRepo pg.PriceRepo,
+	repoProvider pg.PgProvider,
 ) *UpdateHandler {
 	return &UpdateHandler{
 		command:  NewCommandHandler(api, kb),
-		callback: NewCallbackHandler(api, kb, slot, lockSvc, svcRepo, priceRepo),
+		callback: NewCallbackHandler(api, kb, slot, lockSvc, repoProvider.Service(), repoProvider.Price(), repoProvider.Config()),
 		message:  NewMessageHandler(api),
 	}
 }

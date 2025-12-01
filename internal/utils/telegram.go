@@ -14,3 +14,10 @@ func SendKeyboardMessage(chatID int64, text string, kb api.InlineKeyboardMarkup,
 		log.Printf("[send_keyboard_message] error sending message: %s", err)
 	}
 }
+
+func SendMessage(chatID int64, text string, bot *api.BotAPI) {
+	msg := api.NewMessage(chatID, text)
+	if _, err := bot.Send(msg); err != nil {
+		log.Printf("[send_message] error sending message: %s", err)
+	}
+}

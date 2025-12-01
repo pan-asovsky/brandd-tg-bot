@@ -19,6 +19,7 @@ type callbackHandler struct {
 	lockSvc   service.LockService
 	svcRepo   pg.ServiceRepo
 	priceRepo pg.PriceRepo
+	cfgRepo   pg.ConfigRepo
 	handlers  map[string]CallbackFunc
 }
 
@@ -29,6 +30,7 @@ func NewCallbackHandler(
 	lockSvc service.LockService,
 	svcRepo pg.ServiceRepo,
 	priceRepo pg.PriceRepo,
+	cfgRepo pg.ConfigRepo,
 ) CallbackHandler {
 	ch := &callbackHandler{
 		api:       api,
@@ -37,6 +39,7 @@ func NewCallbackHandler(
 		lockSvc:   lockSvc,
 		svcRepo:   svcRepo,
 		priceRepo: priceRepo,
+		cfgRepo:   cfgRepo,
 		handlers:  map[string]CallbackFunc{},
 	}
 

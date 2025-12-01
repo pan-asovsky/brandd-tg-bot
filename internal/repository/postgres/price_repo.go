@@ -13,10 +13,6 @@ type priceRepo struct {
 	db *sql.DB
 }
 
-func NewPriceRepo(db *sql.DB) PriceRepo {
-	return &priceRepo{db: db}
-}
-
 func (pr priceRepo) GetAllRimSizes() []string {
 	rows, err := pr.db.Query(GetAllRimSizes)
 	if err != nil {

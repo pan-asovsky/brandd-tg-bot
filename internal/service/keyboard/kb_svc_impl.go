@@ -128,3 +128,12 @@ func (s *service) RimsKeyboard(rims []string, svc, time, date string) tg.InlineK
 
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
+
+func (s *service) ConfirmKeyboard() tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(consts.ConfirmBtn, consts.ConfirmCbk),
+			tg.NewInlineKeyboardButtonData(consts.RejectBtn, consts.RejectCbk),
+		),
+	)
+}

@@ -14,7 +14,7 @@ func (c *callbackHandler) handleService(q *api.CallbackQuery, cd string) error {
 
 	rims := c.priceRepo.GetAllRimSizes()
 	kb := c.kb.RimsKeyboard(rims, svc, t, d)
-	utils.SendKeyboardMessage(q.Message.Chat.ID, consts.RimsMsg, kb, c.api)
+	utils.SendKeyboardMessage(q.Message.Chat.ID, consts.RimMsg, kb, c.api)
 
 	return nil
 }

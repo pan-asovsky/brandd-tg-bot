@@ -15,10 +15,6 @@ type serviceRepo struct {
 	db *sql.DB
 }
 
-func NewServiceRepo(db *sql.DB) ServiceRepo {
-	return &serviceRepo{db: db}
-}
-
 func (sr serviceRepo) GetServiceTypes() ([]model.ServiceType, error) {
 	rows, err := sr.db.Query(GetAllServiceTypes)
 	if err != nil {

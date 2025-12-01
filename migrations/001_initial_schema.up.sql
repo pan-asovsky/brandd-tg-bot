@@ -49,6 +49,10 @@ CREATE TABLE bookings (
     CONSTRAINT valid_wheel_count CHECK (wheel_count BETWEEN 1 AND 8)
 );
 
+CREATE TABLE config (
+    auto_confirm BOOLEAN NOT NULL
+);
+
 CREATE INDEX idx_slots_date_available ON available_slots(date, is_available) WHERE is_available = true;
 CREATE INDEX idx_slots_date_time ON available_slots(date, start_time);
 CREATE INDEX idx_bookings_chat_id ON bookings(chat_id);

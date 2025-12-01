@@ -31,10 +31,7 @@ type App struct {
 	Cache         *redis.Client
 	Postgres      *sql.DB
 	SessionRepo   *rd.SessionRepo
-	PriceRepo     pg.PriceRepo
-	BookingRepo   pg.BookingRepo
-	SlotRepo      pg.SlotRepo
-	ServiceRepo   pg.ServiceRepo
+	RepoProvider  *pg.PgProvider
 	TelegramBot   *tg.BotAPI
 	Slot          slot.SlotService
 	LockService   *service.LockService
@@ -81,12 +78,8 @@ func (a *App) Init() error {
 	}
 	a.LockService = service.NewLockService(sl, cache.NewLockCache(a.Cache, a.Config.SlotLockTTL))
 
-	// repositories
-	a.SessionRepo = rd.NewSessionRepo(a.Cache, a.Config.SessionTTL)
-	a.BookingRepo = pg.NewBookingRepo(a.Postgres)
-	a.SlotRepo = pg.NewSlotRepo(a.Postgres)
-	a.ServiceRepo = pg.NewServiceRepo(a.Postgres)
-	a.PriceRepo = pg.NewPriceRepo(a.Postgres)
+	// provider
+	a.RepoProvider = pg.NewPgProvider(a.Postgres)
 
 	tgbot, err := bot.NewTelegramBot(a.Config.BotToken, a.Config.WebhookURL)
 	if err != nil {
@@ -96,8 +89,8 @@ func (a *App) Init() error {
 
 	// service + handler
 	a.Keyboard = kb.NewKeyboard()
-	a.Slot = slot.NewSlot(a.SlotRepo, sl)
-	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.Keyboard, a.Slot, *a.LockService, a.ServiceRepo, a.PriceRepo)
+	a.Slot = slot.NewSlot(a.RepoProvider.Slot(), sl)
+	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.Keyboard, a.Slot, *a.LockService, *a.RepoProvider)
 
 	return nil
 }

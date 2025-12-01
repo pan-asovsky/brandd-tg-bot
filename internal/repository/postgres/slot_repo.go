@@ -17,10 +17,6 @@ type slotRepo struct {
 	db *sql.DB
 }
 
-func NewSlotRepo(db *sql.DB) SlotRepo {
-	return &slotRepo{db: db}
-}
-
 func (s *slotRepo) IsTodayAvailable() bool {
 	var available bool
 	err := s.db.QueryRow(IsTodayAvailable).Scan(&available)
