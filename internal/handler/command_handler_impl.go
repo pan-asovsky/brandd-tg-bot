@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -18,7 +17,7 @@ func NewCommandHandler(api *tgbotapi.BotAPI, kb kb.KeyboardService) CommandHandl
 	return &commandHandler{api, kb}
 }
 
-func (c *commandHandler) Handle(ctx context.Context, msg *tgbotapi.Message) error {
+func (c *commandHandler) Handle(msg *tgbotapi.Message) error {
 	switch msg.Text {
 	case consts.Start:
 		c.handleStart(msg.Chat.ID)

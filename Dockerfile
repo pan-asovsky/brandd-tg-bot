@@ -15,6 +15,7 @@ ENV TZ=Europe/Moscow
 WORKDIR /app
 COPY --from=builder /app/bot .
 COPY --from=builder /app/migrations/ ./migrations/
+COPY --from=builder /app/script/ ./script/
 
 EXPOSE 8118
 CMD ["./bot"]

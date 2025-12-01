@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 	"sort"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -63,18 +62,61 @@ func (s *service) ZoneKeyboard(zones model.Zone, date string) tg.InlineKeyboardM
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *service) TimeKeyboard(ts []model.Timeslot) tg.InlineKeyboardMarkup {
+func (s *service) TimeKeyboard(ts []model.Timeslot, zone, date string) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 	var currentRow []tg.InlineKeyboardButton
 
 	for i, t := range ts {
 		txt := fmt.Sprintf("%s-%s", t.Start, t.End)
-		cb := fmt.Sprintf("%s%s", consts.PrefixTime, txt)
-		log.Printf("[time_kb] txt: %s, data: %s", txt, cb)
+		cb := fmt.Sprintf("%s%s:%s:%s", consts.PrefixTime, txt, zone, date)
+		//log.Printf("[time_kb] txt: %s, data: %s", txt, cb)
 
 		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(txt, cb))
 
 		if i%2 == 1 {
+			rows = append(rows, currentRow)
+			currentRow = []tg.InlineKeyboardButton{}
+		}
+	}
+
+	if len(currentRow) > 0 {
+		rows = append(rows, currentRow)
+	}
+
+	return tg.NewInlineKeyboardMarkup(rows...)
+}
+
+func (s *service) ServiceKeyboard(types []model.ServiceType, time, date string) tg.InlineKeyboardMarkup {
+	var rows [][]tg.InlineKeyboardButton
+	var currentRow []tg.InlineKeyboardButton
+
+	for i, t := range types {
+		cb := fmt.Sprintf("%s%s:%s:%s", consts.PrefixService, t.ServiceCode, time, date)
+		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(t.ServiceName, cb))
+
+		if i%2 == 1 {
+			rows = append(rows, currentRow)
+			currentRow = []tg.InlineKeyboardButton{}
+		}
+	}
+
+	if len(currentRow) > 0 {
+		rows = append(rows, currentRow)
+	}
+
+	return tg.NewInlineKeyboardMarkup(rows...)
+}
+
+func (s *service) RimsKeyboard(rims []string, svc, time, date string) tg.InlineKeyboardMarkup {
+	var rows [][]tg.InlineKeyboardButton
+	var currentRow []tg.InlineKeyboardButton
+
+	sort.Strings(rims)
+	for i, rim := range rims {
+		cb := fmt.Sprintf("%s%s:%s:%s:%s", consts.PrefixRim, rim, svc, time, date)
+		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(rim, cb))
+
+		if i%3 == 1 {
 			rows = append(rows, currentRow)
 			currentRow = []tg.InlineKeyboardButton{}
 		}

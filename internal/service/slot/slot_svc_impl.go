@@ -5,19 +5,22 @@ import (
 	"log"
 	"time"
 
+	rd "github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
-	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
 )
 
 type slotService struct {
-	slotRepo pg.SlotRepository
-	cache    rd.ZoneCache
+	slotRepo   pg.SlotRepo
+	slotLocker *rd.SlotLocker
 }
 
-func NewSlot(slotRepo pg.SlotRepository) SlotService {
-	return &slotService{slotRepo: slotRepo}
+func NewSlot(slotRepo pg.SlotRepo, slotLocker *rd.SlotLocker) SlotService {
+	return &slotService{
+		slotRepo:   slotRepo,
+		slotLocker: slotLocker,
+	}
 }
 
 func (s *slotService) GetAvailableBookings() []AvailableBooking {
@@ -52,7 +55,26 @@ func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 		return nil, fmt.Errorf("error getting available slots: %w", err)
 	}
 
-	return s.groupByZones(slots), nil
+	keys := make([]string, len(slots))
+	for i, slot := range slots {
+		keys[i] = s.slotLocker.FormatKey(slot.Date, fmt.Sprintf("%s-%s", slot.StartTime, slot.EndTime))
+		//log.Printf("[get_available_zones] redis key: %s", keys[i])
+	}
+
+	lockStatus, err := s.slotLocker.AreLocked(keys...)
+	if err != nil {
+		return nil, fmt.Errorf("[get_available_zones] failed to check locks: %w", err)
+	}
+
+	filtered := make([]model.Slot, 0, len(slots))
+	for i, key := range keys {
+		if !lockStatus[key] {
+			filtered = append(filtered, slots[i])
+		}
+	}
+	log.Printf("[get_available_zones] slots: %d, filtered: %d", len(slots), len(filtered))
+
+	return s.groupByZones(filtered), nil
 }
 
 func (s *slotService) groupByZones(slots []model.Slot) model.Zone {

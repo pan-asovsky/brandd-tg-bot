@@ -14,4 +14,6 @@ const (
   		AND is_available = true
 		ORDER BY start_time
 	`
+	GetAllServiceTypes = `SELECT * FROM service_types`
+	GetAllRimSizes     = `SELECT DISTINCT rim_size FROM prices`
 )

@@ -8,5 +8,7 @@ import (
 
 func (c *callbackHandler) handleRim(q *api.CallbackQuery, cd string) error {
 	log.Printf("[handle_rim] callback: %s", cd)
+
+	//todo: pre-message and confirm kb
 	return nil
 }

@@ -13,26 +13,31 @@ import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/bot"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
 	kb "github.com/pan-asovsky/brandd-tg-bot/internal/service/keyboard"
 	slot "github.com/pan-asovsky/brandd-tg-bot/internal/service/slot"
+	"github.com/redis/go-redis/v9"
 )
 
 type App struct {
 	Context       context.Context
 	Config        *config.Config
-	Redis         *cache.Client
+	Cache         *redis.Client
 	Postgres      *sql.DB
-	ZoneCache     *rd.ZoneCache
 	SessionRepo   *rd.SessionRepo
-	BookingRepo   pg.BookingRepository
-	SlotRepo      pg.SlotRepository
+	PriceRepo     pg.PriceRepo
+	BookingRepo   pg.BookingRepo
+	SlotRepo      pg.SlotRepo
+	ServiceRepo   pg.ServiceRepo
 	TelegramBot   *tg.BotAPI
 	Slot          slot.SlotService
+	LockService   *service.LockService
 	Keyboard      kb.KeyboardService
 	UpdateHandler *handler.UpdateHandler
 	httpServer    *http.Server
@@ -55,7 +60,7 @@ func (a *App) Init() error {
 	if err != nil {
 		return err
 	}
-	a.Redis = redisClient
+	a.Cache = redisClient
 
 	// postgres client
 	db, err := postgres.NewPostgres(cfg)
@@ -70,29 +75,18 @@ func (a *App) Init() error {
 	)
 	postgres.RunMigrations(dbURL)
 
+	sl, err := locker.NewSlotLocker(a.Cache, a.Config.SlotLockTTL)
+	if err != nil {
+		return err
+	}
+	a.LockService = service.NewLockService(sl, cache.NewLockCache(a.Cache, a.Config.SlotLockTTL))
+
 	// repositories
-	a.ZoneCache = rd.NewZoneCache(a.Redis, a.Config.SessionTTL)
-	a.SessionRepo = rd.NewSessionRepo(a.Redis, a.Config.SessionTTL)
+	a.SessionRepo = rd.NewSessionRepo(a.Cache, a.Config.SessionTTL)
 	a.BookingRepo = pg.NewBookingRepo(a.Postgres)
 	a.SlotRepo = pg.NewSlotRepo(a.Postgres)
-
-	////telegram bot
-	//bot, err := tg.NewBotAPI(a.Config.BotToken)
-	//if err != nil {
-	//	return fmt.Errorf("failed to create telegram bot: %w", err)
-	//}
-	//log.Printf("Authorized on account %s", tgbot.Self.UserName)
-	//
-	//whInfo, _ := tgbot.GetWebhookInfo()
-	//if whInfo.URL != a.Config.WebhookURL {
-	//	webhook, err := tg.NewWebhook(a.Config.WebhookURL)
-	//	if err != nil {
-	//		return fmt.Errorf("failed to create webhook: %w", err)
-	//	}
-	//	if _, err := tgbot.Request(webhook); err != nil {
-	//		return fmt.Errorf("failed to set webhook: %w", err)
-	//	}
-	//}
+	a.ServiceRepo = pg.NewServiceRepo(a.Postgres)
+	a.PriceRepo = pg.NewPriceRepo(a.Postgres)
 
 	tgbot, err := bot.NewTelegramBot(a.Config.BotToken, a.Config.WebhookURL)
 	if err != nil {
@@ -102,8 +96,8 @@ func (a *App) Init() error {
 
 	// service + handler
 	a.Keyboard = kb.NewKeyboard()
-	a.Slot = slot.NewSlot(a.SlotRepo)
-	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.Keyboard, a.Slot, *a.ZoneCache)
+	a.Slot = slot.NewSlot(a.SlotRepo, sl)
+	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.Keyboard, a.Slot, *a.LockService, a.ServiceRepo, a.PriceRepo)
 
 	return nil
 }
@@ -121,8 +115,8 @@ func (a *App) Run() error {
 			log.Printf("Invalid update payload: %v", err)
 			return
 		}
-		if err := a.UpdateHandler.Handle(a.Context, &update); err != nil {
-			log.Printf("Error handling update: %v", err)
+		if err := a.UpdateHandler.Handle(&update); err != nil {
+			log.Printf("[app] error handling update: %v", err)
 		}
 		c.Status(200)
 	})
@@ -155,8 +149,8 @@ func (a *App) Close() {
 			log.Printf("Error closing postgres connection: %s", err)
 		}
 	}
-	if a.Redis != nil {
-		err := a.Redis.Close()
+	if a.Cache != nil {
+		err := a.Cache.Close()
 		if err != nil {
 			log.Printf("Error closing cache connection: %s", err)
 		}

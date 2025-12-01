@@ -11,5 +11,5 @@ const (
 	ServiceCodeTireChange = "TIRE_SERVICE"
 	ServiceCodeBalancing  = "BALANCING"
 	ServiceCodeComplex    = "COMPLEX"
-	ServiceCodeService    = "SERVICE"
+	ServiceCodeTakeItOut  = "TAKE_IT_OUT"
 )

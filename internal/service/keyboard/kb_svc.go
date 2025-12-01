@@ -10,5 +10,7 @@ type KeyboardService interface {
 	GreetingKeyboard() tg.InlineKeyboardMarkup
 	DateKeyboard([]slot.AvailableBooking) tg.InlineKeyboardMarkup
 	ZoneKeyboard(zone model.Zone, date string) tg.InlineKeyboardMarkup
-	TimeKeyboard([]model.Timeslot) tg.InlineKeyboardMarkup
+	TimeKeyboard(ts []model.Timeslot, zone string, date string) tg.InlineKeyboardMarkup
+	ServiceKeyboard(types []model.ServiceType, time string, date string) tg.InlineKeyboardMarkup
+	RimsKeyboard(rims []string, svc, t, d string) tg.InlineKeyboardMarkup
 }

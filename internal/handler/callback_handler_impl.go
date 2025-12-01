@@ -1,37 +1,43 @@
 package handler
 
 import (
-	"context"
 	"log"
 	"strings"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
+	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
 	kb "github.com/pan-asovsky/brandd-tg-bot/internal/service/keyboard"
 	slot "github.com/pan-asovsky/brandd-tg-bot/internal/service/slot"
 )
 
 type callbackHandler struct {
-	api      *api.BotAPI
-	kb       kb.KeyboardService
-	slot     slot.SlotService
-	cache    rd.ZoneCache
-	handlers map[string]CallbackFunc
+	api       *api.BotAPI
+	kb        kb.KeyboardService
+	slot      slot.SlotService
+	lockSvc   service.LockService
+	svcRepo   pg.ServiceRepo
+	priceRepo pg.PriceRepo
+	handlers  map[string]CallbackFunc
 }
 
 func NewCallbackHandler(
 	api *api.BotAPI,
 	kb kb.KeyboardService,
 	slot slot.SlotService,
-	cache rd.ZoneCache,
+	lockSvc service.LockService,
+	svcRepo pg.ServiceRepo,
+	priceRepo pg.PriceRepo,
 ) CallbackHandler {
 	ch := &callbackHandler{
-		api:      api,
-		kb:       kb,
-		slot:     slot,
-		cache:    cache,
-		handlers: map[string]CallbackFunc{},
+		api:       api,
+		kb:        kb,
+		slot:      slot,
+		lockSvc:   lockSvc,
+		svcRepo:   svcRepo,
+		priceRepo: priceRepo,
+		handlers:  map[string]CallbackFunc{},
 	}
 
 	ch.register(consts.PrefixMenu, ch.handleMenu)
@@ -51,7 +57,7 @@ func (c *callbackHandler) register(prefix string, handler CallbackFunc) {
 	c.handlers[prefix] = handler
 }
 
-func (c *callbackHandler) Handle(ctx context.Context, query *api.CallbackQuery) error {
+func (c *callbackHandler) Handle(query *api.CallbackQuery) error {
 	c.cleanup(query)
 
 	for prefix, handler := range c.handlers {
