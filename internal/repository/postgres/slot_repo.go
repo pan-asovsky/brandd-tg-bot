@@ -87,7 +87,7 @@ func (s *slotRepo) FindByDateAndTime(date, start, end string) (*model.Slot, erro
 		&created,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("[find_by_date_and_time] slot not founded: %v", err)
+			return nil, fmt.Errorf("[find_by_date_and_time] not founded for %s %s-%s %+v", date, start, end, err)
 		}
 		return nil, fmt.Errorf("[find_slot_by_date_time] failed: %v", err)
 	}

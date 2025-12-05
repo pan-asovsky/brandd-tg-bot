@@ -43,10 +43,11 @@ func (s *slotService) GetAvailableBookings() []AvailableBooking {
 	return bookings
 }
 
-func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
+func (s *slotService) GetAvailableZones(date string) model.Zone {
 	slots, err := s.slotRepo.GetAvailableSlots(date)
 	if err != nil {
-		return nil, fmt.Errorf("error getting available slots: %w", err)
+		log.Fatalf("error getting available slots: %v", err)
+		return nil
 	}
 
 	keys := make([]string, len(slots))
@@ -57,7 +58,8 @@ func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 
 	lockStatus, err := s.slotLocker.AreLocked(keys...)
 	if err != nil {
-		return nil, fmt.Errorf("[get_available_zones] failed to check locks: %w", err)
+		log.Fatalf("[get_available_zones] failed to check locks: %v", err)
+		return nil
 	}
 
 	filtered := make([]model.Slot, 0, len(slots))
@@ -68,7 +70,7 @@ func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 	}
 	log.Printf("[get_available_zones] slots: %d, filtered: %d", len(slots), len(filtered))
 
-	return s.groupByZones(filtered), nil
+	return s.groupByZones(filtered)
 }
 
 func (s *slotService) groupByZones(slots []model.Slot) model.Zone {

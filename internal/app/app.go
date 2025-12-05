@@ -74,15 +74,15 @@ func (a *App) Init() error {
 	}
 	lockCache := cache.NewLockCache(a.Cache, a.Config.SlotLockTTL)
 
-	// provider
-	a.RepoProvider = pg.NewPgProvider(a.Postgres)
-	a.ServiceProvider = service.NewProvider(a.RepoProvider, sl, lockCache, a.TelegramBot)
-
 	tgbot, err := bot.NewTelegramBot(a.Config.BotToken, a.Config.WebhookURL)
 	if err != nil {
 		return err
 	}
 	a.TelegramBot = tgbot
+
+	// provider
+	a.RepoProvider = pg.NewPgProvider(a.Postgres)
+	a.ServiceProvider = service.NewProvider(a.RepoProvider, sl, lockCache, a.TelegramBot)
 
 	// handler
 	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.RepoProvider)

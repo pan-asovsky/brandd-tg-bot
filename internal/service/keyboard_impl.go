@@ -6,6 +6,7 @@ import (
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
@@ -57,13 +58,13 @@ func (s *keyboardService) ZoneKeyboard(zones model.Zone, date string) tg.InlineK
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *keyboardService) TimeKeyboard(ts []model.Timeslot, zone, date string) tg.InlineKeyboardMarkup {
+func (s *keyboardService) TimeKeyboard(ts []model.Timeslot, info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 	var currentRow []tg.InlineKeyboardButton
 
 	for i, t := range ts {
 		txt := fmt.Sprintf("%s-%s", t.Start, t.End)
-		cb := fmt.Sprintf("%s%s:%s:%s", consts.PrefixTime, txt, zone, date)
+		cb := fmt.Sprintf("%s%s:%s:%s", consts.PrefixTime, txt, info.Zone, info.Date)
 		//log.Printf("[time_kb] txt: %s, data: %s", txt, cb)
 
 		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(txt, cb))

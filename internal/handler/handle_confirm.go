@@ -9,12 +9,12 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleConfirm(q *api.CallbackQuery, cd string) error {
+func (c *callbackHandler) handleConfirm(q *api.CallbackQuery, cd string) {
 	log.Printf("[handle_confirm] callback: %s", cd)
 
 	auto, err := c.cfgRepo.IsAutoConfirm()
 	if err != nil {
-		return err
+		log.Fatalf("[handle_confirm] error: %v", err)
 	}
 
 	if auto {
@@ -23,6 +23,4 @@ func (c *callbackHandler) handleConfirm(q *api.CallbackQuery, cd string) error {
 	} else {
 		utils.SendMsg(q.Message.Chat.ID, consts.PendingConfirmMsg, c.api)
 	}
-
-	return nil
 }

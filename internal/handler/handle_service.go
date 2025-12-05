@@ -6,7 +6,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleService(q *api.CallbackQuery, cd string) error {
+func (c *callbackHandler) handleService(q *api.CallbackQuery, cd string) {
 	//log.Printf("[handle_service] callback: %s", cd)
 
 	//todo:
@@ -15,6 +15,4 @@ func (c *callbackHandler) handleService(q *api.CallbackQuery, cd string) error {
 	rims := c.priceRepo.GetAllRimSizes()
 	kb := c.kb.RimsKeyboard(rims, svc, t, d)
 	utils.SendKeyboardMsg(q.Message.Chat.ID, consts.RimMsg, kb, c.api)
-
-	return nil
 }

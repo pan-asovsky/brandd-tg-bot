@@ -1,28 +1,29 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 	"regexp"
-	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 )
 
-func ParseZoneCallback(cd string) (zone, date string) {
+func ParseDateCallback(cd string) *types.UserSessionInfo {
+	return &types.UserSessionInfo{Date: cd}
+}
+
+func ParseZoneCallback(cd string) *types.UserSessionInfo {
 	re := regexp.MustCompile(`^([0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}):([0-9]{4}-[0-9]{2}-[0-9]{2})$`)
 
 	matches := re.FindStringSubmatch(cd)
-	if len(matches) != 3 {
-		log.Printf("[parse_callback] invalid callback format: %s", cd)
-		return
+	if matches == nil {
+		log.Fatalf("[parse_callback] invalid callback format: %s", cd)
 	}
 
-	zone = matches[1]
-	date = matches[2]
+	zone := matches[1]
+	date := matches[2]
 	//log.Printf("[parse_callback] zone: %s, date: %s", zone, date)
 
-	return zone, date
+	return &types.UserSessionInfo{Date: date, Zone: zone}
 }
 
 func ParseTimeCallback(cd string) (time, zone, date string) {
@@ -59,12 +60,13 @@ func ParseServiceCallback(callback string) (svc, time, date string) {
 	return svc, time, date
 }
 
-func ParseRimCallback(callback string) (*types.UserSessionInfo, error) {
+func ParseRimCallback(cd string) *types.UserSessionInfo {
 	re := regexp.MustCompile(`^(\d+):([A-Z_]+):(\d{2}:\d{2}-\d{2}:\d{2}):(\d{4}-\d{2}-\d{2})$`)
 
-	matches := re.FindStringSubmatch(callback)
+	matches := re.FindStringSubmatch(cd)
 	if matches == nil {
-		return &types.UserSessionInfo{}, fmt.Errorf("[parse_callback] invalid callback format: %s", callback)
+		log.Fatalf("[parse_callback] invalid callback format: %s", cd)
+		return nil
 	}
 
 	r := matches[1]
@@ -72,14 +74,14 @@ func ParseRimCallback(callback string) (*types.UserSessionInfo, error) {
 	t := matches[3]
 	date := matches[4]
 
-	return &types.UserSessionInfo{Date: reformatDate(date), Time: t, Service: svc, Radius: r}, nil
+	return &types.UserSessionInfo{Date: date, Time: t, Service: svc, Radius: r}
 }
 
-func reformatDate(date string) string {
-	t, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		log.Printf("[reformat_date] failed: %s", date)
-		return ""
-	}
-	return t.Format("02.01.2006")
-}
+//func reformatDate(date string) string {
+//	t, err := time.Parse("2006-01-02", date)
+//	if err != nil {
+//		log.Printf("[reformat_date] failed: %s", date)
+//		return ""
+//	}
+//	return t.Format("02.01.2006")
+//}
