@@ -15,18 +15,14 @@ const (
 
 type Booking struct {
 	ID            int64         `db:"id"`
-	TelegramID    int64         `db:"telegram_id"`
-	UserName      string        `db:"user_name"`
+	ChatID        int64         `db:"chat_id"`
 	UserPhone     string        `db:"user_phone"`
 	SlotID        int64         `db:"slot_id"`
 	ServiceTypeID int64         `db:"service_type_id"`
-	RimSize       int           `db:"rim_size"`
-	WheelCount    int64         `db:"wheel_count"`
+	RimRadius     string        `db:"rim_radius"`
 	TotalPrice    int64         `db:"total_price"`
 	Status        BookingStatus `db:"status"`
+	IsActive      bool          `db:"is_active"`
 	CreatedAt     time.Time     `db:"created_at"`
 	UpdatedAt     time.Time     `db:"updated_at"`
-
-	Slot        *Slot        `db:"-"`
-	ServiceType *ServiceType `db:"-"`
 }

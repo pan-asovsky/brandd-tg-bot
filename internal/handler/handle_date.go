@@ -17,7 +17,7 @@ func (c *callbackHandler) handleDate(q *api.CallbackQuery, cd string) error {
 	}
 
 	kb := c.kb.ZoneKeyboard(zones, cd)
-	utils.SendKeyboardMessage(q.Message.Chat.ID, consts.ZoneMsg, kb, c.api)
+	utils.SendKeyboardMsg(q.Message.Chat.ID, consts.ZoneMsg, kb, c.api)
 
 	return nil
 }

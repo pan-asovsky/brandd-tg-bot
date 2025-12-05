@@ -7,40 +7,44 @@ import (
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
-	kb "github.com/pan-asovsky/brandd-tg-bot/internal/service/keyboard"
-	slot "github.com/pan-asovsky/brandd-tg-bot/internal/service/slot"
+	svc "github.com/pan-asovsky/brandd-tg-bot/internal/service"
 )
 
 type callbackHandler struct {
-	api       *api.BotAPI
-	kb        kb.KeyboardService
-	slot      slot.SlotService
-	lockSvc   service.LockService
-	svcRepo   pg.ServiceRepo
-	priceRepo pg.PriceRepo
-	cfgRepo   pg.ConfigRepo
-	handlers  map[string]CallbackFunc
+	api         *api.BotAPI
+	kb          svc.KeyboardService
+	slot        svc.SlotService
+	lockSvc     svc.LockService
+	bookingSvc  svc.BookingService
+	telegramSvc svc.TelegramService
+	svcRepo     pg.ServiceRepo
+	priceRepo   pg.PriceRepo
+	cfgRepo     pg.ConfigRepo
+	handlers    map[string]CallbackFunc
 }
 
 func NewCallbackHandler(
 	api *api.BotAPI,
-	kb kb.KeyboardService,
-	slot slot.SlotService,
-	lockSvc service.LockService,
+	kb svc.KeyboardService,
+	slot svc.SlotService,
+	lockSvc svc.LockService,
+	bookingSvc svc.BookingService,
+	telegramSvc svc.TelegramService,
 	svcRepo pg.ServiceRepo,
 	priceRepo pg.PriceRepo,
 	cfgRepo pg.ConfigRepo,
 ) CallbackHandler {
 	ch := &callbackHandler{
-		api:       api,
-		kb:        kb,
-		slot:      slot,
-		lockSvc:   lockSvc,
-		svcRepo:   svcRepo,
-		priceRepo: priceRepo,
-		cfgRepo:   cfgRepo,
-		handlers:  map[string]CallbackFunc{},
+		api:         api,
+		kb:          kb,
+		slot:        slot,
+		lockSvc:     lockSvc,
+		svcRepo:     svcRepo,
+		bookingSvc:  bookingSvc,
+		telegramSvc: telegramSvc,
+		priceRepo:   priceRepo,
+		cfgRepo:     cfgRepo,
+		handlers:    map[string]CallbackFunc{},
 	}
 
 	ch.register(consts.PrefixMenu, ch.handleMenu)

@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"regexp"
 	"time"
+
+	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 )
 
 func ParseZoneCallback(cd string) (zone, date string) {
@@ -56,22 +59,20 @@ func ParseServiceCallback(callback string) (svc, time, date string) {
 	return svc, time, date
 }
 
-func ParseRimCallback(callback string) (r, svc, time, date string) {
+func ParseRimCallback(callback string) (*types.UserSessionInfo, error) {
 	re := regexp.MustCompile(`^(\d+):([A-Z_]+):(\d{2}:\d{2}-\d{2}:\d{2}):(\d{4}-\d{2}-\d{2})$`)
 
 	matches := re.FindStringSubmatch(callback)
 	if matches == nil {
-		log.Printf("[parse_callback] invalid callback format: %s", callback)
-		return
+		return &types.UserSessionInfo{}, fmt.Errorf("[parse_callback] invalid callback format: %s", callback)
 	}
 
-	r = matches[1]
-	svc = matches[2]
-	time = matches[3]
-	date = matches[4]
-	log.Printf("[parse_callback] r: %s, svc: %s, time: %s, date: %s", r, svc, time, date)
+	r := matches[1]
+	svc := matches[2]
+	t := matches[3]
+	date := matches[4]
 
-	return r, svc, time, reformatDate(date)
+	return &types.UserSessionInfo{Date: reformatDate(date), Time: t, Service: svc, Radius: r}, nil
 }
 
 func reformatDate(date string) string {

@@ -19,7 +19,7 @@ func (c *callbackHandler) handleZone(q *api.CallbackQuery, cd string) error {
 
 	timeslots := zones[z]
 	kb := c.kb.TimeKeyboard(timeslots, z, d)
-	utils.SendKeyboardMessage(q.Message.Chat.ID, consts.TimeMsg, kb, c.api)
+	utils.SendKeyboardMsg(q.Message.Chat.ID, consts.TimeMsg, kb, c.api)
 
 	return nil
 }

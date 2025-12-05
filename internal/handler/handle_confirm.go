@@ -19,9 +19,9 @@ func (c *callbackHandler) handleConfirm(q *api.CallbackQuery, cd string) error {
 
 	if auto {
 		msg := fmt.Sprintf(consts.ConfirmMsg, "30.02.2026", "00:00") //todo: сюда надо тянуть данные callback
-		utils.SendMessage(q.Message.Chat.ID, msg, c.api)
+		utils.SendMsg(q.Message.Chat.ID, msg, c.api)
 	} else {
-		utils.SendMessage(q.Message.Chat.ID, consts.PendingConfirmMsg, c.api)
+		utils.SendMsg(q.Message.Chat.ID, consts.PendingConfirmMsg, c.api)
 	}
 
 	return nil

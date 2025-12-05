@@ -4,8 +4,6 @@ import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
-	kb "github.com/pan-asovsky/brandd-tg-bot/internal/service/keyboard"
-	slot "github.com/pan-asovsky/brandd-tg-bot/internal/service/slot"
 )
 
 type UpdateHandler struct {
@@ -16,15 +14,23 @@ type UpdateHandler struct {
 
 func NewUpdateHandler(
 	api *tg.BotAPI,
-	kb kb.KeyboardService,
-	slot slot.SlotService,
-	lockSvc service.LockService,
-	repoProvider pg.PgProvider,
+	svcProvider *service.Provider,
+	repoProvider *pg.Provider,
 ) *UpdateHandler {
 	return &UpdateHandler{
-		command:  NewCommandHandler(api, kb),
-		callback: NewCallbackHandler(api, kb, slot, lockSvc, repoProvider.Service(), repoProvider.Price(), repoProvider.Config()),
-		message:  NewMessageHandler(api),
+		command: NewCommandHandler(api, svcProvider.Keyboard()),
+		callback: NewCallbackHandler(
+			api,
+			svcProvider.Keyboard(),
+			svcProvider.Slot(),
+			svcProvider.Lock(),
+			svcProvider.Booking(),
+			svcProvider.Telegram(),
+			repoProvider.Service(),
+			repoProvider.Price(),
+			repoProvider.Config(),
+		),
+		message: NewMessageHandler(api, svcProvider.Booking()),
 	}
 }
 

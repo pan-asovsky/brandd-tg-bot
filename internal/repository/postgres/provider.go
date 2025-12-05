@@ -2,30 +2,30 @@ package postgres
 
 import "database/sql"
 
-type PgProvider struct {
+type Provider struct {
 	db *sql.DB
 }
 
-func NewPgProvider(db *sql.DB) *PgProvider {
-	return &PgProvider{db: db}
+func NewPgProvider(db *sql.DB) *Provider {
+	return &Provider{db: db}
 }
 
-func (p *PgProvider) Service() ServiceRepo {
+func (p *Provider) Service() ServiceRepo {
 	return &serviceRepo{db: p.db}
 }
 
-func (p *PgProvider) Price() PriceRepo {
+func (p *Provider) Price() PriceRepo {
 	return &priceRepo{db: p.db}
 }
 
-func (p *PgProvider) Config() ConfigRepo {
+func (p *Provider) Config() ConfigRepo {
 	return &configRepo{db: p.db}
 }
 
-func (p *PgProvider) Slot() SlotRepo {
+func (p *Provider) Slot() SlotRepo {
 	return &slotRepo{db: p.db}
 }
 
-func (p *PgProvider) Booking() BookingRepo {
+func (p *Provider) Booking() BookingRepo {
 	return &bookingRepo{db: p.db}
 }

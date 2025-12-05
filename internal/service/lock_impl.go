@@ -8,16 +8,12 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
 )
 
-type LockService struct {
+type lockService struct {
 	locker *locker.SlotLocker
 	cache  *cache.LockCache
 }
 
-func NewLockService(locker *locker.SlotLocker, cache *cache.LockCache) *LockService {
-	return &LockService{locker: locker, cache: cache}
-}
-
-func (ls *LockService) Toggle(chatID int64, date, time string) error {
+func (ls *lockService) Toggle(chatID int64, date, time string) error {
 	newKey := ls.locker.FormatKey(date, time)
 	//log.Printf("[toggle] new key: %s", newKey)
 

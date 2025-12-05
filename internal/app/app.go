@@ -20,24 +20,20 @@ import (
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
-	kb "github.com/pan-asovsky/brandd-tg-bot/internal/service/keyboard"
-	slot "github.com/pan-asovsky/brandd-tg-bot/internal/service/slot"
 	"github.com/redis/go-redis/v9"
 )
 
 type App struct {
-	Context       context.Context
-	Config        *config.Config
-	Cache         *redis.Client
-	Postgres      *sql.DB
-	SessionRepo   *rd.SessionRepo
-	RepoProvider  *pg.PgProvider
-	TelegramBot   *tg.BotAPI
-	Slot          slot.SlotService
-	LockService   *service.LockService
-	Keyboard      kb.KeyboardService
-	UpdateHandler *handler.UpdateHandler
-	httpServer    *http.Server
+	Context         context.Context
+	Config          *config.Config
+	Cache           *redis.Client
+	Postgres        *sql.DB
+	SessionRepo     *rd.SessionRepo
+	RepoProvider    *pg.Provider
+	ServiceProvider *service.Provider
+	TelegramBot     *tg.BotAPI
+	UpdateHandler   *handler.UpdateHandler
+	httpServer      *http.Server
 }
 
 func NewApp(ctx context.Context) *App {
@@ -76,10 +72,11 @@ func (a *App) Init() error {
 	if err != nil {
 		return err
 	}
-	a.LockService = service.NewLockService(sl, cache.NewLockCache(a.Cache, a.Config.SlotLockTTL))
+	lockCache := cache.NewLockCache(a.Cache, a.Config.SlotLockTTL)
 
 	// provider
 	a.RepoProvider = pg.NewPgProvider(a.Postgres)
+	a.ServiceProvider = service.NewProvider(a.RepoProvider, sl, lockCache, a.TelegramBot)
 
 	tgbot, err := bot.NewTelegramBot(a.Config.BotToken, a.Config.WebhookURL)
 	if err != nil {
@@ -87,10 +84,8 @@ func (a *App) Init() error {
 	}
 	a.TelegramBot = tgbot
 
-	// service + handler
-	a.Keyboard = kb.NewKeyboard()
-	a.Slot = slot.NewSlot(a.RepoProvider.Slot(), sl)
-	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.Keyboard, a.Slot, *a.LockService, *a.RepoProvider)
+	// handler
+	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.RepoProvider)
 
 	return nil
 }

@@ -7,16 +7,11 @@ import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
-	slot "github.com/pan-asovsky/brandd-tg-bot/internal/service/slot"
 )
 
-func NewKeyboard() KeyboardService {
-	return &service{}
-}
+type keyboardService struct{}
 
-type service struct{}
-
-func (s *service) GreetingKeyboard() tg.InlineKeyboardMarkup {
+func (s *keyboardService) GreetingKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.NewBookingBtn, consts.NewBookingCbk)),
 		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.MyBookingsBtn, consts.MyBookingsCbk)),
@@ -24,7 +19,7 @@ func (s *service) GreetingKeyboard() tg.InlineKeyboardMarkup {
 	)
 }
 
-func (s *service) DateKeyboard(bookings []slot.AvailableBooking) tg.InlineKeyboardMarkup {
+func (s *keyboardService) DateKeyboard(bookings []AvailableBooking) tg.InlineKeyboardMarkup {
 	row := tg.NewInlineKeyboardRow()
 	for _, b := range bookings {
 		row = append(row, tg.NewInlineKeyboardButtonData(
@@ -35,7 +30,7 @@ func (s *service) DateKeyboard(bookings []slot.AvailableBooking) tg.InlineKeyboa
 	return tg.NewInlineKeyboardMarkup(row)
 }
 
-func (s *service) ZoneKeyboard(zones model.Zone, date string) tg.InlineKeyboardMarkup {
+func (s *keyboardService) ZoneKeyboard(zones model.Zone, date string) tg.InlineKeyboardMarkup {
 	keys := make([]string, 0, len(zones))
 	for k := range zones {
 		keys = append(keys, k)
@@ -62,7 +57,7 @@ func (s *service) ZoneKeyboard(zones model.Zone, date string) tg.InlineKeyboardM
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *service) TimeKeyboard(ts []model.Timeslot, zone, date string) tg.InlineKeyboardMarkup {
+func (s *keyboardService) TimeKeyboard(ts []model.Timeslot, zone, date string) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 	var currentRow []tg.InlineKeyboardButton
 
@@ -86,7 +81,7 @@ func (s *service) TimeKeyboard(ts []model.Timeslot, zone, date string) tg.Inline
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *service) ServiceKeyboard(types []model.ServiceType, time, date string) tg.InlineKeyboardMarkup {
+func (s *keyboardService) ServiceKeyboard(types []model.ServiceType, time, date string) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 	var currentRow []tg.InlineKeyboardButton
 
@@ -107,7 +102,7 @@ func (s *service) ServiceKeyboard(types []model.ServiceType, time, date string) 
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *service) RimsKeyboard(rims []string, svc, time, date string) tg.InlineKeyboardMarkup {
+func (s *keyboardService) RimsKeyboard(rims []string, svc, time, date string) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 	var currentRow []tg.InlineKeyboardButton
 
@@ -129,11 +124,22 @@ func (s *service) RimsKeyboard(rims []string, svc, time, date string) tg.InlineK
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *service) ConfirmKeyboard() tg.InlineKeyboardMarkup {
+func (s *keyboardService) ConfirmKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
 			tg.NewInlineKeyboardButtonData(consts.ConfirmBtn, consts.ConfirmCbk),
 			tg.NewInlineKeyboardButtonData(consts.RejectBtn, consts.RejectCbk),
 		),
 	)
+}
+
+func (s *keyboardService) RequestPhoneKeyboard() tg.ReplyKeyboardMarkup {
+	kb := tg.NewReplyKeyboard(
+		tg.NewKeyboardButtonRow(
+			tg.KeyboardButton{Text: consts.ShareContactBtn, RequestContact: true},
+		),
+	)
+	kb.ResizeKeyboard = true
+	kb.OneTimeKeyboard = true
+	return kb
 }

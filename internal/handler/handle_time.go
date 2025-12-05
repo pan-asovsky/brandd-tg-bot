@@ -21,7 +21,7 @@ func (c *callbackHandler) handleTime(q *api.CallbackQuery, cd string) error {
 	}
 
 	kb := c.kb.ServiceKeyboard(types, t, d)
-	utils.SendKeyboardMessage(chatID, consts.ServiceMsg, kb, c.api)
+	utils.SendKeyboardMsg(chatID, consts.ServiceMsg, kb, c.api)
 
 	return nil
 }

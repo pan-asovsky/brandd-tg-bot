@@ -16,13 +16,6 @@ type slotService struct {
 	slotLocker *rd.SlotLocker
 }
 
-func NewSlot(slotRepo pg.SlotRepo, slotLocker *rd.SlotLocker) SlotService {
-	return &slotService{
-		slotRepo:   slotRepo,
-		slotLocker: slotLocker,
-	}
-}
-
 func (s *slotService) GetAvailableBookings() []AvailableBooking {
 	today := time.Now()
 
@@ -49,6 +42,7 @@ func (s *slotService) GetAvailableBookings() []AvailableBooking {
 
 	return bookings
 }
+
 func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 	slots, err := s.slotRepo.GetAvailableSlots(date)
 	if err != nil {
@@ -105,4 +99,19 @@ func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
 		}
 	}
 	return zones
+}
+
+func (s *slotService) FindByDateAndTime(date, start, end string) (*model.Slot, error) {
+	slot, err := s.slotRepo.FindByDateAndTime(date, start, end)
+	if err != nil {
+		return nil, fmt.Errorf("[find_by_date_time] error: %v", err)
+	}
+	return slot, nil
+}
+
+func (s *slotService) MarkUnavailable(date, start, end string) error {
+	if err := s.slotRepo.MarkUnavailable(date, start, end); err != nil {
+		return err
+	}
+	return nil
 }

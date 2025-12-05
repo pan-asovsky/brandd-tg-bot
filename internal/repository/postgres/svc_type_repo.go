@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
@@ -9,13 +10,14 @@ import (
 
 type ServiceRepo interface {
 	GetServiceTypes() ([]model.ServiceType, error)
+	FindByCode(service string) (*model.ServiceType, error)
 }
 
 type serviceRepo struct {
 	db *sql.DB
 }
 
-func (sr serviceRepo) GetServiceTypes() ([]model.ServiceType, error) {
+func (sr *serviceRepo) GetServiceTypes() ([]model.ServiceType, error) {
 	rows, err := sr.db.Query(GetAllServiceTypes)
 	if err != nil {
 		return nil, fmt.Errorf("[get_service_types] error: %w", err)
@@ -41,4 +43,21 @@ func (sr serviceRepo) GetServiceTypes() ([]model.ServiceType, error) {
 	}
 
 	return types, nil
+}
+
+func (sr *serviceRepo) FindByCode(svc string) (*model.ServiceType, error) {
+	var service model.ServiceType
+	if err := sr.db.QueryRow(GetServiceTypeByCode, svc).Scan(
+		&service.ID,
+		&service.ServiceCode,
+		&service.ServiceName,
+		&service.Description,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("[find_by_code] service type not founded: %w", err)
+		}
+		return nil, fmt.Errorf("[find_by_code] failed: %w", err)
+	}
+
+	return &service, nil
 }
