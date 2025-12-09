@@ -1,18 +1,29 @@
 package handler
 
 import (
+	"log"
+
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleService(q *api.CallbackQuery, cd string) {
-	//log.Printf("[handle_service] callback: %s", cd)
+func (c *callbackHandler) handleService(q *api.CallbackQuery, cd string) error {
+	log.Printf("%s callback: %s", utils.GetCallerName(), cd)
 
-	//todo:
-	svc, t, d := utils.ParseServiceCallback(cd)
+	info, err := utils.GetSessionInfo(cd)
+	if err != nil {
+		return utils.Error(err)
+	}
+	info.ChatID = q.Message.Chat.ID
 
-	rims := c.priceRepo.GetAllRimSizes()
-	kb := c.kb.RimsKeyboard(rims, svc, t, d)
-	utils.SendKeyboardMsg(q.Message.Chat.ID, consts.RimMsg, kb, c.api)
+	rims, err := c.repoProvider.Price().GetAllRimSizes()
+	if err != nil {
+		return utils.Error(err)
+	}
+
+	if err := c.svcProvider.Telegram().ProcessServiceType(rims, info); err != nil {
+		return utils.Error(err)
+	}
+
+	return nil
 }

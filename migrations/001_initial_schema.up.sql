@@ -2,7 +2,7 @@ CREATE TABLE service_types (
     id BIGSERIAL PRIMARY KEY,
     service_code VARCHAR(20) NOT NULL UNIQUE,
     service_name VARCHAR(50) NOT NULL,
-    description TEXT
+    is_composite BOOLEAN NOT NULL
 );
 
 CREATE TABLE prices (
@@ -34,23 +34,24 @@ CREATE TABLE bookings (
     id BIGSERIAL PRIMARY KEY,
     chat_id BIGINT NOT NULL,
     user_phone VARCHAR,
-    slot_id BIGINT NOT NULL REFERENCES available_slots(id) ON DELETE RESTRICT,
-    service_type_id BIGINT NOT NULL REFERENCES service_types(id) ON DELETE RESTRICT,
 
+    date VARCHAR NOT NULL,
+    time VARCHAR NOT NULL,
+    service VARCHAR NOT NULL,
     rim_radius INTEGER NOT NULL,
     total_price BIGINT,
+
     status VARCHAR(50) NOT NULL DEFAULT 'NOT_CONFIRMED',
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
-    CONSTRAINT unique_booking_slot UNIQUE(slot_id, chat_id)
+    CONSTRAINT unique_booking_slot UNIQUE(date, time, chat_id)
 );
 
 CREATE INDEX idx_slots_date_available ON available_slots(date, is_available) WHERE is_available = true;
 CREATE INDEX idx_slots_date_time ON available_slots(date, start_time);
 CREATE INDEX idx_bookings_chat_id ON bookings(chat_id);
-CREATE INDEX idx_bookings_slot_id ON bookings(slot_id);
 CREATE INDEX idx_bookings_status ON bookings(status);
 CREATE INDEX idx_prices_rim_service ON prices(rim_size, service_type_code) WHERE is_active = true;
 

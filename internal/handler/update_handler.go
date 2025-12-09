@@ -2,7 +2,7 @@ package handler
 
 import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
+	repo "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
 )
 
@@ -15,22 +15,12 @@ type UpdateHandler struct {
 func NewUpdateHandler(
 	api *tg.BotAPI,
 	svcProvider *service.Provider,
-	repoProvider *pg.Provider,
+	repoProvider *repo.Provider,
 ) *UpdateHandler {
 	return &UpdateHandler{
-		command: NewCommandHandler(api, svcProvider.Keyboard()),
-		callback: NewCallbackHandler(
-			api,
-			svcProvider.Keyboard(),
-			svcProvider.Slot(),
-			svcProvider.Lock(),
-			svcProvider.Booking(),
-			svcProvider.Telegram(),
-			repoProvider.Service(),
-			repoProvider.Price(),
-			repoProvider.Config(),
-		),
-		message: NewMessageHandler(api, svcProvider.Booking()),
+		command:  NewCommandHandler(api, svcProvider.Keyboard()),
+		callback: NewCallbackHandler(api, svcProvider, repoProvider),
+		message:  NewMessageHandler(api, svcProvider.Booking(), svcProvider.Telegram()),
 	}
 }
 

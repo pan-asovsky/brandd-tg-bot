@@ -1,8 +1,11 @@
-INSERT INTO service_types (service_code, service_name, description) VALUES
-    ('TAKE_IT_OUT', 'Съём-установка', 'Съём-установка колеса'),
-    ('TIRE_SERVICE', 'Шиномонтаж', 'Шиномонтаж (замена резины)'),
-    ('BALANCING', 'Балансировка', 'Балансировка колес'),
-    ('COMPLEX', 'Комплекс', 'Съём-установка + шиномонтаж + балансировка');
+INSERT INTO service_types (service_code, service_name, is_composite) VALUES
+    ('TAKE_IT_OUT', 'Съём-установка', true),
+    ('TIRE_SERVICE', 'Шиномонтаж', true),
+    ('BALANCING', 'Балансировка', true),
+    ('COMPLEX', 'Комплекс', true),
+    ('TAKE_AND_TIRE', 'Съём-установка и шиномонтаж', false),
+    ('TAKE_AND_BALANCING', 'Съём-установка и балансировка', false),
+    ('TIRE_AND_BALANCING', 'Шиномонтаж и балансировка', false);
 
 INSERT INTO prices (rim_size, service_type_code, price_per_wheel, price_per_set)
 SELECT

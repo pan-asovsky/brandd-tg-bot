@@ -1,22 +1,26 @@
 package handler
 
 import (
-	"log"
+	"fmt"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleRim(q *api.CallbackQuery, cd string) {
-	//log.Printf("[handle_rim] callback: %s", cd)
-	info := utils.ParseRimCallback(cd)
+func (c *callbackHandler) handleRim(q *api.CallbackQuery, cd string) error {
+	info, err := utils.GetSessionInfo(cd)
+	if err != nil {
+		return fmt.Errorf("[handle_rim] %w", err)
+	}
 	info.ChatID = q.Message.Chat.ID
 
-	if err := c.bookingSvc.Create(info); err != nil {
-		log.Fatalf("[handle_rim] booking create error: %v", err)
+	if err := c.svcProvider.Booking().Create(info); err != nil {
+		return fmt.Errorf("[handle_rim] %w", err)
 	}
 
-	kb := c.kb.RequestPhoneKeyboard()
-	utils.SendRequestPhoneMsg(q.Message.Chat.ID, consts.RequestUserPhone, kb, c.api)
+	if err := c.svcProvider.Telegram().ProcessRimRadius(info); err != nil {
+		return fmt.Errorf("[handle_rim] %w", err)
+	}
+
+	return nil
 }

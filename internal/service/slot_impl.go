@@ -43,23 +43,20 @@ func (s *slotService) GetAvailableBookings() []AvailableBooking {
 	return bookings
 }
 
-func (s *slotService) GetAvailableZones(date string) model.Zone {
+func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 	slots, err := s.slotRepo.GetAvailableSlots(date)
 	if err != nil {
-		log.Fatalf("error getting available slots: %v", err)
-		return nil
+		return nil, err
 	}
 
 	keys := make([]string, len(slots))
 	for i, slot := range slots {
 		keys[i] = s.slotLocker.FormatKey(slot.Date, fmt.Sprintf("%s-%s", slot.StartTime, slot.EndTime))
-		//log.Printf("[get_available_zones] redis key: %s", keys[i])
 	}
 
 	lockStatus, err := s.slotLocker.AreLocked(keys...)
 	if err != nil {
-		log.Fatalf("[get_available_zones] failed to check locks: %v", err)
-		return nil
+		return nil, fmt.Errorf("[get_available_zones] failed to check locks: %w", err)
 	}
 
 	filtered := make([]model.Slot, 0, len(slots))
@@ -70,7 +67,7 @@ func (s *slotService) GetAvailableZones(date string) model.Zone {
 	}
 	log.Printf("[get_available_zones] slots: %d, filtered: %d", len(slots), len(filtered))
 
-	return s.groupByZones(filtered)
+	return s.groupByZones(filtered), nil
 }
 
 func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
@@ -103,17 +100,17 @@ func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
 	return zones
 }
 
-func (s *slotService) FindByDateAndTime(date, start, end string) (*model.Slot, error) {
-	slot, err := s.slotRepo.FindByDateAndTime(date, start, end)
+func (s *slotService) FindByDateAndTime(date, start string) (*model.Slot, error) {
+	slot, err := s.slotRepo.FindByDateAndTime(date, start)
 	if err != nil {
-		return nil, fmt.Errorf("[find_by_date_time] error: %v", err)
+		return nil, fmt.Errorf("[find_by_date_time] error: %w", err)
 	}
 	return slot, nil
 }
 
 func (s *slotService) MarkUnavailable(date, start, end string) error {
 	if err := s.slotRepo.MarkUnavailable(date, start, end); err != nil {
-		return err
+		return fmt.Errorf("[mark_unavailable] %w", err)
 	}
 	return nil
 }

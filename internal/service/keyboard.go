@@ -12,7 +12,7 @@ type KeyboardService interface {
 	ZoneKeyboard(zone model.Zone, date string) tg.InlineKeyboardMarkup
 	TimeKeyboard(ts []model.Timeslot, info *types.UserSessionInfo) tg.InlineKeyboardMarkup
 	ServiceKeyboard(types []model.ServiceType, time, date string) tg.InlineKeyboardMarkup
-	RimsKeyboard(rims []string, svc, t, d string) tg.InlineKeyboardMarkup
+	RimsKeyboard(rims []string, svc, time, date string) tg.InlineKeyboardMarkup
 	ConfirmKeyboard() tg.InlineKeyboardMarkup
 	RequestPhoneKeyboard() tg.ReplyKeyboardMarkup
 }

@@ -11,40 +11,22 @@ import (
 )
 
 type callbackHandler struct {
-	api        *api.BotAPI
-	kb         svc.KeyboardService
-	slot       svc.SlotService
-	lockSvc    svc.LockService
-	bookingSvc svc.BookingService
-	telegram   svc.TelegramService
-	svcRepo    pg.ServiceRepo
-	priceRepo  pg.PriceRepo
-	cfgRepo    pg.ConfigRepo
-	handlers   map[string]CallbackFunc
+	api          *api.BotAPI
+	svcProvider  *svc.Provider
+	repoProvider *pg.Provider
+	handlers     map[string]CallbackFunc
 }
 
 func NewCallbackHandler(
 	api *api.BotAPI,
-	kb svc.KeyboardService,
-	slot svc.SlotService,
-	lockSvc svc.LockService,
-	bookingSvc svc.BookingService,
-	telegramSvc svc.TelegramService,
-	svcRepo pg.ServiceRepo,
-	priceRepo pg.PriceRepo,
-	cfgRepo pg.ConfigRepo,
+	svcProvider *svc.Provider,
+	repoProvider *pg.Provider,
 ) CallbackHandler {
 	ch := &callbackHandler{
-		api:        api,
-		kb:         kb,
-		slot:       slot,
-		lockSvc:    lockSvc,
-		svcRepo:    svcRepo,
-		bookingSvc: bookingSvc,
-		telegram:   telegramSvc,
-		priceRepo:  priceRepo,
-		cfgRepo:    cfgRepo,
-		handlers:   map[string]CallbackFunc{},
+		api:          api,
+		svcProvider:  svcProvider,
+		repoProvider: repoProvider,
+		handlers:     map[string]CallbackFunc{},
 	}
 
 	ch.register(consts.PrefixMenu, ch.handleMenu)
@@ -58,7 +40,7 @@ func NewCallbackHandler(
 	return ch
 }
 
-type CallbackFunc func(cb *api.CallbackQuery, data string)
+type CallbackFunc func(cb *api.CallbackQuery, data string) error
 
 func (c *callbackHandler) register(prefix string, handler CallbackFunc) {
 	c.handlers[prefix] = handler
@@ -70,11 +52,10 @@ func (c *callbackHandler) Handle(query *api.CallbackQuery) error {
 	for prefix, handler := range c.handlers {
 		if strings.HasPrefix(query.Data, prefix) {
 			cb := strings.TrimPrefix(query.Data, prefix)
-			handler(query, cb)
+			return handler(query, cb)
 		}
 	}
 
-	log.Printf("callback handler not found for %s", query.Data)
 	return nil
 }
 

@@ -18,9 +18,9 @@ type serviceRepo struct {
 }
 
 func (sr *serviceRepo) GetServiceTypes() ([]model.ServiceType, error) {
-	rows, err := sr.db.Query(GetAllServiceTypes)
+	rows, err := sr.db.Query(GetCompositeServiceTypes)
 	if err != nil {
-		return nil, fmt.Errorf("[get_service_types] error: %w", err)
+		return nil, fmt.Errorf("[get_service_types] query error: %w", err)
 	}
 	defer rows.Close()
 
@@ -31,7 +31,7 @@ func (sr *serviceRepo) GetServiceTypes() ([]model.ServiceType, error) {
 			&svc.ID,
 			&svc.ServiceCode,
 			&svc.ServiceName,
-			&svc.Description,
+			&svc.IsComposite,
 		); err != nil {
 			return nil, fmt.Errorf("[get_service_types] rows scan error: %w", err)
 		}
@@ -51,12 +51,12 @@ func (sr *serviceRepo) FindByCode(svc string) (*model.ServiceType, error) {
 		&service.ID,
 		&service.ServiceCode,
 		&service.ServiceName,
-		&service.Description,
+		&service.IsComposite,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("[find_by_code] service type not founded: %w", err)
+			return nil, fmt.Errorf("[find_service_by_code] service type not founded: %w", err)
 		}
-		return nil, fmt.Errorf("[find_by_code] failed: %w", err)
+		return nil, fmt.Errorf("[find_service_by_code] failed: %w", err)
 	}
 
 	return &service, nil

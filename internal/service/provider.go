@@ -31,7 +31,7 @@ func (p *Provider) Lock() LockService {
 }
 
 func (p *Provider) Booking() BookingService {
-	return &bookingService{p.repoProvider}
+	return &bookingService{p.repoProvider, p.Slot()}
 }
 
 func (p *Provider) Telegram() TelegramService {

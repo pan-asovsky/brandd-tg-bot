@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -13,6 +14,7 @@ type BookingRepo interface {
 	UpdateStatus(id int64, status model.BookingStatus) error
 	Save(booking *model.Booking) error
 	SetPhone(phone string, chatID int64) error
+	Confirm(chatID int64) error
 }
 
 type bookingRepo struct {
@@ -20,11 +22,27 @@ type bookingRepo struct {
 }
 
 func (b *bookingRepo) FindActiveByChatID(chatID int64) (*model.Booking, error) {
-	var booking *model.Booking
-	if err := b.db.QueryRow(FindActiveByChatID, chatID).Scan(&booking); err != nil {
-		return nil, fmt.Errorf("[find_active_booking_by_chat_id] failed for chat %v: %w", chatID, err)
+	var booking model.Booking
+	if err := b.db.QueryRow(FindActiveByChatID, chatID).Scan(
+		&booking.ID,
+		&booking.ChatID,
+		&booking.UserPhone,
+		&booking.Date,
+		&booking.Time,
+		&booking.Service,
+		&booking.RimRadius,
+		&booking.TotalPrice,
+		&booking.Status,
+		&booking.IsActive,
+		&booking.CreatedAt,
+		&booking.UpdatedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("[find_booking_by_chat_id] not founded for %d: %v", chatID, err)
+		}
+		return nil, fmt.Errorf("[find_booking_by_chat_id] failed for %d: %v", chatID, err)
 	}
-	return booking, nil
+	return &booking, nil
 }
 
 func (b *bookingRepo) UpdateStatus(id int64, status model.BookingStatus) error {
@@ -34,8 +52,9 @@ func (b *bookingRepo) UpdateStatus(id int64, status model.BookingStatus) error {
 func (b *bookingRepo) Save(booking *model.Booking) error {
 	err := b.db.QueryRow(SaveBooking,
 		booking.ChatID,
-		booking.SlotID,
-		booking.ServiceTypeID,
+		booking.Date,
+		booking.Time,
+		booking.Service,
 		booking.RimRadius,
 		true,
 		model.NotConfirmed,
@@ -44,14 +63,19 @@ func (b *bookingRepo) Save(booking *model.Booking) error {
 	if err := err; err != nil {
 		return fmt.Errorf("[save_booking] error: %w", err)
 	}
-	//log.Printf("[save_booking] booking %v saved", booking.ID)
 	return nil
 }
 
 func (b *bookingRepo) SetPhone(phone string, chatID int64) error {
-	_, err := b.db.Exec(SetPhoneByChatID, phone, chatID)
-	if err != nil {
-		return fmt.Errorf("[set_phone_by_chat_id] error: %w", err)
+	if _, err := b.db.Exec(SetPhoneByChatID, phone, chatID); err != nil {
+		return fmt.Errorf("[set_phone_by_chat_id] query error: %w", err)
+	}
+	return nil
+}
+
+func (b *bookingRepo) Confirm(chatID int64) error {
+	if _, err := b.db.Exec(ConfirmBooking, model.Confirmed, chatID); err != nil {
+		return fmt.Errorf("[confirm_booking] error: %w", err)
 	}
 	return nil
 }

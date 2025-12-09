@@ -2,22 +2,21 @@ package postgres
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 )
 
 type PriceRepo interface {
-	GetAllRimSizes() []string
+	GetAllRimSizes() ([]string, error)
 }
 
 type priceRepo struct {
 	db *sql.DB
 }
 
-func (pr priceRepo) GetAllRimSizes() []string {
+func (pr priceRepo) GetAllRimSizes() ([]string, error) {
 	rows, err := pr.db.Query(GetAllRimSizes)
 	if err != nil {
-		log.Printf("[get_all_rim_sizes] error: %v", err)
-		return nil
+		return nil, fmt.Errorf("[get_all_rim_sizes] query error: %w", err)
 	}
 	defer rows.Close()
 
@@ -25,16 +24,14 @@ func (pr priceRepo) GetAllRimSizes() []string {
 	for rows.Next() {
 		var rimSize string
 		if err := rows.Scan(&rimSize); err != nil {
-			log.Printf("[get_all_rim_sizes] scan error: %v", err)
-			return nil
+			return nil, fmt.Errorf("[get_all_rim_sizes] scan error: %w", err)
 		}
 		rimSizes = append(rimSizes, rimSize)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Printf("[get_all_rim_sizes] rows error: %v", err)
-		return nil
+		return nil, fmt.Errorf("[get_all_rim_sizes] rows error: %w", err)
 	}
 
-	return rimSizes
+	return rimSizes, nil
 }

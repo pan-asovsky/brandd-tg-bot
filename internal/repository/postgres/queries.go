@@ -14,9 +14,9 @@ const (
   		AND is_available = true
 		ORDER BY start_time
 	`
-	GetAllServiceTypes = `SELECT * FROM service_types`
-	GetAllRimSizes     = `SELECT DISTINCT rim_size FROM prices`
-	IsAutoConfirm      = `SELECT auto_confirm from config`
+	GetCompositeServiceTypes = `SELECT * FROM service_types WHERE is_composite = true`
+	GetAllRimSizes           = `SELECT DISTINCT rim_size FROM prices`
+	IsAutoConfirm            = `SELECT auto_confirm from config`
 
 	MarkSlotUnavailable = `
 		UPDATE available_slots 
@@ -28,8 +28,7 @@ const (
 	GetSlotByDateAndTime = `
 		SELECT * FROM available_slots 
 		WHERE date = $1 
-		AND start_time = $2 
-		AND end_time = $3`
+		AND start_time = $2`
 
 	GetServiceTypeByCode = `
 		SELECT * FROM service_types
@@ -37,10 +36,12 @@ const (
 
 	FindActiveByChatID = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true`
 
-	SaveBooking = `INSERT INTO bookings (chat_id, slot_id, service_type_id,
-                      					 rim_radius, is_active, 
+	SaveBooking = `INSERT INTO bookings (chat_id, date, time,
+                      					 service, rim_radius, is_active, 
                       					 status, created_at, updated_at)  
-                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`
 
 	SetPhoneByChatID = `UPDATE bookings SET user_phone = $1 WHERE chat_id = $2 and is_active = true`
+
+	ConfirmBooking = `UPDATE bookings SET status = $1 WHERE chat_id = $2 and is_active = true`
 )

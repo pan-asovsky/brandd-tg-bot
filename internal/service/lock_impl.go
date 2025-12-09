@@ -6,6 +6,7 @@ import (
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 )
 
 type lockService struct {
@@ -13,13 +14,14 @@ type lockService struct {
 	cache  *cache.LockCache
 }
 
-func (ls *lockService) Toggle(chatID int64, date, time string) error {
-	newKey := ls.locker.FormatKey(date, time)
+func (ls *lockService) Toggle(info *types.UserSessionInfo) error {
+	newKey := ls.locker.FormatKey(info.Date, info.Time)
 	//log.Printf("[toggle] new key: %s", newKey)
 
+	chatID := info.ChatID
 	oldLock, exists, err := ls.cache.Get(chatID)
 	if err != nil {
-		return fmt.Errorf("[old_lock] error: %w", err)
+		return fmt.Errorf("[toggle] %w", err)
 	}
 	//log.Printf("[toggle] old lock exists: %v", exists)
 	//log.Printf("[old_lock] key: %s, uuid: %s", oldLock.Key, oldLock.UUID)
@@ -30,24 +32,22 @@ func (ls *lockService) Toggle(chatID int64, date, time string) error {
 		if err := ls.locker.RefreshTTL(oldLock.Key); err != nil {
 			return fmt.Errorf("[refresh_ttl] error: %w", err)
 		}
-		return nil
 	}
 
 	if exists {
 		if err := ls.locker.Unlock(oldLock.Key, oldLock.UUID); err != nil {
-			return fmt.Errorf("[unlock] error: %w", err)
+			return fmt.Errorf("[toggle] %w", err)
 		}
 		ls.cache.Del(chatID)
 	}
 
-	uuid, ok, err := ls.locker.Lock(date, time)
+	uuid, ok, err := ls.locker.Lock(info.Date, info.Time)
 	if err != nil || !ok {
-		return fmt.Errorf("[slot_locker] error: %w", err)
+		return fmt.Errorf("[toggle] %w", err)
 	}
 
-	info := cache.SlotLockInfo{Key: newKey, UUID: uuid}
-	//log.Printf("[toggle] new info: %v", info)
-	ls.cache.Set(chatID, info)
+	lockInfo := cache.SlotLockInfo{Key: newKey, UUID: uuid}
+	ls.cache.Set(chatID, lockInfo)
 
 	return nil
 }

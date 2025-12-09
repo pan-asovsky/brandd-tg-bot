@@ -1,5 +1,7 @@
 package service
 
+import "github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+
 type LockService interface {
-	Toggle(chatID int64, date, time string) error
+	Toggle(info *types.UserSessionInfo) error
 }

@@ -42,7 +42,7 @@ func (s *keyboardService) ZoneKeyboard(zones model.Zone, date string) tg.InlineK
 	var currentRow []tg.InlineKeyboardButton
 
 	for i, zoneText := range keys {
-		cb := fmt.Sprintf("%s%s:%s", consts.PrefixZone, zoneText, date)
+		cb := fmt.Sprintf("%s%s/%s", consts.PrefixZone, zoneText, date)
 		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(zoneText, cb))
 
 		if i%2 == 1 {
@@ -64,9 +64,7 @@ func (s *keyboardService) TimeKeyboard(ts []model.Timeslot, info *types.UserSess
 
 	for i, t := range ts {
 		txt := fmt.Sprintf("%s-%s", t.Start, t.End)
-		cb := fmt.Sprintf("%s%s:%s:%s", consts.PrefixTime, txt, info.Zone, info.Date)
-		//log.Printf("[time_kb] txt: %s, data: %s", txt, cb)
-
+		cb := fmt.Sprintf("%s%s/%s/%s", consts.PrefixTime, txt, info.Zone, info.Date)
 		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(txt, cb))
 
 		if i%2 == 1 {
@@ -87,7 +85,7 @@ func (s *keyboardService) ServiceKeyboard(types []model.ServiceType, time, date 
 	var currentRow []tg.InlineKeyboardButton
 
 	for i, t := range types {
-		cb := fmt.Sprintf("%s%s:%s:%s", consts.PrefixService, t.ServiceCode, time, date)
+		cb := fmt.Sprintf("%s%s/%s/%s", consts.PrefixService, t.ServiceCode, time, date)
 		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(t.ServiceName, cb))
 
 		if i%2 == 1 {
@@ -109,7 +107,7 @@ func (s *keyboardService) RimsKeyboard(rims []string, svc, time, date string) tg
 
 	sort.Strings(rims)
 	for i, rim := range rims {
-		cb := fmt.Sprintf("%s%s:%s:%s:%s", consts.PrefixRim, rim, svc, time, date)
+		cb := fmt.Sprintf("%s%s/%s/%s/%s", consts.PrefixRim, rim, svc, time, date)
 		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(rim, cb))
 
 		if i%3 == 1 {

@@ -12,7 +12,7 @@ import (
 type SlotRepo interface {
 	IsTodayAvailable() bool
 	GetAvailableSlots(date string) ([]model.Slot, error)
-	FindByDateAndTime(date, start, end string) (*model.Slot, error)
+	FindByDateAndTime(date, start string) (*model.Slot, error)
 	MarkUnavailable(date, start, end string) error
 }
 
@@ -29,7 +29,7 @@ func (s *slotRepo) IsTodayAvailable() bool {
 func (s *slotRepo) GetAvailableSlots(date string) ([]model.Slot, error) {
 	rows, err := s.db.Query(GetZonesByDate, date)
 	if err != nil {
-		return nil, fmt.Errorf("[get_available_slots] failed: %v", err)
+		return nil, fmt.Errorf("[get_available_slots] query error: %w", err)
 	}
 	defer rows.Close()
 
@@ -50,7 +50,7 @@ func (s *slotRepo) GetAvailableSlots(date string) ([]model.Slot, error) {
 			&slot.IsAvailable,
 			&created,
 		); err != nil {
-			return nil, fmt.Errorf("row scan error: %w", err)
+			return nil, fmt.Errorf("[get_available_slots] row scan error: %w", err)
 		}
 
 		slot.Date = sqlDate.Format("2006-01-02")
@@ -63,14 +63,13 @@ func (s *slotRepo) GetAvailableSlots(date string) ([]model.Slot, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows error: %v", err)
+		return nil, fmt.Errorf("[get_available_slots] rows error: %w", err)
 	}
 
-	//log.Printf("[get_available_slots] founded %d slots for date: %s", len(slots), date)
 	return slots, nil
 }
 
-func (s *slotRepo) FindByDateAndTime(date, start, end string) (*model.Slot, error) {
+func (s *slotRepo) FindByDateAndTime(date, start string) (*model.Slot, error) {
 	var (
 		sqlDate   time.Time
 		startTime time.Time
@@ -78,7 +77,7 @@ func (s *slotRepo) FindByDateAndTime(date, start, end string) (*model.Slot, erro
 		created   time.Time
 		slot      model.Slot
 	)
-	if err := s.db.QueryRow(GetSlotByDateAndTime, date, start, end).Scan(
+	if err := s.db.QueryRow(GetSlotByDateAndTime, date, start).Scan(
 		&slot.ID,
 		&sqlDate,
 		&startTime,
@@ -87,9 +86,9 @@ func (s *slotRepo) FindByDateAndTime(date, start, end string) (*model.Slot, erro
 		&created,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("[find_by_date_and_time] not founded for %s %s-%s %+v", date, start, end, err)
+			return nil, fmt.Errorf("[find_slot_by_date_time] not founded for %s %s %v", date, start, err)
 		}
-		return nil, fmt.Errorf("[find_slot_by_date_time] failed: %v", err)
+		return nil, fmt.Errorf("[find_slot_by_date_time] failed: %w", err)
 	}
 
 	slot.Date = sqlDate.Format("02-01-2006")
@@ -101,8 +100,8 @@ func (s *slotRepo) FindByDateAndTime(date, start, end string) (*model.Slot, erro
 }
 
 func (s *slotRepo) MarkUnavailable(date, start, end string) error {
-	if err := s.db.QueryRow(MarkSlotUnavailable, date, start, end).Scan(); err != nil {
-		return fmt.Errorf("[set_unavailable] update error: %v", err)
+	if _, err := s.db.Exec(MarkSlotUnavailable, date, start, end); err != nil {
+		return fmt.Errorf("[mark_slot_unavailable] query error: %w", err)
 	}
 	return nil
 }

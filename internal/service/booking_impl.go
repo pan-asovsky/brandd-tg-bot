@@ -1,7 +1,7 @@
 package service
 
 import (
-	"log"
+	"fmt"
 	"strings"
 	"time"
 
@@ -12,61 +12,43 @@ import (
 
 type bookingService struct {
 	repoProvider *pg.Provider
+	slotService  SlotService
 }
 
 func (b *bookingService) Create(info *types.UserSessionInfo) error {
 	booking := &model.Booking{
 		ChatID:    info.ChatID,
+		Date:      info.Date,
 		RimRadius: info.Radius,
 		Status:    model.NotConfirmed,
 		CreatedAt: time.Now(),
 	}
 
-	booking.SlotID = b.getSlotID(info)
-	booking.ServiceTypeID = b.getServiceTypeID(info)
-
-	if err := b.repoProvider.Booking().Save(booking); err != nil {
-		return err
+	start, end := b.parseTime(info.Time)
+	if err := b.slotService.MarkUnavailable(info.Date, start, end); err != nil {
+		return fmt.Errorf("[create_booking] %w", err)
 	}
 
-	//log.Printf("[booking]: %+v", booking)
-	return nil
+	booking.Time = start
+
+	return b.repoProvider.Booking().Save(booking)
 }
 
 func (b *bookingService) Confirm(chatID int64) error {
-	return nil
+	return b.repoProvider.Booking().Confirm(chatID)
 }
 
 func (b *bookingService) SetPhone(phone string, chatID int64) error {
-	booking, err := b.repoProvider.Booking().FindActiveByChatID(chatID)
-	if err != nil {
-		return err
-	}
-	booking.UserPhone = phone
-	return nil
+	return b.repoProvider.Booking().SetPhone(phone, chatID)
 }
 
-func (b *bookingService) getSlotID(info *types.UserSessionInfo) int64 {
-	start, end := b.parseTime(info.Time)
-	slot, err := b.repoProvider.Slot().FindByDateAndTime(info.Date, start, end)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return slot.ID
-}
-
-func (b *bookingService) getServiceTypeID(info *types.UserSessionInfo) int64 {
-	svcType, err := b.repoProvider.Service().FindByCode(info.Service)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return svcType.ID
+func (b *bookingService) FindActiveByChatID(chatID int64) (*model.Booking, error) {
+	return b.repoProvider.Booking().FindActiveByChatID(chatID)
 }
 
 func (b *bookingService) parseTime(time string) (start, end string) {
 	split := strings.Split(time, "-")
 	start = split[0]
 	end = split[1]
-	//log.Printf("[parse_time]: time: %s, start: %s, end: %s", time, start, end)
 	return start, end
 }

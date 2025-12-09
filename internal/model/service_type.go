@@ -4,7 +4,7 @@ type ServiceType struct {
 	ID          int64  `db:"id"`
 	ServiceCode string `db:"service_code"`
 	ServiceName string `db:"service_name"`
-	Description string `db:"description"`
+	IsComposite bool   `db:"is_composite"`
 }
 
 const (
