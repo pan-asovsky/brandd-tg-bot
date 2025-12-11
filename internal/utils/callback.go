@@ -11,8 +11,6 @@ import (
 )
 
 func GetSessionInfo(callback string) (*types.UserSessionInfo, error) {
-	log.Printf("[parse_callback] raw callback: %s", callback)
-
 	switch {
 	case isDateCallback(callback):
 		return parseDateCallback(callback)

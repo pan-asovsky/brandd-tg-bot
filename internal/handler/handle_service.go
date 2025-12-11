@@ -12,18 +12,16 @@ func (c *callbackHandler) handleService(q *api.CallbackQuery, cd string) error {
 
 	info, err := utils.GetSessionInfo(cd)
 	if err != nil {
-		return utils.Error(err)
+		return utils.WrapError(err)
 	}
 	info.ChatID = q.Message.Chat.ID
 
 	rims, err := c.repoProvider.Price().GetAllRimSizes()
 	if err != nil {
-		return utils.Error(err)
+		return utils.WrapError(err)
 	}
 
-	if err := c.svcProvider.Telegram().ProcessServiceType(rims, info); err != nil {
-		return utils.Error(err)
-	}
-
-	return nil
+	return utils.WrapFunction(func() error {
+		return c.svcProvider.Telegram().ProcessServiceType(rims, info)
+	})
 }

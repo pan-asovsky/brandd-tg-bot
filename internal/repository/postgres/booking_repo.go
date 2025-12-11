@@ -58,8 +58,9 @@ func (b *bookingRepo) Save(booking *model.Booking) error {
 		booking.RimRadius,
 		true,
 		model.NotConfirmed,
-		time.Now(),
-		time.Now()).Scan(&booking.ID)
+		time.Now().UTC().Add(3*time.Hour),
+		time.Now().UTC().Add(3*time.Hour),
+	).Scan(&booking.ID)
 	if err := err; err != nil {
 		return fmt.Errorf("[save_booking] error: %w", err)
 	}

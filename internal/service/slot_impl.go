@@ -9,6 +9,7 @@ import (
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type slotService struct {
@@ -56,7 +57,7 @@ func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 
 	lockStatus, err := s.slotLocker.AreLocked(keys...)
 	if err != nil {
-		return nil, fmt.Errorf("[get_available_zones] failed to check locks: %w", err)
+		return nil, utils.WrapError(err)
 	}
 
 	filtered := make([]model.Slot, 0, len(slots))
@@ -101,16 +102,12 @@ func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
 }
 
 func (s *slotService) FindByDateAndTime(date, start string) (*model.Slot, error) {
-	slot, err := s.slotRepo.FindByDateAndTime(date, start)
-	if err != nil {
-		return nil, fmt.Errorf("[find_by_date_time] error: %w", err)
-	}
-	return slot, nil
+
+	return utils.WrapErrorWithValue(s.slotRepo.FindByDateAndTime(date, start))
 }
 
 func (s *slotService) MarkUnavailable(date, start, end string) error {
-	if err := s.slotRepo.MarkUnavailable(date, start, end); err != nil {
-		return fmt.Errorf("[mark_unavailable] %w", err)
-	}
-	return nil
+	return utils.WrapFunction(func() error {
+		return s.slotRepo.MarkUnavailable(date, start, end)
+	})
 }

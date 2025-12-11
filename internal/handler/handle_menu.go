@@ -6,12 +6,11 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleMenu(q *api.CallbackQuery, cd string) error {
+func (c *callbackHandler) handleMenu(q *api.CallbackQuery, _ string) error {
 	info := &types.UserSessionInfo{ChatID: q.Message.Chat.ID}
 
 	bookings := c.svcProvider.Slot().GetAvailableBookings()
-	if err := c.svcProvider.Telegram().ProcessMenu(bookings, info); err != nil {
-		return utils.Error(err)
-	}
-	return nil
+	return utils.WrapFunction(func() error {
+		return c.svcProvider.Telegram().ProcessMenu(bookings, info)
+	})
 }

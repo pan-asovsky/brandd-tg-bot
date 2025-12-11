@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
@@ -19,9 +18,9 @@ func (b *bookingService) Create(info *types.UserSessionInfo) error {
 	booking := &model.Booking{
 		ChatID:    info.ChatID,
 		Date:      info.Date,
+		Service:   info.Service,
 		RimRadius: info.Radius,
 		Status:    model.NotConfirmed,
-		CreatedAt: time.Now(),
 	}
 
 	start, end := b.parseTime(info.Time)

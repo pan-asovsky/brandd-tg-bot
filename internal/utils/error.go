@@ -2,17 +2,33 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"runtime"
 	"strings"
 )
 
-func Error(err error) error {
+func WrapError(err error) error {
 	return fmt.Errorf("%s %w", GetCallerName(), err)
 }
 
+func WrapFunction(fn func() error) error {
+	if err := fn(); err != nil {
+		log.Printf("i'm here, but error exists: %t", err != nil)
+		return fmt.Errorf("%s %w", GetCallerName(), err)
+	}
+	return nil
+}
+
+func WrapErrorWithValue[T any](value *T, err error) (*T, error) {
+	if err != nil {
+		return value, fmt.Errorf("%s %w", GetCallerName(), err)
+	}
+	return value, nil
+}
+
 func GetCallerName() string {
-	pc, _, _, ok := runtime.Caller(1)
+	pc, _, _, ok := runtime.Caller(2)
 	if !ok {
 		return "unknown"
 	}

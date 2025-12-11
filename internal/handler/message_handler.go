@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"fmt"
-
 	tgbot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type MessageHandler interface {
@@ -37,13 +36,14 @@ func (m *messageHandler) Handle(msg *tgbot.Message) error {
 func (m *messageHandler) handlePhone(msg *tgbot.Message) error {
 	booking, err := m.bookingSvc.FindActiveByChatID(msg.Chat.ID)
 	if err != nil {
-		return fmt.Errorf("[handle_phone] %w", err)
+		return utils.WrapError(err)
 	}
+
 	if err := m.bookingSvc.SetPhone(msg.Contact.PhoneNumber, msg.Chat.ID); err != nil {
-		return fmt.Errorf("[handle_phone] %w", err)
+		return utils.WrapError(err)
 	}
-	if err := m.telegramSvc.ProcessPhone(booking, msg.Chat.ID); err != nil {
-		return fmt.Errorf("[handle_phone] %w", err)
-	}
-	return nil
+
+	return utils.WrapFunction(func() error {
+		return m.telegramSvc.ProcessPhone(booking, msg.Chat.ID)
+	})
 }

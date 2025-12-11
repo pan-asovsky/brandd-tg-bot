@@ -8,21 +8,20 @@ import (
 func (c *callbackHandler) handleTime(q *api.CallbackQuery, cd string) error {
 	info, err := utils.GetSessionInfo(cd)
 	if err != nil {
-		return utils.Error(err)
+		return utils.WrapError(err)
 	}
 	info.ChatID = q.Message.Chat.ID
 
 	if err := c.svcProvider.Lock().Toggle(info); err != nil {
-		return err
+		return utils.WrapError(err)
 	}
 
 	types, err := c.repoProvider.Service().GetServiceTypes()
 	if err != nil {
-		return utils.Error(err)
-	}
-	if err := c.svcProvider.Telegram().ProcessTime(types, info); err != nil {
-		return utils.Error(err)
+		return utils.WrapError(err)
 	}
 
-	return nil
+	return utils.WrapFunction(func() error {
+		return c.svcProvider.Telegram().ProcessTime(types, info)
+	})
 }
