@@ -8,18 +8,18 @@ import (
 )
 
 type Provider struct {
-	repoProvider *pg.Provider
-	slotLocker   *locker.SlotLocker
-	lockCache    *cache.LockCache
-	tgapi        *api.BotAPI
+	pgProvider *pg.Provider
+	slotLocker *locker.SlotLocker
+	lockCache  *cache.LockCache
+	tgapi      *api.BotAPI
 }
 
-func NewProvider(repoProvider *pg.Provider, slotLocker *locker.SlotLocker, lockCache *cache.LockCache, tgapi *api.BotAPI) *Provider {
-	return &Provider{repoProvider: repoProvider, slotLocker: slotLocker, lockCache: lockCache, tgapi: tgapi}
+func NewProvider(pgProvider *pg.Provider, slotLocker *locker.SlotLocker, lockCache *cache.LockCache, tgapi *api.BotAPI) *Provider {
+	return &Provider{pgProvider: pgProvider, slotLocker: slotLocker, lockCache: lockCache, tgapi: tgapi}
 }
 
 func (p *Provider) Slot() SlotService {
-	return &slotService{p.repoProvider.Slot(), p.slotLocker}
+	return &slotService{p.pgProvider.Slot(), p.slotLocker}
 }
 
 func (p *Provider) Keyboard() KeyboardService {
@@ -31,9 +31,17 @@ func (p *Provider) Lock() LockService {
 }
 
 func (p *Provider) Booking() BookingService {
-	return &bookingService{p.repoProvider, p.Slot()}
+	return &bookingService{p.pgProvider, p.Slot()}
 }
 
 func (p *Provider) Telegram() TelegramService {
 	return &telegramService{kb: p.Keyboard(), tgapi: p.tgapi}
+}
+
+func (p *Provider) Price() PriceService {
+	return &priceService{pgProvider: p.pgProvider}
+}
+
+func (p *Provider) Config() ConfigService {
+	return &configService{configRepo: p.pgProvider.Config()}
 }

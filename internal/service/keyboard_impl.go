@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
@@ -101,6 +102,72 @@ func (s *keyboardService) ServiceKeyboard(types []model.ServiceType, time, date 
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
+func (s *keyboardService) ServiceKeyboardV2(types []model.ServiceType, info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
+	selectedServices := info.SelectedServices
+	var rows [][]tg.InlineKeyboardButton
+
+	for i := 0; i < len(types); i += 2 {
+		var row []tg.InlineKeyboardButton
+
+		if i < len(types) {
+			t := types[i]
+			buttonText := t.ServiceName
+			if selectedServices[t.ServiceCode] {
+				buttonText = "✅ " + buttonText
+			}
+
+			cb := fmt.Sprintf("%s%s/%s/%s",
+				"svc::",
+				t.ServiceCode,
+				info.Time,
+				info.Date,
+			)
+			row = append(row, tg.NewInlineKeyboardButtonData(buttonText, cb))
+		}
+
+		if i+1 < len(types) {
+			t := types[i+1]
+			buttonText := t.ServiceName
+			if selectedServices[t.ServiceCode] {
+				buttonText = "✅ " + buttonText
+			}
+
+			cb := fmt.Sprintf("%s%s/%s/%s",
+				"svc::",
+				t.ServiceCode,
+				info.Time,
+				info.Date,
+			)
+			row = append(row, tg.NewInlineKeyboardButtonData(buttonText, cb))
+		}
+
+		if len(row) > 0 {
+			rows = append(rows, row)
+		}
+	}
+
+	var controlRow []tg.InlineKeyboardButton
+	if len(selectedServices) > 0 {
+		var selectedTrue []string
+		for svcCode, selected := range selectedServices {
+			if selected {
+				selectedTrue = append(selectedTrue, svcCode)
+			}
+		}
+
+		sort.Strings(selectedTrue)
+		readyData := fmt.Sprintf("SVC::%s/%s/%s",
+			strings.Join(selectedTrue, "+"),
+			info.Time,
+			info.Date,
+		)
+		controlRow = append(controlRow, tg.NewInlineKeyboardButtonData(consts.ReadyBtn, readyData))
+		rows = append(rows, controlRow)
+	}
+
+	return tg.NewInlineKeyboardMarkup(rows...)
+}
+
 func (s *keyboardService) RimsKeyboard(rims []string, svc, time, date string) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 	var currentRow []tg.InlineKeyboardButton
@@ -126,7 +193,7 @@ func (s *keyboardService) RimsKeyboard(rims []string, svc, time, date string) tg
 func (s *keyboardService) ConfirmKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonData(consts.ConfirmBtn, consts.ConfirmCbk),
+			tg.NewInlineKeyboardButtonData(consts.ConfirmBtn, consts.ConfirmBookingCbk),
 			tg.NewInlineKeyboardButtonData(consts.RejectBtn, consts.RejectCbk),
 		),
 	)

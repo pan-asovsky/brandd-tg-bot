@@ -2,18 +2,23 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type PriceRepo interface {
 	GetAllRimSizes() ([]string, error)
+	GetSetPrice(svc string, radius string) (int64, error)
 }
 
 type priceRepo struct {
 	db *sql.DB
 }
 
-func (pr priceRepo) GetAllRimSizes() ([]string, error) {
+func (pr *priceRepo) GetAllRimSizes() ([]string, error) {
 	rows, err := pr.db.Query(GetAllRimSizes)
 	if err != nil {
 		return nil, fmt.Errorf("[get_all_rim_sizes] query error: %w", err)
@@ -34,4 +39,16 @@ func (pr priceRepo) GetAllRimSizes() ([]string, error) {
 	}
 
 	return rimSizes, nil
+}
+
+func (pr *priceRepo) GetSetPrice(svc string, radius string) (int64, error) {
+	var price model.Price
+	if err := pr.db.QueryRow(GetPricePerSet, svc, radius).Scan(&price.PricePerSet); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, fmt.Errorf("[get_set_price] not founded for %s %s %w", svc, radius, err)
+		}
+		return 0, utils.WrapError(err)
+	}
+
+	return price.PricePerSet, nil
 }

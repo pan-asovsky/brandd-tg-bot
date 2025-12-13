@@ -29,7 +29,7 @@ type App struct {
 	Cache           *redis.Client
 	Postgres        *sql.DB
 	SessionRepo     *rd.SessionRepo
-	RepoProvider    *pg.Provider
+	pgProvider      *pg.Provider
 	ServiceProvider *service.Provider
 	TelegramBot     *tg.BotAPI
 	UpdateHandler   *handler.UpdateHandler
@@ -80,12 +80,14 @@ func (a *App) Init() error {
 	}
 	a.TelegramBot = tgbot
 
+	a.SessionRepo = rd.NewSessionRepo(a.Cache, a.Config.SlotLockTTL)
+
 	// provider
-	a.RepoProvider = pg.NewPgProvider(a.Postgres)
-	a.ServiceProvider = service.NewProvider(a.RepoProvider, sl, lockCache, a.TelegramBot)
+	a.pgProvider = pg.NewPgProvider(a.Postgres)
+	a.ServiceProvider = service.NewProvider(a.pgProvider, sl, lockCache, a.TelegramBot)
 
 	// handler
-	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.RepoProvider)
+	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.pgProvider, a.SessionRepo)
 
 	return nil
 }

@@ -9,26 +9,32 @@ import (
 )
 
 func WrapError(err error) error {
-	return fmt.Errorf("%s %w", GetCallerName(), err)
+	return fmt.Errorf("%s %w", getCallerName(2), err)
 }
 
-func WrapFunction(fn func() error) error {
+func WrapErrorf(err error, text string, args ...interface{}) error {
+	return fmt.Errorf("%s %s: %w", getCallerName(2), fmt.Sprintf(text, args...), err)
+}
+
+func WrapFunctionError(fn func() error) error {
 	if err := fn(); err != nil {
 		log.Printf("i'm here, but error exists: %t", err != nil)
-		return fmt.Errorf("%s %w", GetCallerName(), err)
+		return fmt.Errorf("%s %w", getCallerName(2), err)
 	}
 	return nil
 }
 
-func WrapErrorWithValue[T any](value *T, err error) (*T, error) {
+func WrapFunction[T any](fn func() (T, error)) (T, error) {
+	value, err := fn()
 	if err != nil {
-		return value, fmt.Errorf("%s %w", GetCallerName(), err)
+		var zero T
+		return zero, fmt.Errorf("%s %w", getCallerName(2), err)
 	}
 	return value, nil
 }
 
-func GetCallerName() string {
-	pc, _, _, ok := runtime.Caller(2)
+func getCallerName(skip int) string {
+	pc, _, _, ok := runtime.Caller(skip)
 	if !ok {
 		return "unknown"
 	}
@@ -43,13 +49,13 @@ func GetCallerName() string {
 	// Извлекаем только имя метода
 	parts := strings.Split(fullName, ".")
 	if len(parts) > 0 {
-		return fmt.Sprintf("[%s]", ToSnakeCaseRegex(parts[len(parts)-1]))
+		return fmt.Sprintf("[%s]", toSnakeCaseRegex(parts[len(parts)-1]))
 	}
 
-	return fmt.Sprintf("[%s]", ToSnakeCaseRegex(fullName))
+	return fmt.Sprintf("[%s]", toSnakeCaseRegex(fullName))
 }
 
-func ToSnakeCaseRegex(s string) string {
+func toSnakeCaseRegex(s string) string {
 	matchFirstCap := regexp.MustCompile("(.)([A-Z][a-z]+)")
 	matchAllCap := regexp.MustCompile("([a-z0-9])([A-Z])")
 

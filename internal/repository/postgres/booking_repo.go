@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type BookingRepo interface {
 	FindActiveByChatID(telegramID int64) (*model.Booking, error)
 	UpdateStatus(id int64, status model.BookingStatus) error
-	Save(booking *model.Booking) error
+	Save(booking *model.Booking) (*model.Booking, error)
 	SetPhone(phone string, chatID int64) error
 	Confirm(chatID int64) error
 }
@@ -49,7 +50,8 @@ func (b *bookingRepo) UpdateStatus(id int64, status model.BookingStatus) error {
 	return nil
 }
 
-func (b *bookingRepo) Save(booking *model.Booking) error {
+func (b *bookingRepo) Save(booking *model.Booking) (*model.Booking, error) {
+	now := time.Now().UTC().Add(3 * time.Hour)
 	err := b.db.QueryRow(SaveBooking,
 		booking.ChatID,
 		booking.Date,
@@ -58,13 +60,13 @@ func (b *bookingRepo) Save(booking *model.Booking) error {
 		booking.RimRadius,
 		true,
 		model.NotConfirmed,
-		time.Now().UTC().Add(3*time.Hour),
-		time.Now().UTC().Add(3*time.Hour),
+		now,
+		now,
 	).Scan(&booking.ID)
-	if err := err; err != nil {
-		return fmt.Errorf("[save_booking] error: %w", err)
+	if err != nil {
+		return nil, utils.WrapError(err)
 	}
-	return nil
+	return booking, nil
 }
 
 func (b *bookingRepo) SetPhone(phone string, chatID int64) error {

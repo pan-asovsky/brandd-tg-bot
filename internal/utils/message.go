@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -21,6 +22,7 @@ func FmtConfirmMsg(booking *model.Booking) (string, error) {
 		booking.Time,
 		consts.ServiceNames[booking.Service],
 		booking.RimRadius,
+		toInt64(booking.TotalPrice),
 	), nil
 }
 
@@ -31,4 +33,11 @@ func formatDate(date string) (string, error) {
 	}
 
 	return t.Format("02.01.2006"), nil
+}
+
+func toInt64(nullable sql.NullInt64) int64 {
+	if nullable.Valid {
+		return nullable.Int64
+	}
+	return 0
 }

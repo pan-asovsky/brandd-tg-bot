@@ -44,4 +44,6 @@ const (
 	SetPhoneByChatID = `UPDATE bookings SET user_phone = $1 WHERE chat_id = $2 and is_active = true`
 
 	ConfirmBooking = `UPDATE bookings SET status = $1 WHERE chat_id = $2 and is_active = true`
+
+	GetPricePerSet = `SELECT price_per_set FROM prices WHERE service_type_code = $1 AND rim_size = $2 AND is_active = true`
 )

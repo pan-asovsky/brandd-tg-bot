@@ -16,12 +16,12 @@ func (c *callbackHandler) handleTime(q *api.CallbackQuery, cd string) error {
 		return utils.WrapError(err)
 	}
 
-	types, err := c.repoProvider.Service().GetServiceTypes()
+	types, err := c.pgProvider.Service().GetServiceTypes()
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	return utils.WrapFunction(func() error {
-		return c.svcProvider.Telegram().ProcessTime(types, info)
+	return utils.WrapFunctionError(func() error {
+		return c.svcProvider.Telegram().RequestServiceTypes(types, info)
 	})
 }

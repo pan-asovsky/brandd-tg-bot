@@ -102,12 +102,13 @@ func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
 }
 
 func (s *slotService) FindByDateAndTime(date, start string) (*model.Slot, error) {
-
-	return utils.WrapErrorWithValue(s.slotRepo.FindByDateAndTime(date, start))
+	return utils.WrapFunction(func() (*model.Slot, error) {
+		return s.slotRepo.FindByDateAndTime(date, start)
+	})
 }
 
 func (s *slotService) MarkUnavailable(date, start, end string) error {
-	return utils.WrapFunction(func() error {
+	return utils.WrapFunctionError(func() error {
 		return s.slotRepo.MarkUnavailable(date, start, end)
 	})
 }

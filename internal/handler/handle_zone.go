@@ -17,7 +17,7 @@ func (c *callbackHandler) handleZone(q *api.CallbackQuery, cd string) error {
 		return utils.WrapError(err)
 	}
 
-	return utils.WrapFunction(func() error {
-		return c.svcProvider.Telegram().ProcessZone(zones[info.Zone], info)
+	return utils.WrapFunctionError(func() error {
+		return c.svcProvider.Telegram().RequestTime(zones[info.Zone], info)
 	})
 }

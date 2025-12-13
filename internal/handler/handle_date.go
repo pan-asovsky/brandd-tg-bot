@@ -17,7 +17,7 @@ func (c *callbackHandler) handleDate(q *api.CallbackQuery, cd string) error {
 		return utils.WrapError(err)
 	}
 
-	return utils.WrapFunction(func() error {
-		return c.svcProvider.Telegram().ProcessDate(zones, info)
+	return utils.WrapFunctionError(func() error {
+		return c.svcProvider.Telegram().RequestZone(zones, info)
 	})
 }

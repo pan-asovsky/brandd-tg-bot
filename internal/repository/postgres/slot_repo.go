@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
@@ -77,6 +78,8 @@ func (s *slotRepo) FindByDateAndTime(date, start string) (*model.Slot, error) {
 		created   time.Time
 		slot      model.Slot
 	)
+
+	log.Printf("for query date and time %s %s", date, start)
 	if err := s.db.QueryRow(GetSlotByDateAndTime, date, start).Scan(
 		&slot.ID,
 		&sqlDate,

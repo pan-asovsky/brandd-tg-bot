@@ -7,4 +7,5 @@ const (
 	ConfirmBtn      = "✅ Подтвердить"
 	RejectBtn       = "❌ Отказаться"
 	ShareContactBtn = "Поделиться"
+	ReadyBtn        = "Готово"
 )

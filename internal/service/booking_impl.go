@@ -1,48 +1,50 @@
 package service
 
 import (
-	"fmt"
+	"database/sql"
 	"strings"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type bookingService struct {
-	repoProvider *pg.Provider
-	slotService  SlotService
+	pgProvider  *pg.Provider
+	slotService SlotService
 }
 
-func (b *bookingService) Create(info *types.UserSessionInfo) error {
+func (b *bookingService) Create(info *types.UserSessionInfo) (*model.Booking, error) {
 	booking := &model.Booking{
-		ChatID:    info.ChatID,
-		Date:      info.Date,
-		Service:   info.Service,
-		RimRadius: info.Radius,
-		Status:    model.NotConfirmed,
+		ChatID:     info.ChatID,
+		Date:       info.Date,
+		Service:    info.Service,
+		RimRadius:  info.Radius,
+		TotalPrice: sql.NullInt64{Int64: info.TotalPrice, Valid: true},
+		Status:     model.NotConfirmed,
 	}
 
 	start, end := b.parseTime(info.Time)
 	if err := b.slotService.MarkUnavailable(info.Date, start, end); err != nil {
-		return fmt.Errorf("[create_booking] %w", err)
+		return nil, utils.WrapError(err)
 	}
 
 	booking.Time = start
 
-	return b.repoProvider.Booking().Save(booking)
+	return b.pgProvider.Booking().Save(booking)
 }
 
 func (b *bookingService) Confirm(chatID int64) error {
-	return b.repoProvider.Booking().Confirm(chatID)
+	return b.pgProvider.Booking().Confirm(chatID)
 }
 
 func (b *bookingService) SetPhone(phone string, chatID int64) error {
-	return b.repoProvider.Booking().SetPhone(phone, chatID)
+	return b.pgProvider.Booking().SetPhone(phone, chatID)
 }
 
 func (b *bookingService) FindActiveByChatID(chatID int64) (*model.Booking, error) {
-	return b.repoProvider.Booking().FindActiveByChatID(chatID)
+	return b.pgProvider.Booking().FindActiveByChatID(chatID)
 }
 
 func (b *bookingService) parseTime(time string) (start, end string) {
