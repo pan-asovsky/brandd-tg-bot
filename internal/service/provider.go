@@ -23,7 +23,7 @@ func (p *Provider) Slot() SlotService {
 }
 
 func (p *Provider) Keyboard() KeyboardService {
-	return &keyboardService{}
+	return &keyboardService{callbackService: p.BuildCallback()}
 }
 
 func (p *Provider) Lock() LockService {
@@ -31,7 +31,7 @@ func (p *Provider) Lock() LockService {
 }
 
 func (p *Provider) Booking() BookingService {
-	return &bookingService{p.pgProvider, p.Slot()}
+	return &bookingService{p.pgProvider, p.Slot(), p.Price()}
 }
 
 func (p *Provider) Telegram() TelegramService {
@@ -44,4 +44,12 @@ func (p *Provider) Price() PriceService {
 
 func (p *Provider) Config() ConfigService {
 	return &configService{configRepo: p.pgProvider.Config()}
+}
+
+func (p *Provider) ParseCallback() ParseCallbackService {
+	return &parseCallbackService{}
+}
+
+func (p *Provider) BuildCallback() BuildCallbackService {
+	return BuildCallbackService{}
 }

@@ -3,33 +3,43 @@ package service
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/rules"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-type keyboardService struct{}
+type keyboardService struct {
+	callbackService BuildCallbackService
+}
 
 func (s *keyboardService) GreetingKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
-		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.NewBookingBtn, consts.NewBookingCbk)),
-		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.MyBookingsBtn, consts.MyBookingsCbk)),
+		//tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.NewBookingBtn, consts.NewBookingCbk)),
+		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.NewBookingBtn, s.callbackService.NewBooking())),
+		//tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.MyBookingsBtn, consts.MyBookingsCbk)),
+		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.MyBookingsBtn, s.callbackService.MyBookings())),
+		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.CalendarBtn, consts.CalendarCbk)),
 		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(consts.HelpBtn, consts.HelpCbk)),
 	)
 }
 
 func (s *keyboardService) DateKeyboard(bookings []AvailableBooking) tg.InlineKeyboardMarkup {
+	var rows [][]tg.InlineKeyboardButton
+
 	row := tg.NewInlineKeyboardRow()
 	for _, b := range bookings {
 		row = append(row, tg.NewInlineKeyboardButtonData(
 			b.Label,
-			consts.PrefixDate+b.Date.Format("2006-01-02"),
+			s.callbackService.Date(b.Date),
 		))
 	}
-	return tg.NewInlineKeyboardMarkup(row)
+
+	rows = append(rows, row, s.backKeyboardRow(s.callbackService.Menu()))
+	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
 func (s *keyboardService) ZoneKeyboard(zones model.Zone, date string) tg.InlineKeyboardMarkup {
@@ -42,9 +52,9 @@ func (s *keyboardService) ZoneKeyboard(zones model.Zone, date string) tg.InlineK
 	var rows [][]tg.InlineKeyboardButton
 	var currentRow []tg.InlineKeyboardButton
 
-	for i, zoneText := range keys {
-		cb := fmt.Sprintf("%s%s/%s", consts.PrefixZone, zoneText, date)
-		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(zoneText, cb))
+	for i, zone := range keys {
+		cb := s.callbackService.Zone(date, zone)
+		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(zone, cb))
 
 		if i%2 == 1 {
 			rows = append(rows, currentRow)
@@ -56,6 +66,7 @@ func (s *keyboardService) ZoneKeyboard(zones model.Zone, date string) tg.InlineK
 		rows = append(rows, currentRow)
 	}
 
+	rows = append(rows, s.backKeyboardRow(s.callbackService.NewBooking()))
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
@@ -64,9 +75,9 @@ func (s *keyboardService) TimeKeyboard(ts []model.Timeslot, info *types.UserSess
 	var currentRow []tg.InlineKeyboardButton
 
 	for i, t := range ts {
-		txt := fmt.Sprintf("%s-%s", t.Start, t.End)
-		cb := fmt.Sprintf("%s%s/%s/%s", consts.PrefixTime, txt, info.Zone, info.Date)
-		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(txt, cb))
+		time := fmt.Sprintf("%s-%s", t.Start, t.End)
+		info.Time = time
+		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(time, s.callbackService.Time(info)))
 
 		if i%2 == 1 {
 			rows = append(rows, currentRow)
@@ -78,31 +89,16 @@ func (s *keyboardService) TimeKeyboard(ts []model.Timeslot, info *types.UserSess
 		rows = append(rows, currentRow)
 	}
 
+	date, err := utils.ParseDate(info.Date)
+	if err != nil {
+		fmt.Printf("[time_keyboard] %v", err)
+	}
+
+	rows = append(rows, s.backKeyboardRow(s.callbackService.Date(date)))
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *keyboardService) ServiceKeyboard(types []model.ServiceType, time, date string) tg.InlineKeyboardMarkup {
-	var rows [][]tg.InlineKeyboardButton
-	var currentRow []tg.InlineKeyboardButton
-
-	for i, t := range types {
-		cb := fmt.Sprintf("%s%s/%s/%s", consts.PrefixService, t.ServiceCode, time, date)
-		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(t.ServiceName, cb))
-
-		if i%2 == 1 {
-			rows = append(rows, currentRow)
-			currentRow = []tg.InlineKeyboardButton{}
-		}
-	}
-
-	if len(currentRow) > 0 {
-		rows = append(rows, currentRow)
-	}
-
-	return tg.NewInlineKeyboardMarkup(rows...)
-}
-
-func (s *keyboardService) ServiceKeyboardV2(types []model.ServiceType, info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
+func (s *keyboardService) ServiceKeyboard(types []model.ServiceType, info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
 	selectedServices := info.SelectedServices
 	var rows [][]tg.InlineKeyboardButton
 
@@ -116,12 +112,7 @@ func (s *keyboardService) ServiceKeyboardV2(types []model.ServiceType, info *typ
 				buttonText = "✅ " + buttonText
 			}
 
-			cb := fmt.Sprintf("%s%s/%s/%s",
-				"svc::",
-				t.ServiceCode,
-				info.Time,
-				info.Date,
-			)
+			cb := s.callbackService.ServiceSelection(t.ServiceCode, info)
 			row = append(row, tg.NewInlineKeyboardButtonData(buttonText, cb))
 		}
 
@@ -132,12 +123,7 @@ func (s *keyboardService) ServiceKeyboardV2(types []model.ServiceType, info *typ
 				buttonText = "✅ " + buttonText
 			}
 
-			cb := fmt.Sprintf("%s%s/%s/%s",
-				"svc::",
-				t.ServiceCode,
-				info.Time,
-				info.Date,
-			)
+			cb := s.callbackService.ServiceSelection(t.ServiceCode, info)
 			row = append(row, tg.NewInlineKeyboardButtonData(buttonText, cb))
 		}
 
@@ -156,26 +142,27 @@ func (s *keyboardService) ServiceKeyboardV2(types []model.ServiceType, info *typ
 		}
 
 		sort.Strings(selectedTrue)
-		readyData := fmt.Sprintf("SVC::%s/%s/%s",
-			strings.Join(selectedTrue, "+"),
-			info.Time,
-			info.Date,
-		)
-		controlRow = append(controlRow, tg.NewInlineKeyboardButtonData(consts.ReadyBtn, readyData))
+
+		serviceRules := rules.ServiceRules{}
+		service := serviceRules.MapServices(selectedTrue)
+		info.Service = service
+
+		controlRow = append(controlRow, tg.NewInlineKeyboardButtonData(consts.ReadyBtn, s.callbackService.ServiceConfirmation(info)))
 		rows = append(rows, controlRow)
 	}
 
+	rows = append(rows, s.backKeyboardRow(s.callbackService.Zone(info.Date, info.Zone)))
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *keyboardService) RimsKeyboard(rims []string, svc, time, date string) tg.InlineKeyboardMarkup {
+func (s *keyboardService) RimsKeyboard(rims []string, info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 	var currentRow []tg.InlineKeyboardButton
 
 	sort.Strings(rims)
 	for i, rim := range rims {
-		cb := fmt.Sprintf("%s%s/%s/%s/%s", consts.PrefixRim, rim, svc, time, date)
-		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(rim, cb))
+		info.RimRadius = rim
+		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(rim, s.callbackService.Rim(info)))
 
 		if i%3 == 1 {
 			rows = append(rows, currentRow)
@@ -187,15 +174,17 @@ func (s *keyboardService) RimsKeyboard(rims []string, svc, time, date string) tg
 		rows = append(rows, currentRow)
 	}
 
+	rows = append(rows, s.backKeyboardRow(s.callbackService.Time(info)))
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *keyboardService) ConfirmKeyboard() tg.InlineKeyboardMarkup {
+func (s *keyboardService) ConfirmKeyboard(info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
 			tg.NewInlineKeyboardButtonData(consts.ConfirmBtn, consts.ConfirmBookingCbk),
 			tg.NewInlineKeyboardButtonData(consts.RejectBtn, consts.RejectCbk),
 		),
+		s.backKeyboardRow(s.callbackService.ServiceConfirmation(info)),
 	)
 }
 
@@ -208,4 +197,45 @@ func (s *keyboardService) RequestPhoneKeyboard() tg.ReplyKeyboardMarkup {
 	kb.ResizeKeyboard = true
 	kb.OneTimeKeyboard = true
 	return kb
+}
+
+func (s *keyboardService) EmptyMyBookingsKeyboard() tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(consts.NewBookingBtn, s.callbackService.NewBooking()),
+			tg.NewInlineKeyboardButtonData(consts.BackBtn, s.callbackService.Menu()),
+		),
+	)
+}
+
+func (s *keyboardService) ExistsMyBookingsKeyboard() tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(consts.CancelBtn, s.callbackService.PreCancelBooking()),
+			tg.NewInlineKeyboardButtonData(consts.BackBtn, s.callbackService.Menu()),
+		),
+	)
+}
+
+func (s *keyboardService) BookingCancellationKeyboard() tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(consts.NoBtn, s.callbackService.NoCancelBooking()),
+			tg.NewInlineKeyboardButtonData(consts.YesBtn, s.callbackService.CancelBooking()),
+		),
+	)
+}
+
+func (s *keyboardService) BackKeyboard() tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(consts.BackBtn, s.callbackService.Menu()),
+		),
+	)
+}
+
+func (s *keyboardService) backKeyboardRow(callback string) []tg.InlineKeyboardButton {
+	return tg.NewInlineKeyboardRow(
+		tg.NewInlineKeyboardButtonData(consts.BackBtn, fmt.Sprintf(callback)),
+	)
 }

@@ -13,11 +13,11 @@ type UpdateHandler struct {
 	message  MessageHandler
 }
 
-func NewUpdateHandler(api *tg.BotAPI, svcProvider *service.Provider, pgProvider *repo.Provider, sessionRepo *rd.SessionRepo) *UpdateHandler {
+func NewUpdateHandler(api *tg.BotAPI, svcProvider *service.Provider, pgProvider *repo.Provider, serviceTypeCache rd.ServiceTypeCacheService) *UpdateHandler {
 	return &UpdateHandler{
-		command:  NewCommandHandler(api, svcProvider.Keyboard()),
-		callback: NewCallbackHandler(api, svcProvider, pgProvider, sessionRepo),
-		message:  NewMessageHandler(api, svcProvider),
+		command:  NewCommandHandler(api, svcProvider),
+		callback: NewCallbackHandler(api, svcProvider, pgProvider, serviceTypeCache),
+		message:  NewMessageHandler(api, svcProvider, serviceTypeCache),
 	}
 }
 

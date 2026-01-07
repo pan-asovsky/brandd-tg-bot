@@ -24,16 +24,16 @@ import (
 )
 
 type App struct {
-	Context         context.Context
-	Config          *config.Config
-	Cache           *redis.Client
-	Postgres        *sql.DB
-	SessionRepo     *rd.SessionRepo
-	pgProvider      *pg.Provider
-	ServiceProvider *service.Provider
-	TelegramBot     *tg.BotAPI
-	UpdateHandler   *handler.UpdateHandler
-	httpServer      *http.Server
+	Context                 context.Context
+	Config                  *config.Config
+	Cache                   *redis.Client
+	Postgres                *sql.DB
+	ServiceTypeCacheService rd.ServiceTypeCacheService
+	pgProvider              *pg.Provider
+	ServiceProvider         *service.Provider
+	TelegramBot             *tg.BotAPI
+	UpdateHandler           *handler.UpdateHandler
+	httpServer              *http.Server
 }
 
 func NewApp(ctx context.Context) *App {
@@ -80,14 +80,14 @@ func (a *App) Init() error {
 	}
 	a.TelegramBot = tgbot
 
-	a.SessionRepo = rd.NewSessionRepo(a.Cache, a.Config.SlotLockTTL)
+	a.ServiceTypeCacheService = rd.NewServiceTypeCacheService(a.Cache, a.Config.SlotLockTTL)
 
 	// provider
 	a.pgProvider = pg.NewPgProvider(a.Postgres)
 	a.ServiceProvider = service.NewProvider(a.pgProvider, sl, lockCache, a.TelegramBot)
 
 	// handler
-	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.pgProvider, a.SessionRepo)
+	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.pgProvider, a.ServiceTypeCacheService)
 
 	return nil
 }

@@ -18,10 +18,10 @@ type priceService struct {
 
 func (p *priceService) Calculate(service, radius string) (int64, error) {
 	services := splitServices(service)
+
 	var totalPrice int64
 	for _, svc := range services {
 		price, err := p.pgProvider.Price().GetSetPrice(svc, radius)
-		log.Printf("[calculate] price for %s and %s: %d", svc, radius, price)
 		if err != nil {
 			return 0, utils.WrapError(err)
 		}

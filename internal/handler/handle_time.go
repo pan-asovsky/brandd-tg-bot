@@ -5,14 +5,19 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleTime(q *api.CallbackQuery, cd string) error {
-	info, err := utils.GetSessionInfo(cd)
+func (c *callbackHandler) handleTime(query *api.CallbackQuery) error {
+	provider := c.svcProvider
+
+	info, err := provider.ParseCallback().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
-	info.ChatID = q.Message.Chat.ID
 
-	if err := c.svcProvider.Lock().Toggle(info); err != nil {
+	if err = c.serviceTypeCache.Clean(info.ChatID); err != nil {
+		return utils.WrapError(err)
+	}
+
+	if err := provider.Lock().Toggle(info); err != nil {
 		return utils.WrapError(err)
 	}
 
@@ -22,6 +27,6 @@ func (c *callbackHandler) handleTime(q *api.CallbackQuery, cd string) error {
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().RequestServiceTypes(types, info)
+		return provider.Telegram().RequestServiceTypes(types, info)
 	})
 }

@@ -12,23 +12,29 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type SessionRepo struct {
+type ServiceTypeCacheService interface {
+	Toggle(chatID int64, clickedService string) (map[string]bool, error)
+	Clean(chatID int64) error
+}
+
+type serviceTypeCacheService struct {
 	cache *redis.Client
 	ttl   time.Duration
 	ctx   context.Context
 }
 
-func NewSessionRepo(r *redis.Client, ttl time.Duration) *SessionRepo {
-	return &SessionRepo{
+func NewServiceTypeCacheService(r *redis.Client, ttl time.Duration) ServiceTypeCacheService {
+	return &serviceTypeCacheService{
 		cache: r,
 		ttl:   ttl,
 		ctx:   context.Background(),
 	}
 }
 
-func (s *SessionRepo) Toggle(chatID int64, clickedService string) (map[string]bool, error) {
-	key := s.selectedServicesKey(chatID)
+func (s *serviceTypeCacheService) Toggle(chatID int64, clickedService string) (map[string]bool, error) {
+	key := s.formatKey(chatID)
 
+	//log.Printf("[toggle_service] chatID: %d, clicked: %s", chatID, clickedService)
 	currentMap, err := s.cache.HGetAll(s.ctx, key).Result()
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, utils.WrapError(err)
@@ -38,8 +44,6 @@ func (s *SessionRepo) Toggle(chatID int64, clickedService string) (map[string]bo
 	for service, value := range currentMap {
 		selectedMap[service] = value == "true"
 	}
-
-	log.Printf("[toggle] current %#v, selected %#v", currentMap, selectedMap)
 
 	selectedMap[clickedService] = !selectedMap[clickedService]
 
@@ -68,10 +72,29 @@ func (s *SessionRepo) Toggle(chatID int64, clickedService string) (map[string]bo
 		return nil, utils.WrapError(err)
 	}
 
-	log.Printf("[toggle] final %#v", finalMap)
+	//log.Printf("[toggle_service] result: %v", finalMap)
 	return finalMap, nil
 }
 
-func (s *SessionRepo) selectedServicesKey(chatID int64) string {
+func (s *serviceTypeCacheService) Clean(chatID int64) error {
+	key := s.formatKey(chatID)
+
+	exists, err := s.cache.Exists(s.ctx, key).Result()
+	if err != nil {
+		return utils.WrapError(err)
+	}
+
+	if exists > 0 {
+		if err := s.cache.Del(s.ctx, key).Err(); err != nil {
+			return utils.WrapError(err)
+		}
+		log.Printf("[service_cache] deleted for: %d (existed)", chatID)
+	} else {
+		log.Printf("[service_cache] nothing to delete for: %d", chatID)
+	}
+
+	return nil
+}
+func (s *serviceTypeCacheService) formatKey(chatID int64) string {
 	return fmt.Sprintf("selected_services:%d", chatID)
 }

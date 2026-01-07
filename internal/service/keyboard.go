@@ -11,9 +11,12 @@ type KeyboardService interface {
 	DateKeyboard([]AvailableBooking) tg.InlineKeyboardMarkup
 	ZoneKeyboard(zone model.Zone, date string) tg.InlineKeyboardMarkup
 	TimeKeyboard(ts []model.Timeslot, info *types.UserSessionInfo) tg.InlineKeyboardMarkup
-	ServiceKeyboard(types []model.ServiceType, time, date string) tg.InlineKeyboardMarkup
-	ServiceKeyboardV2(types []model.ServiceType, info *types.UserSessionInfo) tg.InlineKeyboardMarkup
-	RimsKeyboard(rims []string, svc, time, date string) tg.InlineKeyboardMarkup
-	ConfirmKeyboard() tg.InlineKeyboardMarkup
+	ServiceKeyboard(types []model.ServiceType, info *types.UserSessionInfo) tg.InlineKeyboardMarkup
+	RimsKeyboard(rims []string, info *types.UserSessionInfo) tg.InlineKeyboardMarkup
+	ConfirmKeyboard(info *types.UserSessionInfo) tg.InlineKeyboardMarkup
 	RequestPhoneKeyboard() tg.ReplyKeyboardMarkup
+	EmptyMyBookingsKeyboard() tg.InlineKeyboardMarkup
+	ExistsMyBookingsKeyboard() tg.InlineKeyboardMarkup
+	BackKeyboard() tg.InlineKeyboardMarkup
+	BookingCancellationKeyboard() tg.InlineKeyboardMarkup
 }

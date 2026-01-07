@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -42,7 +43,7 @@ func (lc *LockCache) Get(chatID int64) (SlotLockInfo, bool, error) {
 	if errors.Is(err, redis.Nil) {
 		return SlotLockInfo{}, false, nil
 	}
-	log.Printf("[lock_cache] get value: %v", val)
+	//log.Printf("[lock_cache] get value: %v", val)
 
 	if err != nil {
 		return SlotLockInfo{}, false, fmt.Errorf("[lock_cache] get error: %w", err)
@@ -56,8 +57,10 @@ func (lc *LockCache) Get(chatID int64) (SlotLockInfo, bool, error) {
 	return SlotLockInfo{Key: key, UUID: uuid}, true, nil
 }
 
-func (lc *LockCache) Del(chatID int64) {
-	lc.rc.Del(lc.ctx, lc.fmtKey(chatID))
+func (lc *LockCache) Del(chatID int64) error {
+	return utils.WrapFunctionError(func() error {
+		return lc.rc.Del(lc.ctx, lc.fmtKey(chatID)).Err()
+	})
 }
 
 func (lc *LockCache) fmtKey(chatID int64) string {

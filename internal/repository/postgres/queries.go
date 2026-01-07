@@ -22,8 +22,7 @@ const (
 		UPDATE available_slots 
 		SET is_available = false 
 		WHERE date = $1 
-		AND start_time = $2 
-		AND end_time = $3`
+		AND start_time = $2`
 
 	GetSlotByDateAndTime = `
 		SELECT * FROM available_slots 
@@ -36,14 +35,24 @@ const (
 
 	FindActiveByChatID = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true`
 
+	ExistsByChatID = `SELECT EXISTS(SELECT 1 FROM bookings WHERE chat_id = $1 AND is_active = true AND status NOT IN ('CANCELLED', 'NO_SHOW'))`
+
 	SaveBooking = `INSERT INTO bookings (chat_id, date, time,
-                      					 service, rim_radius, is_active, 
-                      					 status, created_at, updated_at)  
-                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`
+                      					 service, rim_radius, total_price,
+                      					 is_active, status, created_at, updated_at)  
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
 
 	SetPhoneByChatID = `UPDATE bookings SET user_phone = $1 WHERE chat_id = $2 and is_active = true`
 
-	ConfirmBooking = `UPDATE bookings SET status = $1 WHERE chat_id = $2 and is_active = true`
+	UpdateRimRadiusByChatID = `UPDATE bookings SET rim_radius = $1 WHERE chat_id = $2 and is_active = true`
+
+	UpdateStatusByChatID = `UPDATE bookings SET status = $1 WHERE chat_id = $2 AND is_active = true`
+
+	UpdatePriceByChatID = `UPDATE bookings SET total_price = $1 WHERE chat_id = $2 AND is_active = true`
+
+	ConfirmBooking = `UPDATE bookings SET status = $1, confirmed_by = $2 WHERE chat_id = $3 and is_active = true`
+
+	CancelBooking = `UPDATE bookings SET status = $1, is_active = false WHERE chat_id = $2`
 
 	GetPricePerSet = `SELECT price_per_set FROM prices WHERE service_type_code = $1 AND rim_size = $2 AND is_active = true`
 )

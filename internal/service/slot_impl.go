@@ -107,8 +107,8 @@ func (s *slotService) FindByDateAndTime(date, start string) (*model.Slot, error)
 	})
 }
 
-func (s *slotService) MarkUnavailable(date, start, end string) error {
+func (s *slotService) MarkUnavailable(date, startTime string) error {
 	return utils.WrapFunctionError(func() error {
-		return s.slotRepo.MarkUnavailable(date, start, end)
+		return s.slotRepo.MarkUnavailable(date, startTime)
 	})
 }

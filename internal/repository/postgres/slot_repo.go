@@ -8,13 +8,14 @@ import (
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type SlotRepo interface {
 	IsTodayAvailable() bool
 	GetAvailableSlots(date string) ([]model.Slot, error)
 	FindByDateAndTime(date, start string) (*model.Slot, error)
-	MarkUnavailable(date, start, end string) error
+	MarkUnavailable(date, startTime string) error
 }
 
 type slotRepo struct {
@@ -79,7 +80,7 @@ func (s *slotRepo) FindByDateAndTime(date, start string) (*model.Slot, error) {
 		slot      model.Slot
 	)
 
-	log.Printf("for query date and time %s %s", date, start)
+	log.Printf("[find_by_date_and_time] date: %s, time: %s", date, start)
 	if err := s.db.QueryRow(GetSlotByDateAndTime, date, start).Scan(
 		&slot.ID,
 		&sqlDate,
@@ -94,7 +95,7 @@ func (s *slotRepo) FindByDateAndTime(date, start string) (*model.Slot, error) {
 		return nil, fmt.Errorf("[find_slot_by_date_time] failed: %w", err)
 	}
 
-	slot.Date = sqlDate.Format("02-01-2006")
+	slot.Date = sqlDate.Format("2006-01-02")
 	slot.StartTime = startTime.Format("15:04")
 	slot.EndTime = endTime.Format("15:04")
 	slot.CreatedAt = created.Format("15:04 02-01-2006")
@@ -102,9 +103,10 @@ func (s *slotRepo) FindByDateAndTime(date, start string) (*model.Slot, error) {
 	return &slot, nil
 }
 
-func (s *slotRepo) MarkUnavailable(date, start, end string) error {
-	if _, err := s.db.Exec(MarkSlotUnavailable, date, start, end); err != nil {
-		return fmt.Errorf("[mark_slot_unavailable] query error: %w", err)
+func (s *slotRepo) MarkUnavailable(date, startTime string) error {
+	//log.Printf("[mark_unavailable] date: %s, time: %s", date, startTime)
+	if _, err := s.db.Exec(MarkSlotUnavailable, date, startTime); err != nil {
+		return utils.WrapError(err)
 	}
 	return nil
 }

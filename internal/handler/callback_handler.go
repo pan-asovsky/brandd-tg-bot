@@ -16,35 +16,38 @@ type CallbackHandler interface {
 }
 
 type callbackHandler struct {
-	api         *api.BotAPI
-	svcProvider *svc.Provider
-	pgProvider  *pg.Provider
-	sessionRepo *rd.SessionRepo
-	handlers    map[string]CallbackFunc
+	api              *api.BotAPI
+	svcProvider      *svc.Provider
+	pgProvider       *pg.Provider
+	serviceTypeCache rd.ServiceTypeCacheService
+	handlers         map[string]CallbackFunc
 }
 
-func NewCallbackHandler(api *api.BotAPI, svcProvider *svc.Provider, pgProvider *pg.Provider, sessionRepo *rd.SessionRepo) CallbackHandler {
+func NewCallbackHandler(api *api.BotAPI, svcProvider *svc.Provider, pgProvider *pg.Provider, serviceTypeCache rd.ServiceTypeCacheService) CallbackHandler {
 	ch := &callbackHandler{
-		api:         api,
-		svcProvider: svcProvider,
-		pgProvider:  pgProvider,
-		sessionRepo: sessionRepo,
-		handlers:    map[string]CallbackFunc{},
+		api:              api,
+		svcProvider:      svcProvider,
+		pgProvider:       pgProvider,
+		serviceTypeCache: serviceTypeCache,
+		handlers:         map[string]CallbackFunc{},
 	}
 
 	ch.register(consts.PrefixMenu, ch.handleMenu)
 	ch.register(consts.PrefixDate, ch.handleDate)
 	ch.register(consts.PrefixZone, ch.handleZone)
 	ch.register(consts.PrefixTime, ch.handleTime)
-	ch.register(consts.V2PrefixServiceSelect, ch.handleServiceSelect)
-	ch.register(consts.V2PrefixServiceConfirm, ch.handleServiceConfirm)
+	ch.register(consts.PrefixServiceSelect, ch.handleServiceSelect)
+	ch.register(consts.PrefixServiceConfirm, ch.handleServiceConfirm)
 	ch.register(consts.PrefixRim, ch.handleRim)
 	ch.register(consts.PrefixConfirm, ch.handleConfirm)
+	ch.register(consts.PrefixBooking, ch.handleBooking)
+
+	ch.register(consts.PrefixBack, ch.handleBack)
 
 	return ch
 }
 
-type CallbackFunc func(cb *api.CallbackQuery, data string) error
+type CallbackFunc func(cb *api.CallbackQuery) error
 
 func (c *callbackHandler) register(prefix string, handler CallbackFunc) {
 	c.handlers[prefix] = handler
@@ -55,9 +58,10 @@ func (c *callbackHandler) Handle(query *api.CallbackQuery) error {
 
 	for prefix, handler := range c.handlers {
 		if strings.HasPrefix(query.Data, prefix) {
-			cb := strings.TrimPrefix(query.Data, prefix)
-			return handler(query, cb)
+			//cd := strings.TrimPrefix(query.Data, prefix)
+			return handler(query)
 		}
+		//return handler(query)
 	}
 
 	return nil

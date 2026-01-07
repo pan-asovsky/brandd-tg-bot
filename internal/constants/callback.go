@@ -1,9 +1,15 @@
 package constants
 
 const (
-	NewBookingCbk     = PrefixMenu + "NEW"
-	MyBookingsCbk     = PrefixMenu + "MY"
-	HelpCbk           = PrefixMenu + "HELP"
-	ConfirmBookingCbk = PrefixConfirm + "YES"
-	RejectCbk         = PrefixConfirm + "NO"
+	NewBookingCbk       = PrefixBooking + New
+	MyBookingsCbk       = PrefixBooking + My
+	PreCancelBookingCbk = PrefixBooking + PreCancel
+	CancelBookingCbk    = PrefixBooking + Cancel
+	NoCancelBookingCbk  = PrefixBooking + NoCancel
+
+	HelpCbk     = PrefixMenu + Help
+	CalendarCbk = PrefixMenu + Calendar
+
+	ConfirmBookingCbk = PrefixConfirm + Yes
+	RejectCbk         = PrefixConfirm + No
 )

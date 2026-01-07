@@ -5,7 +5,7 @@ var ServiceNames = map[string]string{
 	"BALANCING":          "Балансировка",
 	"TIRE_SERVICE":       "Шиномонтаж",
 	"COMPLEX":            "Комплекс",
-	"TAKE_AND_TIRE":      "Съём-устанока и шиномонтаж",
+	"TAKE_AND_TIRE":      "Съём-установка и шиномонтаж",
 	"TAKE_AND_BALANCING": "Съём-установка и балансировка",
 	"TIRE_AND_BALANCING": "Шиномонтаж и балансировка",
 }

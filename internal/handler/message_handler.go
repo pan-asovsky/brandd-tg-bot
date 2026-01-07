@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"log"
+
 	tgbot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
@@ -13,12 +16,13 @@ type MessageHandler interface {
 }
 
 type messageHandler struct {
-	api         *tgbot.BotAPI
-	svcProvider *service.Provider
+	api              *tgbot.BotAPI
+	svcProvider      *service.Provider
+	serviceTypeCache rd.ServiceTypeCacheService
 }
 
-func NewMessageHandler(api *tgbot.BotAPI, svcProvider *service.Provider) MessageHandler {
-	return &messageHandler{api: api, svcProvider: svcProvider}
+func NewMessageHandler(api *tgbot.BotAPI, svcProvider *service.Provider, serviceTypeCache rd.ServiceTypeCacheService) MessageHandler {
+	return &messageHandler{api: api, svcProvider: svcProvider, serviceTypeCache: serviceTypeCache}
 }
 
 func (m *messageHandler) Handle(msg *tgbot.Message) error {
@@ -34,11 +38,16 @@ func (m *messageHandler) Handle(msg *tgbot.Message) error {
 }
 
 func (m *messageHandler) handlePhone(msg *tgbot.Message) error {
-	if err := m.svcProvider.Booking().SetPhone(msg.Contact.PhoneNumber, msg.Chat.ID); err != nil {
+	chatID := msg.Chat.ID
+
+	if err := m.svcProvider.Telegram().RemoveReplyKeyboard(chatID); err != nil {
 		return utils.WrapError(err)
 	}
 
-	chatID := msg.Chat.ID
+	if err := m.svcProvider.Booking().SetPhone(msg.Contact.PhoneNumber, chatID); err != nil {
+		return utils.WrapError(err)
+	}
+
 	auto, err := m.svcProvider.Config().IsAutoConfirm()
 	if err != nil {
 		return utils.WrapError(err)
@@ -57,6 +66,7 @@ func (m *messageHandler) handlePhone(msg *tgbot.Message) error {
 
 func (m *messageHandler) handleAutoConfirm(chatID int64) error {
 	slot, err := m.getActiveSlot(chatID)
+	//log.Printf("[handle_auto_confirm] slot: %v", slot)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -77,16 +87,39 @@ func (m *messageHandler) getActiveSlot(chatID int64) (*model.Slot, error) {
 }
 
 func (m *messageHandler) confirmAndNotify(chatID int64, slot *model.Slot) error {
-	if err := m.svcProvider.Booking().Confirm(chatID); err != nil {
+	if err := m.svcProvider.Slot().MarkUnavailable(slot.Date, slot.StartTime); err != nil {
 		return utils.WrapError(err)
 	}
+
+	if err := m.svcProvider.Booking().AutoConfirm(chatID); err != nil {
+		return utils.WrapError(err)
+	}
+
+	if err := m.svcProvider.Lock().Clean(chatID); err != nil {
+		return utils.WrapError(err)
+	}
+
+	if err := m.serviceTypeCache.Clean(chatID); err != nil {
+		return utils.WrapError(err)
+	}
+
 	return utils.WrapFunctionError(func() error {
 		return m.svcProvider.Telegram().ProcessConfirm(chatID, slot)
 	})
 }
 
 func (m *messageHandler) handlePendingConfirm(chatID int64) error {
+	if err := m.svcProvider.Booking().UpdateStatus(chatID, model.NotConfirmed); err != nil {
+		return utils.WrapError(err)
+	}
+
 	return utils.WrapFunctionError(func() error {
 		return m.svcProvider.Telegram().ProcessPendingConfirm(chatID)
 	})
+}
+
+func (m *messageHandler) cleanup(chatID int64, messageID int) {
+	if _, err := m.api.Request(tgbot.NewDeleteMessage(chatID, messageID)); err != nil {
+		log.Printf("error delete previous message %d: %v", messageID, err)
+	}
 }

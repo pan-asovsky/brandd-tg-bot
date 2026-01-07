@@ -1,29 +1,58 @@
 package handler
 
 import (
+	"log"
+
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleRim(q *api.CallbackQuery, cd string) error {
-	info, err := utils.GetSessionInfo(cd)
+func (c *callbackHandler) handleRim(query *api.CallbackQuery) error {
+	provider := c.svcProvider
+
+	info, err := provider.ParseCallback().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
-	info.ChatID = q.Message.Chat.ID
 
-	totalPrice, err := c.svcProvider.Price().Calculate(info.Service, info.Radius)
+	if err = c.serviceTypeCache.Clean(info.ChatID); err != nil {
+		return utils.WrapError(err)
+	}
+
+	totalPrice, err := provider.Price().Calculate(info.Service, info.RimRadius)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 	info.TotalPrice = totalPrice
 
-	booking, err := c.svcProvider.Booking().Create(info)
-	if err != nil {
-		return utils.WrapError(err)
+	exists := provider.Booking().ExistsByChatID(info.ChatID)
+
+	var booking *model.Booking
+	if !exists {
+		booking, err = provider.Booking().Create(info)
+		log.Printf("[handle_rim] (false) exists: %v, created: %v", exists, err)
+		if err != nil {
+			return utils.WrapError(err)
+		}
+	} else {
+		if err = provider.Booking().UpdateRimRadius(info.ChatID, info.RimRadius); err != nil {
+			return utils.WrapError(err)
+		}
+
+		if err = provider.Booking().RecalculatePrice(info.ChatID); err != nil {
+			return utils.WrapError(err)
+		}
+
+		booking, err = provider.Booking().FindActiveByChatID(info.ChatID)
+		log.Printf("[handle_rim] (true) exists: %v, founded: %v, err: %v", exists, booking, err)
+		if err != nil {
+			return utils.WrapError(err)
+		}
 	}
 
+	log.Printf("[handle_rim] booking: %v", booking)
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().RequestPreConfirm(booking, info.ChatID)
+		return provider.Telegram().RequestPreConfirm(booking, info)
 	})
 }

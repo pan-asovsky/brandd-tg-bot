@@ -41,13 +41,15 @@ CREATE TABLE bookings (
     rim_radius INTEGER NOT NULL,
     total_price BIGINT,
 
-    status VARCHAR(50) NOT NULL DEFAULT 'NOT_CONFIRMED',
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-
-    CONSTRAINT unique_booking_slot UNIQUE(date, time, chat_id)
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX unique_active_booking_slot
+    ON bookings (date, time, chat_id)
+    WHERE is_active;
 
 CREATE INDEX idx_slots_date_available ON available_slots(date, is_available) WHERE is_available = true;
 CREATE INDEX idx_slots_date_time ON available_slots(date, start_time);

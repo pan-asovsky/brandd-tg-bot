@@ -1,26 +1,25 @@
 package handler
 
 import (
-	"log"
-
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleServiceSelect(q *api.CallbackQuery, cd string) error {
-	log.Printf("[service_select] callback: %s", cd)
-	info, err := utils.GetSessionInfo(cd)
-	if err != nil {
-		return utils.WrapError(err)
-	}
-	info.ChatID = q.Message.Chat.ID
+func (c *callbackHandler) handleServiceSelect(query *api.CallbackQuery) error {
+	svcProvider := c.svcProvider
 
-	selected, err := c.sessionRepo.Toggle(info.ChatID, info.Service)
+	info, err := svcProvider.ParseCallback().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
-	info.SelectedServices = selected
-	log.Println("[service_select] services to callback:", info.SelectedServices)
+
+	if len(info.Service) > 0 {
+		selected, err := c.serviceTypeCache.Toggle(info.ChatID, info.Service)
+		if err != nil {
+			return utils.WrapError(err)
+		}
+		info.SelectedServices = selected
+	}
 
 	types, err := c.pgProvider.Service().GetServiceTypes()
 	if err != nil {
@@ -28,26 +27,24 @@ func (c *callbackHandler) handleServiceSelect(q *api.CallbackQuery, cd string) e
 	}
 
 	return utils.WrapFunctionError(func() error {
-		//return c.svcProvider.Telegram().ProcessServiceSelect(types, info)
-		return c.svcProvider.Telegram().RequestServiceTypes(types, info)
+		return svcProvider.Telegram().RequestServiceTypes(types, info)
 	})
 }
 
-func (c *callbackHandler) handleServiceConfirm(q *api.CallbackQuery, cd string) error {
-	log.Printf("[service_confirm] callback: %s", cd)
-	info, err := utils.GetSessionInfo(cd)
+func (c *callbackHandler) handleServiceConfirm(query *api.CallbackQuery) error {
+	svcProvider := c.svcProvider
+
+	info, err := svcProvider.ParseCallback().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
-	info.ChatID = q.Message.Chat.ID
 
 	rims, err := c.pgProvider.Price().GetAllRimSizes()
 	if err != nil {
 		return utils.WrapError(err)
 	}
-	log.Println("[service_confirm] session info:", info)
 
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().RequestRimRadius(rims, info)
+		return svcProvider.Telegram().RequestRimRadius(rims, info)
 	})
 }

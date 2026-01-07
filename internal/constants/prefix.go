@@ -1,15 +1,17 @@
 package constants
 
 const (
-	PrefixMenu    = "MENU::"
-	PrefixDate    = "DATE::"
-	PrefixZone    = "ZONE::"
-	PrefixTime    = "TIME::"
-	PrefixService = "SERVICE::"
+	PrefixMenu = "MENU::"
+	PrefixDate = "DATE::"
+	PrefixZone = "ZONE::"
+	PrefixTime = "TIME::"
 
-	V2PrefixServiceSelect  = "svc::"
-	V2PrefixServiceConfirm = "SVC::"
+	PrefixServiceSelect  = "svc::"
+	PrefixServiceConfirm = "SVC::"
 
 	PrefixRim     = "RIM::"
 	PrefixConfirm = "CONFIRM::"
+
+	PrefixBack    = "BACK::"
+	PrefixBooking = "BOOKING::"
 )

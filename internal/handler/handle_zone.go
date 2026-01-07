@@ -5,19 +5,25 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleZone(q *api.CallbackQuery, cd string) error {
-	info, err := utils.GetSessionInfo(cd)
-	if err != nil {
-		return utils.WrapError(err)
-	}
-	info.ChatID = q.Message.Chat.ID
+func (c *callbackHandler) handleZone(query *api.CallbackQuery) error {
+	provider := c.svcProvider
 
-	zones, err := c.svcProvider.Slot().GetAvailableZones(info.Date)
+	info, err := provider.ParseCallback().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
+
+	if err = provider.Lock().Clean(info.ChatID); err != nil {
+		return utils.WrapError(err)
+	}
+
+	zones, err := provider.Slot().GetAvailableZones(info.Date)
+	if err != nil {
+		return utils.WrapError(err)
+	}
+	//log.Printf("[handle_zone] zone: %v, info.Zone: %s", zones, info.Zone)
 
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().RequestTime(zones[info.Zone], info)
+		return provider.Telegram().RequestTime(zones[info.Zone], info)
 	})
 }
