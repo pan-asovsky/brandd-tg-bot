@@ -59,7 +59,15 @@ func (b *bookingService) UpdateStatus(chatID int64, status model.BookingStatus) 
 }
 
 func (b *bookingService) UpdateRimRadius(chatID int64, rimRadius string) error {
-	return b.pgProvider.Booking().UpdateRimRadius(chatID, rimRadius)
+	return utils.WrapFunctionError(func() error {
+		return b.pgProvider.Booking().UpdateRimRadius(chatID, rimRadius)
+	})
+}
+
+func (b *bookingService) UpdateService(chatID int64, service string) error {
+	return utils.WrapFunctionError(func() error {
+		return b.pgProvider.Booking().UpdateService(chatID, service)
+	})
 }
 
 func (b *bookingService) RecalculatePrice(chatID int64) error {

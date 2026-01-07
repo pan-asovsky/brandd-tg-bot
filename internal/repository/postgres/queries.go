@@ -33,22 +33,24 @@ const (
 		SELECT * FROM service_types
 		WHERE service_code = $1`
 
-	FindActiveByChatID = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true`
+	FindActive = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true`
 
-	ExistsByChatID = `SELECT EXISTS(SELECT 1 FROM bookings WHERE chat_id = $1 AND is_active = true AND status NOT IN ('CANCELLED', 'NO_SHOW'))`
+	BookingExists = `SELECT EXISTS(SELECT 1 FROM bookings WHERE chat_id = $1 AND is_active = true AND status NOT IN ('CANCELLED', 'NO_SHOW'))`
 
 	SaveBooking = `INSERT INTO bookings (chat_id, date, time,
                       					 service, rim_radius, total_price,
                       					 is_active, status, created_at, updated_at)  
                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
 
-	SetPhoneByChatID = `UPDATE bookings SET user_phone = $1 WHERE chat_id = $2 and is_active = true`
+	SetPhone = `UPDATE bookings SET user_phone = $1 WHERE chat_id = $2 and is_active = true`
 
-	UpdateRimRadiusByChatID = `UPDATE bookings SET rim_radius = $1 WHERE chat_id = $2 and is_active = true`
+	UpdateRimRadius = `UPDATE bookings SET rim_radius = $1 WHERE chat_id = $2 and is_active = true`
 
-	UpdateStatusByChatID = `UPDATE bookings SET status = $1 WHERE chat_id = $2 AND is_active = true`
+	UpdateStatus = `UPDATE bookings SET status = $1 WHERE chat_id = $2 AND is_active = true`
 
-	UpdatePriceByChatID = `UPDATE bookings SET total_price = $1 WHERE chat_id = $2 AND is_active = true`
+	UpdatePrice = `UPDATE bookings SET total_price = $1 WHERE chat_id = $2 AND is_active = true`
+
+	UpdateService = `UPDATE bookings SET service = $1 WHERE chat_id = $2 AND is_active = true`
 
 	ConfirmBooking = `UPDATE bookings SET status = $1, confirmed_by = $2 WHERE chat_id = $3 and is_active = true`
 

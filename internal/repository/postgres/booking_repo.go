@@ -21,6 +21,7 @@ type BookingRepo interface {
 	Confirm(chatID int64) error
 	AutoConfirm(chatID int64) error
 	Cancel(chatID int64) error
+	UpdateService(chatID int64, service string) error
 }
 
 type bookingRepo struct {
@@ -29,7 +30,7 @@ type bookingRepo struct {
 
 func (b *bookingRepo) FindActiveByChatID(chatID int64) (*model.Booking, error) {
 	var booking model.Booking
-	if err := b.db.QueryRow(FindActiveByChatID, chatID).Scan(
+	if err := b.db.QueryRow(FindActive, chatID).Scan(
 		&booking.ID,
 		&booking.ChatID,
 		&booking.UserPhone,
@@ -56,14 +57,14 @@ func (b *bookingRepo) FindActiveByChatID(chatID int64) (*model.Booking, error) {
 
 func (b *bookingRepo) ExistsByChatID(chatID int64) bool {
 	var exists bool
-	if err := b.db.QueryRow(ExistsByChatID, chatID).Scan(&exists); err != nil {
+	if err := b.db.QueryRow(BookingExists, chatID).Scan(&exists); err != nil {
 		return false
 	}
 	return exists
 }
 
 func (b *bookingRepo) UpdateRimRadius(chatID int64, rimRadius string) error {
-	_, err := b.db.Exec(UpdateRimRadiusByChatID, rimRadius, chatID)
+	_, err := b.db.Exec(UpdateRimRadius, rimRadius, chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -72,7 +73,7 @@ func (b *bookingRepo) UpdateRimRadius(chatID int64, rimRadius string) error {
 }
 
 func (b *bookingRepo) UpdateStatus(chatID int64, status model.BookingStatus) error {
-	_, err := b.db.Exec(UpdateStatusByChatID, status, chatID)
+	_, err := b.db.Exec(UpdateStatus, status, chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -81,7 +82,16 @@ func (b *bookingRepo) UpdateStatus(chatID int64, status model.BookingStatus) err
 }
 
 func (b *bookingRepo) UpdatePrice(chatID int64, price int64) error {
-	_, err := b.db.Exec(UpdatePriceByChatID, price, chatID)
+	_, err := b.db.Exec(UpdatePrice, price, chatID)
+	if err != nil {
+		return utils.WrapError(err)
+	}
+
+	return nil
+}
+
+func (b *bookingRepo) UpdateService(chatID int64, service string) error {
+	_, err := b.db.Exec(UpdateService, service, chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -110,7 +120,7 @@ func (b *bookingRepo) Save(booking *model.Booking) (*model.Booking, error) {
 }
 
 func (b *bookingRepo) SetPhone(phone string, chatID int64) error {
-	if _, err := b.db.Exec(SetPhoneByChatID, phone, chatID); err != nil {
+	if _, err := b.db.Exec(SetPhone, phone, chatID); err != nil {
 		return fmt.Errorf("[set_phone_by_chat_id] query error: %w", err)
 	}
 	return nil

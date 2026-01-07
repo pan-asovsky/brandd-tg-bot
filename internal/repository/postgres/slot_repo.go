@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
@@ -60,7 +59,6 @@ func (s *slotRepo) GetAvailableSlots(date string) ([]model.Slot, error) {
 		slot.EndTime = end.Format("15:04")
 		slot.CreatedAt = created.Format("2006-01-02 15:04")
 
-		//log.Printf("[get_available_slots] mapped slot: %+v", slot)
 		slots = append(slots, slot)
 	}
 
@@ -80,7 +78,6 @@ func (s *slotRepo) FindByDateAndTime(date, start string) (*model.Slot, error) {
 		slot      model.Slot
 	)
 
-	log.Printf("[find_by_date_and_time] date: %s, time: %s", date, start)
 	if err := s.db.QueryRow(GetSlotByDateAndTime, date, start).Scan(
 		&slot.ID,
 		&sqlDate,
@@ -104,7 +101,6 @@ func (s *slotRepo) FindByDateAndTime(date, start string) (*model.Slot, error) {
 }
 
 func (s *slotRepo) MarkUnavailable(date, startTime string) error {
-	//log.Printf("[mark_unavailable] date: %s, time: %s", date, startTime)
 	if _, err := s.db.Exec(MarkSlotUnavailable, date, startTime); err != nil {
 		return utils.WrapError(err)
 	}

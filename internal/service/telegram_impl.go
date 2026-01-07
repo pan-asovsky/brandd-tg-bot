@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -39,7 +38,6 @@ func (t *telegramService) RequestTime(timeslots []model.Timeslot, info *types.Us
 }
 
 func (t *telegramService) RequestServiceTypes(types []model.ServiceType, info *types.UserSessionInfo) error {
-	log.Printf("[before_building_service_keyboard] info: %v", info)
 	kb := t.kb.ServiceKeyboard(types, info)
 	return utils.WrapFunctionError(func() error {
 		return t.sendKeyboardMessage(info.ChatID, consts.ServiceMsg, kb)

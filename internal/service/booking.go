@@ -14,6 +14,7 @@ type BookingService interface {
 	UpdateStatus(chatID int64, status model.BookingStatus) error
 	ExistsByChatID(chatID int64) bool
 	UpdateRimRadius(chatID int64, rimRadius string) error
+	UpdateService(chatID int64, service string) error
 	RecalculatePrice(chatID int64) error
 	Cancel(chatID int64) error
 }
