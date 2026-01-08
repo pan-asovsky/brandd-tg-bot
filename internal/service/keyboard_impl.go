@@ -194,8 +194,8 @@ func (s *keyboardService) RequestPhoneKeyboard() tg.ReplyKeyboardMarkup {
 			tg.KeyboardButton{Text: consts.ShareContactBtn, RequestContact: true},
 		),
 	)
+
 	kb.ResizeKeyboard = true
-	kb.OneTimeKeyboard = true
 	return kb
 }
 

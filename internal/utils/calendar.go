@@ -17,10 +17,10 @@ func GenerateICS(startDate, endDate time.Time) string {
 
 	buffer.WriteString("BEGIN:VEVENT\r\n")
 	buffer.WriteString(fmt.Sprintf("UID:%s\r\n", generateUID()))
-	buffer.WriteString(fmt.Sprintf("DTSTAMP;TZID=Europe/Moscow:%s\r\n", startDate.Format("20060102T150405")))
+	buffer.WriteString(fmt.Sprintf("DTSTAMP:%s\r\n", startDate.UTC().Format("20060102T150405Z")))
 
-	buffer.WriteString(fmt.Sprintf("DTSTART;TZID=Europe/Moscow:%s\r\n", startDate.Format("20060102T150405")))
-	buffer.WriteString(fmt.Sprintf("DTEND;TZID=Europe/Moscow:%s\r\n", endDate.Format("20060102T150405")))
+	buffer.WriteString(fmt.Sprintf("DTSTART:%s\r\n", startDate.UTC().Format("20060102T150405Z")))
+	buffer.WriteString(fmt.Sprintf("DTEND:%s\r\n", endDate.UTC().Format("20060102T150405Z")))
 
 	buffer.WriteString(fmt.Sprintf("SUMMARY:%s\r\n", "Шиномонтаж"))
 	buffer.WriteString(fmt.Sprintf("DESCRIPTION:%s\r\n", "Запись на шиномонтаж в Bandd"))
@@ -32,8 +32,9 @@ func GenerateICS(startDate, endDate time.Time) string {
 	return buffer.String()
 }
 
-func ParseDateTime(dateStr, timeStr string) (time.Time, error) {
-	return time.Parse("2006-01-02 15:04", dateStr+" "+timeStr)
+func ParseDateTimeInMSKZone(dateStr, timeStr string) (time.Time, error) {
+	mscZone := time.FixedZone("MSK", 3*60*60)
+	return time.ParseInLocation("2006-01-02 15:04", dateStr+" "+timeStr, mscZone)
 }
 
 func ParseDate(dateStr string) (time.Time, error) {

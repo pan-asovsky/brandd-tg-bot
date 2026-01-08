@@ -142,15 +142,11 @@ func (t *telegramService) SendCalendar(chatID int64, fn func() (*model.Booking, 
 		})
 	}
 
-	startDate, err := utils.ParseDateTime(booking.Date, booking.Time)
+	startDate, err := utils.ParseDateTimeInMSKZone(booking.Date, booking.Time)
 	if err != nil {
 		return utils.WrapError(err)
 	}
-	endDate := startDate.Add(1 * time.Hour)
-	//log.Printf("[send_calendar] start date: %s, end date: %s", startDate, endDate)
-
-	ics := utils.GenerateICS(startDate, endDate)
-	//log.Printf("[send_calendar] ics: %s", ics)
+	ics := utils.GenerateICS(startDate, startDate.Add(1*time.Hour))
 
 	return utils.WrapFunctionError(func() error {
 		return t.sendCalendarFile(chatID, ics, t.kb.BackKeyboard())
@@ -170,7 +166,7 @@ func (t *telegramService) SendPreCancelBookingMessage(chatID int64, date, time s
 
 func (t *telegramService) SendCancellationMessage(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
-		return t.sendMessage(chatID, consts.BookingCancelled)
+		return t.sendKeyboardMessage(chatID, consts.BookingCancelled, t.kb.BackKeyboard())
 	})
 }
 
