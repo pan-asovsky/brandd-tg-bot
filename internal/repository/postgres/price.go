@@ -9,11 +9,6 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-type PriceRepo interface {
-	GetAllRimSizes() ([]string, error)
-	GetSetPrice(svc string, radius string) (int64, error)
-}
-
 type priceRepo struct {
 	db *sql.DB
 }

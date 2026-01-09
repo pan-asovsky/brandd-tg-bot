@@ -7,10 +7,6 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
-type ServiceRepo interface {
-	GetServiceTypes() ([]model.ServiceType, error)
-}
-
 type serviceRepo struct {
 	db *sql.DB
 }

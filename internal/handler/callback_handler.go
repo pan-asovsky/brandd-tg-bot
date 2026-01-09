@@ -6,24 +6,22 @@ import (
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
-	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
 	svc "github.com/pan-asovsky/brandd-tg-bot/internal/service"
 )
-
-type CallbackHandler interface {
-	Handle(query *api.CallbackQuery) error
-}
 
 type callbackHandler struct {
 	api              *api.BotAPI
 	svcProvider      *svc.Provider
 	pgProvider       *pg.Provider
-	serviceTypeCache rd.ServiceTypeCacheService
+	serviceTypeCache cache.ServiceTypeCache
 	handlers         map[string]CallbackFunc
 }
 
-func NewCallbackHandler(api *api.BotAPI, svcProvider *svc.Provider, pgProvider *pg.Provider, serviceTypeCache rd.ServiceTypeCacheService) CallbackHandler {
+func NewCallbackHandler(api *api.BotAPI, svcProvider *svc.Provider, pgProvider *pg.Provider, serviceTypeCache cache.ServiceTypeCache) i.CallbackHandler {
 	ch := &callbackHandler{
 		api:              api,
 		svcProvider:      svcProvider,

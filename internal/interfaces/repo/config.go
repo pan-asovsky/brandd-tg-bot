@@ -1,5 +1,5 @@
 package interfaces
 
-type ConfigService interface {
+type ConfigRepo interface {
 	IsAutoConfirm() (bool, error)
 }

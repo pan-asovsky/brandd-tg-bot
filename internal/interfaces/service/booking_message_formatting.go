@@ -1,4 +1,4 @@
-package interfaces
+package service
 
 import "github.com/pan-asovsky/brandd-tg-bot/internal/model"
 

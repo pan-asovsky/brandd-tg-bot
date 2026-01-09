@@ -10,13 +10,6 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-type SlotRepo interface {
-	IsTodayAvailable() bool
-	GetAvailableSlots(date string) ([]model.Slot, error)
-	FindByDateAndTime(date, start string) (*model.Slot, error)
-	MarkUnavailable(date, startTime string) error
-}
-
 type slotRepo struct {
 	db *sql.DB
 }

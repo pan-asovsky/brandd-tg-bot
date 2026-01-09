@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
@@ -13,8 +13,8 @@ import (
 
 type bookingService struct {
 	pgProvider   *pg.Provider
-	slotService  i.SlotService
-	priceService i.PriceService
+	slotService  service.SlotService
+	priceService service.PriceService
 }
 
 func (b *bookingService) Create(info *types.UserSessionInfo) (*model.Booking, error) {

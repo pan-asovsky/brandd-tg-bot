@@ -4,7 +4,7 @@ import (
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	msgfmt "github.com/pan-asovsky/brandd-tg-bot/internal/service/message_formatting"
 )
@@ -62,4 +62,8 @@ func (p *Provider) MessageFormattingProvider() msgfmt.MessageFormattingProviderS
 
 func (p *Provider) DateTime() i.DateTimeService {
 	return &dateTimeService{}
+}
+
+func (p *Provider) User() i.UserService {
+	return &userService{p.pgProvider.User()}
 }

@@ -1,4 +1,4 @@
-package interfaces
+package service
 
 import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
@@ -19,7 +19,6 @@ type TelegramService interface {
 	ProcessConfirm(chatID int64, slot *model.Slot) error
 	ProcessPendingConfirm(chatID int64) error
 
-	SendHelpMessage(chatID int64) error
 	SendBookingRestrictionMessage(chatID int64, booking *model.Booking) error
 	SendMyBookingsMessage(chatID int64, fn func() (*model.Booking, error)) error
 	SendStartMenu(chatID int64) error
@@ -27,4 +26,6 @@ type TelegramService interface {
 	SendPreCancelBookingMessage(chatID int64, date, time string) error
 	SendCancellationMessage(chatID int64) error
 	SendCancelDenyMessage(chatID int64) error
+
+	NewBookingNotify(chatID int64, booking *model.Booking) error
 }

@@ -1,12 +1,12 @@
 package service
 
 import (
-	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type configService struct {
-	configRepo pg.ConfigRepo
+	configRepo i.ConfigRepo
 }
 
 func (c *configService) IsAutoConfirm() (bool, error) {

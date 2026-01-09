@@ -16,6 +16,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
@@ -28,7 +29,7 @@ type App struct {
 	Config                  *config.Config
 	Cache                   *redis.Client
 	Postgres                *sql.DB
-	ServiceTypeCacheService rd.ServiceTypeCacheService
+	ServiceTypeCacheService i.ServiceTypeCache
 	pgProvider              *pg.Provider
 	ServiceProvider         *service.Provider
 	TelegramBot             *tg.BotAPI

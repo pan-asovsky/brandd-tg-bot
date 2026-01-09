@@ -1,4 +1,4 @@
-package interfaces
+package service
 
 import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"

@@ -7,31 +7,27 @@ import (
 	"log"
 	"time"
 
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/rules"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 	"github.com/redis/go-redis/v9"
 )
 
-type ServiceTypeCacheService interface {
-	Toggle(chatID int64, clickedService string) (map[string]bool, error)
-	Clean(chatID int64) error
-}
-
-type serviceTypeCacheService struct {
+type serviceTypeCache struct {
 	cache *redis.Client
 	ttl   time.Duration
 	ctx   context.Context
 }
 
-func NewServiceTypeCacheService(r *redis.Client, ttl time.Duration) ServiceTypeCacheService {
-	return &serviceTypeCacheService{
+func NewServiceTypeCacheService(r *redis.Client, ttl time.Duration) i.ServiceTypeCache {
+	return &serviceTypeCache{
 		cache: r,
 		ttl:   ttl,
 		ctx:   context.Background(),
 	}
 }
 
-func (s *serviceTypeCacheService) Toggle(chatID int64, clickedService string) (map[string]bool, error) {
+func (s *serviceTypeCache) Toggle(chatID int64, clickedService string) (map[string]bool, error) {
 	key := s.formatKey(chatID)
 
 	//log.Printf("[toggle_service] chatID: %d, clicked: %s", chatID, clickedService)
@@ -72,11 +68,10 @@ func (s *serviceTypeCacheService) Toggle(chatID int64, clickedService string) (m
 		return nil, utils.WrapError(err)
 	}
 
-	//log.Printf("[toggle_service] result: %v", finalMap)
 	return finalMap, nil
 }
 
-func (s *serviceTypeCacheService) Clean(chatID int64) error {
+func (s *serviceTypeCache) Clean(chatID int64) error {
 	key := s.formatKey(chatID)
 
 	exists, err := s.cache.Exists(s.ctx, key).Result()
@@ -95,6 +90,6 @@ func (s *serviceTypeCacheService) Clean(chatID int64) error {
 
 	return nil
 }
-func (s *serviceTypeCacheService) formatKey(chatID int64) string {
+func (s *serviceTypeCache) formatKey(chatID int64) string {
 	return fmt.Sprintf("selected_services:%d", chatID)
 }

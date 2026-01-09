@@ -43,7 +43,6 @@ func (lc *LockCache) Get(chatID int64) (SlotLockInfo, bool, error) {
 	if errors.Is(err, redis.Nil) {
 		return SlotLockInfo{}, false, nil
 	}
-	//log.Printf("[lock_cache] get value: %v", val)
 
 	if err != nil {
 		return SlotLockInfo{}, false, fmt.Errorf("[lock_cache] get error: %w", err)

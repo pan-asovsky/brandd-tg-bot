@@ -6,15 +6,15 @@ import (
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	msgfmt "github.com/pan-asovsky/brandd-tg-bot/internal/service/message_formatting"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type telegramService struct {
-	kb             i.KeyboardService
-	dateTime       i.DateTimeService
+	kb             service.KeyboardService
+	dateTime       service.DateTimeService
 	msgFmtProvider msgfmt.MessageFormattingProviderService
 	tgapi          *api.BotAPI
 }
@@ -100,12 +100,6 @@ func (t *telegramService) ProcessPendingConfirm(chatID int64) error {
 	})
 }
 
-func (t *telegramService) SendHelpMessage(chatID int64) error {
-	return utils.WrapFunctionError(func() error {
-		return t.sendKeyboardMessage(chatID, consts.HelpMessage, t.kb.BackKeyboard())
-	})
-}
-
 func (t *telegramService) SendBookingRestrictionMessage(chatID int64, booking *model.Booking) error {
 
 	//msg, err := utils.FmtBookingRestrictionMsg(booking)
@@ -143,8 +137,6 @@ func (t *telegramService) SendStartMenu(chatID int64) error {
 }
 
 func (t *telegramService) SendPreCancelBookingMessage(chatID int64, date, time string) error {
-	//msg, err := utils.FmtBookingPreCancelMsg(date, time)
-
 	msg, err := t.msgFmtProvider.Booking().PreCancel(date, time)
 	if err != nil {
 		return utils.WrapError(err)
@@ -164,6 +156,17 @@ func (t *telegramService) SendCancellationMessage(chatID int64) error {
 func (t *telegramService) SendCancelDenyMessage(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
 		return t.sendKeyboardMessage(chatID, consts.ThanksForNoLeave, t.kb.BackKeyboard())
+	})
+}
+
+func (t *telegramService) NewBookingNotify(chatID int64, booking *model.Booking) error {
+	msg, err := t.msgFmtProvider.Admin().NewBookingNotify(booking)
+	if err != nil {
+		return utils.WrapError(err)
+	}
+
+	return utils.WrapFunctionError(func() error {
+		return t.sendMessageHTMLMode(chatID, msg)
 	})
 }
 

@@ -6,10 +6,6 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-type ConfigRepo interface {
-	IsAutoConfirm() (bool, error)
-}
-
 type configRepo struct {
 	db *sql.DB
 }

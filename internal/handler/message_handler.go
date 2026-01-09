@@ -5,23 +5,20 @@ import (
 
 	tgbot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
-	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-type MessageHandler interface {
-	Handle(msg *tgbot.Message) error
-}
-
 type messageHandler struct {
 	api              *tgbot.BotAPI
 	svcProvider      *service.Provider
-	serviceTypeCache rd.ServiceTypeCacheService
+	serviceTypeCache cache.ServiceTypeCache
 }
 
-func NewMessageHandler(api *tgbot.BotAPI, svcProvider *service.Provider, serviceTypeCache rd.ServiceTypeCacheService) MessageHandler {
+func NewMessageHandler(api *tgbot.BotAPI, svcProvider *service.Provider, serviceTypeCache cache.ServiceTypeCache) i.MessageHandler {
 	return &messageHandler{api: api, svcProvider: svcProvider, serviceTypeCache: serviceTypeCache}
 }
 
@@ -66,19 +63,21 @@ func (m *messageHandler) handlePhone(msg *tgbot.Message) error {
 
 func (m *messageHandler) handleAutoConfirm(chatID int64) error {
 	slot, err := m.getActiveSlot(chatID)
-	//log.Printf("[handle_auto_confirm] slot: %v", slot)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
+	if err = m.confirm(chatID, slot); err != nil {
+		return utils.WrapError(err)
+	}
+
 	return utils.WrapFunctionError(func() error {
-		return m.confirmAndNotify(chatID, slot)
+		return m.notifyAdmins(chatID)
 	})
 }
 
 func (m *messageHandler) getActiveSlot(chatID int64) (*model.Slot, error) {
 	booking, err := m.svcProvider.Booking().FindActiveByChatID(chatID)
-	log.Printf("[get_active_slot] booking: %v, err: %v", booking, err)
 	if err != nil {
 		return nil, utils.WrapError(err)
 	}
@@ -87,7 +86,7 @@ func (m *messageHandler) getActiveSlot(chatID int64) (*model.Slot, error) {
 	})
 }
 
-func (m *messageHandler) confirmAndNotify(chatID int64, slot *model.Slot) error {
+func (m *messageHandler) confirm(chatID int64, slot *model.Slot) error {
 	if err := m.svcProvider.Slot().MarkUnavailable(slot.Date, slot.StartTime); err != nil {
 		return utils.WrapError(err)
 	}
@@ -107,6 +106,22 @@ func (m *messageHandler) confirmAndNotify(chatID int64, slot *model.Slot) error 
 	return utils.WrapFunctionError(func() error {
 		return m.svcProvider.Telegram().ProcessConfirm(chatID, slot)
 	})
+}
+
+func (m *messageHandler) notifyAdmins(chatID int64) error {
+	booking, err := m.svcProvider.Booking().FindActiveByChatID(chatID)
+	if err != nil {
+		return utils.WrapError(err)
+	}
+
+	admins := m.svcProvider.User().GetActiveAdmins()
+	for _, admin := range admins {
+		if err = m.svcProvider.Telegram().NewBookingNotify(admin.ChatID, booking); err != nil {
+			return utils.WrapError(err)
+		}
+	}
+
+	return nil
 }
 
 func (m *messageHandler) handlePendingConfirm(chatID int64) error {

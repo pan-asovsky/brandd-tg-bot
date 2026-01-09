@@ -7,13 +7,13 @@ import (
 
 	rd "github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
-	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type slotService struct {
-	slotRepo   pg.SlotRepo
+	slotRepo   i.SlotRepo
 	slotLocker *rd.SlotLocker
 }
 
@@ -51,8 +51,8 @@ func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 	}
 
 	keys := make([]string, len(slots))
-	for i, slot := range slots {
-		keys[i] = s.slotLocker.FormatKey(slot.Date, fmt.Sprintf("%s-%s", slot.StartTime, slot.EndTime))
+	for x, slot := range slots {
+		keys[x] = s.slotLocker.FormatKey(slot.Date, fmt.Sprintf("%s-%s", slot.StartTime, slot.EndTime))
 	}
 
 	lockStatus, err := s.slotLocker.AreLocked(keys...)
@@ -61,9 +61,9 @@ func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 	}
 
 	filtered := make([]model.Slot, 0, len(slots))
-	for i, key := range keys {
+	for x, key := range keys {
 		if !lockStatus[key] {
-			filtered = append(filtered, slots[i])
+			filtered = append(filtered, slots[x])
 		}
 	}
 	log.Printf("[get_available_zones] slots: %d, filtered: %d", len(slots), len(filtered))

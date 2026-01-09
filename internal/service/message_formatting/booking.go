@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
@@ -19,7 +19,7 @@ func (b *bookingMessageFormattingService) Confirm(date, startTime string) string
 }
 
 func (b *bookingMessageFormattingService) PreConfirm(booking *model.Booking) (string, error) {
-	date, err := b.dateTime.FormatDate(booking.Date, "2006-01-02", "01.02.2006")
+	date, err := b.dateTime.FormatDate(booking.Date, "2006-01-02", "02.01.2006")
 	if err != nil {
 		return "", utils.WrapError(err)
 	}
@@ -31,7 +31,7 @@ func (b *bookingMessageFormattingService) PreConfirm(booking *model.Booking) (st
 		booking.Time,
 		consts.ServiceNames[booking.Service],
 		booking.RimRadius,
-		sqlNullIntToInt64(booking.TotalPrice),
+		SQLNullIntToInt64(booking.TotalPrice),
 	), nil
 }
 
@@ -45,7 +45,7 @@ func (b *bookingMessageFormattingService) My(booking *model.Booking) (string, er
 		consts.ActiveBooking,
 		view,
 		consts.ServiceNames[booking.Service],
-		sqlNullIntToInt64(booking.TotalPrice),
+		SQLNullIntToInt64(booking.TotalPrice),
 	), nil
 }
 
@@ -67,9 +67,16 @@ func (b *bookingMessageFormattingService) PreCancel(date, time string) (string, 
 	return fmt.Sprintf(consts.BookingPreCancellation, view), nil
 }
 
-func sqlNullIntToInt64(nullable sql.NullInt64) int64 {
+func SQLNullIntToInt64(nullable sql.NullInt64) int64 {
 	if nullable.Valid {
 		return nullable.Int64
 	}
 	return 0
+}
+
+func SQLNullString(nullable sql.NullString) string {
+	if nullable.Valid {
+		return nullable.String
+	}
+	return ""
 }

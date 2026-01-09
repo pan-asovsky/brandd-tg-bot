@@ -29,10 +29,6 @@ const (
 		WHERE date = $1 
 		AND start_time = $2`
 
-	GetServiceTypeByCode = `
-		SELECT * FROM service_types
-		WHERE service_code = $1`
-
 	FindActive = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true`
 
 	BookingExists = `SELECT EXISTS(SELECT 1 FROM bookings WHERE chat_id = $1 AND is_active = true AND status NOT IN ('CANCELLED', 'NO_SHOW'))`
@@ -57,4 +53,6 @@ const (
 	CancelBooking = `UPDATE bookings SET status = $1, is_active = false WHERE chat_id = $2`
 
 	GetPricePerSet = `SELECT price_per_set FROM prices WHERE service_type_code = $1 AND rim_size = $2 AND is_active = true`
+
+	GetActiveAdmins = "SELECT * FROM users WHERE role = 'admin' AND is_active = true"
 )
