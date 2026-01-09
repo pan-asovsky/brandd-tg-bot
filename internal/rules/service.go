@@ -17,8 +17,6 @@ const (
 	PLUS             = "+"
 )
 
-// BALANCING+TIRE_SERVICE
-
 type ServiceRules struct{}
 
 func (r *ServiceRules) Apply(currentMap map[string]bool, clickedService string) map[string]bool {

@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+type AvailableBooking struct {
+	Date  time.Time
+	Label string
+}
 type BookingStatus string
 
 const (

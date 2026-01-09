@@ -5,10 +5,6 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-type ConfigService interface {
-	IsAutoConfirm() (bool, error)
-}
-
 type configService struct {
 	configRepo pg.ConfigRepo
 }

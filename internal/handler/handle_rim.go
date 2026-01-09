@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"log"
+
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
@@ -9,7 +11,7 @@ import (
 func (c *callbackHandler) handleRim(query *api.CallbackQuery) error {
 	provider := c.svcProvider
 
-	info, err := provider.ParseCallback().Parse(query)
+	info, err := provider.CallbackParsing().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -29,6 +31,7 @@ func (c *callbackHandler) handleRim(query *api.CallbackQuery) error {
 	var booking *model.Booking
 	if !exists {
 		booking, err = provider.Booking().Create(info)
+		log.Printf("[handle_rim] (false). created: %v", booking)
 		if err != nil {
 			return utils.WrapError(err)
 		}
@@ -46,6 +49,7 @@ func (c *callbackHandler) handleRim(query *api.CallbackQuery) error {
 		}
 
 		booking, err = provider.Booking().FindActiveByChatID(info.ChatID)
+		log.Printf("[handle_rim] (true) founded: %v", booking)
 		if err != nil {
 			return utils.WrapError(err)
 		}

@@ -32,7 +32,7 @@ func NewCallbackHandler(api *api.BotAPI, svcProvider *svc.Provider, pgProvider *
 		handlers:         map[string]CallbackFunc{},
 	}
 
-	ch.register(consts.PrefixMenu, ch.handleMenu)
+	//ch.register(consts.PrefixMenu, ch.handleMenu)
 	ch.register(consts.PrefixDate, ch.handleDate)
 	ch.register(consts.PrefixZone, ch.handleZone)
 	ch.register(consts.PrefixTime, ch.handleTime)

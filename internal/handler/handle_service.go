@@ -8,7 +8,7 @@ import (
 func (c *callbackHandler) handleServiceSelect(query *api.CallbackQuery) error {
 	svcProvider := c.svcProvider
 
-	info, err := svcProvider.ParseCallback().Parse(query)
+	info, err := svcProvider.CallbackParsing().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -34,7 +34,7 @@ func (c *callbackHandler) handleServiceSelect(query *api.CallbackQuery) error {
 func (c *callbackHandler) handleServiceConfirm(query *api.CallbackQuery) error {
 	svcProvider := c.svcProvider
 
-	info, err := svcProvider.ParseCallback().Parse(query)
+	info, err := svcProvider.CallbackParsing().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}

@@ -8,7 +8,7 @@ import (
 func (c *callbackHandler) handleDate(query *api.CallbackQuery) error {
 	provider := c.svcProvider
 
-	info, err := provider.ParseCallback().Parse(query)
+	info, err := provider.CallbackParsing().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}

@@ -9,11 +9,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 )
 
-type ParseCallbackService interface {
-	Parse(query *api.CallbackQuery) (*types.UserSessionInfo, error)
-}
-
-type parseCallbackService struct {
+type callbackParsingService struct {
 }
 
 const (
@@ -24,7 +20,7 @@ const (
 	KeyRadius  = "R"
 )
 
-func (c *parseCallbackService) Parse(query *api.CallbackQuery) (*types.UserSessionInfo, error) {
+func (c *callbackParsingService) Parse(query *api.CallbackQuery) (*types.UserSessionInfo, error) {
 	log.Printf("[parse_callback] callback: %s", query.Data)
 	_, payload, ok := strings.Cut(query.Data, "::")
 	if !ok {

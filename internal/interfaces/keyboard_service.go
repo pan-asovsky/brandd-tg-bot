@@ -1,0 +1,22 @@
+package interfaces
+
+import (
+	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+)
+
+type KeyboardService interface {
+	GreetingKeyboard() tg.InlineKeyboardMarkup
+	DateKeyboard([]model.AvailableBooking) tg.InlineKeyboardMarkup
+	ZoneKeyboard(zone model.Zone, date string) tg.InlineKeyboardMarkup
+	TimeKeyboard(ts []model.Timeslot, info *types.UserSessionInfo) tg.InlineKeyboardMarkup
+	ServiceKeyboard(types []model.ServiceType, info *types.UserSessionInfo) tg.InlineKeyboardMarkup
+	RimsKeyboard(rims []string, info *types.UserSessionInfo) tg.InlineKeyboardMarkup
+	ConfirmKeyboard(info *types.UserSessionInfo) tg.InlineKeyboardMarkup
+	RequestPhoneKeyboard() tg.ReplyKeyboardMarkup
+	EmptyMyBookingsKeyboard() tg.InlineKeyboardMarkup
+	ExistsMyBookingsKeyboard() tg.InlineKeyboardMarkup
+	BackKeyboard() tg.InlineKeyboardMarkup
+	BookingCancellationKeyboard() tg.InlineKeyboardMarkup
+}

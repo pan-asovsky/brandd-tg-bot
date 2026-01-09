@@ -17,40 +17,40 @@ const (
 	Rim     = "R~"
 )
 
-type BuildCallbackService struct{}
+type callbackBuildingService struct{}
 
-func (BuildCallbackService) Menu() string {
+func (cb *callbackBuildingService) Menu() string {
 	return consts.PrefixBack + consts.Menu
 }
 
-func (BuildCallbackService) NewBooking() string {
+func (cb *callbackBuildingService) NewBooking() string {
 	return consts.NewBookingCbk
 }
 
-func (BuildCallbackService) MyBookings() string {
+func (cb *callbackBuildingService) MyBookings() string {
 	return consts.MyBookingsCbk
 }
 
-func (BuildCallbackService) PreCancelBooking() string {
+func (cb *callbackBuildingService) PreCancelBooking() string {
 	return consts.PreCancelBookingCbk
 }
 
-func (BuildCallbackService) CancelBooking() string {
+func (cb *callbackBuildingService) CancelBooking() string {
 	return consts.CancelBookingCbk
 }
 
-func (BuildCallbackService) NoCancelBooking() string {
+func (cb *callbackBuildingService) NoCancelBooking() string {
 	return consts.NoCancelBookingCbk
 }
 
-func (BuildCallbackService) Date(date time.Time) string {
+func (cb *callbackBuildingService) Date(date time.Time) string {
 	return fmt.Sprintf("%s%s%s",
 		consts.PrefixDate,
 		Date, encodeDate(date.Format("2006-01-02")),
 	)
 }
 
-func (BuildCallbackService) Zone(date, zone string) string {
+func (cb *callbackBuildingService) Zone(date, zone string) string {
 	return fmt.Sprintf("%s%s%s|%s%s",
 		consts.PrefixZone,
 		Date, encodeDate(date),
@@ -58,7 +58,7 @@ func (BuildCallbackService) Zone(date, zone string) string {
 	)
 }
 
-func (BuildCallbackService) Time(info *types.UserSessionInfo) string {
+func (cb *callbackBuildingService) Time(info *types.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s",
 		consts.PrefixTime,
 		Date, encodeDate(info.Date),
@@ -67,7 +67,7 @@ func (BuildCallbackService) Time(info *types.UserSessionInfo) string {
 	)
 }
 
-func (BuildCallbackService) ServiceSelection(service string, info *types.UserSessionInfo) string {
+func (cb *callbackBuildingService) ServiceSelection(service string, info *types.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s",
 		consts.PrefixServiceSelect,
 		Date, encodeDate(info.Date),
@@ -77,7 +77,7 @@ func (BuildCallbackService) ServiceSelection(service string, info *types.UserSes
 	)
 }
 
-func (BuildCallbackService) ServiceConfirmation(info *types.UserSessionInfo) string {
+func (cb *callbackBuildingService) ServiceConfirmation(info *types.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s",
 		consts.PrefixServiceConfirm,
 		Date, encodeDate(info.Date),
@@ -87,7 +87,7 @@ func (BuildCallbackService) ServiceConfirmation(info *types.UserSessionInfo) str
 	)
 }
 
-func (BuildCallbackService) Rim(info *types.UserSessionInfo) string {
+func (cb *callbackBuildingService) Rim(info *types.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s|%s%s",
 		consts.PrefixRim,
 		Date, encodeDate(info.Date),

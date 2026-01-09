@@ -78,6 +78,7 @@ func (m *messageHandler) handleAutoConfirm(chatID int64) error {
 
 func (m *messageHandler) getActiveSlot(chatID int64) (*model.Slot, error) {
 	booking, err := m.svcProvider.Booking().FindActiveByChatID(chatID)
+	log.Printf("[get_active_slot] booking: %v, err: %v", booking, err)
 	if err != nil {
 		return nil, utils.WrapError(err)
 	}

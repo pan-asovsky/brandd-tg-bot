@@ -8,10 +8,6 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-type PriceService interface {
-	Calculate(service, radius string) (int64, error)
-}
-
 type priceService struct {
 	pgProvider *pg.Provider
 }

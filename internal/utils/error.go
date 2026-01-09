@@ -30,17 +30,15 @@ func WrapFunction[T any](fn func() (T, error)) (T, error) {
 func getCallerName(skip int) string {
 	pc, _, _, ok := runtime.Caller(skip)
 	if !ok {
-		return "unknown"
+		return "[unknown]"
 	}
 
 	fn := runtime.FuncForPC(pc)
 	if fn == nil {
-		return "unknown"
+		return "[unknown]"
 	}
 
 	fullName := fn.Name()
-
-	// Извлекаем только имя метода
 	parts := strings.Split(fullName, ".")
 	if len(parts) > 0 {
 		return fmt.Sprintf("[%s]", toSnakeCaseRegex(parts[len(parts)-1]))

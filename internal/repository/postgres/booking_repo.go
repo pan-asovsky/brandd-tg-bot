@@ -109,7 +109,7 @@ func (b *bookingRepo) Save(booking *model.Booking) (*model.Booking, error) {
 		booking.RimRadius,
 		booking.TotalPrice,
 		true,
-		model.NotConfirmed,
+		booking.Status,
 		now,
 		now,
 	).Scan(&booking.ID)
