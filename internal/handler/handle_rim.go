@@ -45,7 +45,8 @@ func (c *callbackHandler) handleRim(query *api.CallbackQuery) error {
 			return utils.WrapError(err)
 		}
 
-		booking, err = provider.Booking().FindActiveByChatID(info.ChatID)
+		//booking, err = provider.Booking().FindActiveNotPending(info.ChatID)
+		booking, err = provider.Booking().FindPending(info.ChatID)
 		if err != nil {
 			return utils.WrapError(err)
 		}

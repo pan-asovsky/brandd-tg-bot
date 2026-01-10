@@ -70,7 +70,7 @@ func (m *messageHandler) handlePhone(chatID int64, contactPhone string) error {
 }
 
 func (m *messageHandler) handleAutoConfirm(chatID int64) error {
-	slot, err := m.getActiveSlot(chatID)
+	slot, booking, err := m.getActiveSlot(chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -80,18 +80,29 @@ func (m *messageHandler) handleAutoConfirm(chatID int64) error {
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return m.notifyAdmins(chatID)
+		return m.notifyAdmins(booking)
 	})
 }
 
-func (m *messageHandler) getActiveSlot(chatID int64) (*entity.Slot, error) {
-	booking, err := m.svcProvider.Booking().FindActiveByChatID(chatID)
+func (m *messageHandler) getActiveSlot(chatID int64) (*entity.Slot, *entity.Booking, error) {
+	var booking *entity.Booking
+	var slot *entity.Slot
+
+	booking, err := m.svcProvider.Booking().FindPending(chatID)
 	if err != nil {
-		return nil, utils.WrapError(err)
+		return slot, booking, utils.WrapError(err)
 	}
-	return utils.WrapFunction(func() (*entity.Slot, error) {
-		return m.svcProvider.Slot().FindByDateAndTime(booking.Date, booking.Time)
-	})
+
+	log.Printf("[get_active_slot] booking: %v", booking)
+
+	slot, err = m.svcProvider.Slot().FindByDateAndTime(booking.Date, booking.Time)
+	if err != nil {
+		return slot, booking, utils.WrapError(err)
+	}
+
+	log.Printf("[get_active_slot] slot: %v", slot)
+
+	return slot, booking, nil
 }
 
 func (m *messageHandler) confirm(chatID int64, slot *entity.Slot) error {
@@ -116,15 +127,10 @@ func (m *messageHandler) confirm(chatID int64, slot *entity.Slot) error {
 	})
 }
 
-func (m *messageHandler) notifyAdmins(chatID int64) error {
-	booking, err := m.svcProvider.Booking().FindActiveByChatID(chatID)
-	if err != nil {
-		return utils.WrapError(err)
-	}
-
+func (m *messageHandler) notifyAdmins(booking *entity.Booking) error {
 	admins := m.svcProvider.User().GetActiveAdmins()
 	for _, admin := range admins {
-		if err = m.svcProvider.Telegram().NewBookingNotify(admin.ChatID, booking); err != nil {
+		if err := m.svcProvider.Telegram().NewBookingNotify(admin.ChatID, booking); err != nil {
 			return utils.WrapError(err)
 		}
 	}

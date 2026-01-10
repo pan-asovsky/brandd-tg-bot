@@ -29,7 +29,8 @@ const (
 		WHERE date = $1 
 		AND start_time = $2`
 
-	FindActive = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true`
+	FindActiveNotPending = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true AND status != 'PENDING'`
+	FindActivePending    = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true AND status = 'PENDING'`
 
 	BookingExists = `SELECT EXISTS(SELECT 1 FROM bookings WHERE chat_id = $1 AND is_active = true AND status NOT IN ('CANCELLED', 'NO_SHOW'))`
 

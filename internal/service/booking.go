@@ -45,12 +45,16 @@ func (b *bookingService) SetPhone(phone string, chatID int64) error {
 	return b.pgProvider.Booking().SetPhone(phone, chatID)
 }
 
-func (b *bookingService) FindActiveByChatID(chatID int64) (*entity.Booking, error) {
-	return b.pgProvider.Booking().FindActiveByChatID(chatID)
+func (b *bookingService) FindActiveNotPending(chatID int64) (*entity.Booking, error) {
+	return b.pgProvider.Booking().FindActiveNotPending(chatID)
+}
+
+func (b *bookingService) FindPending(chatID int64) (*entity.Booking, error) {
+	return b.pgProvider.Booking().FindPending(chatID)
 }
 
 func (b *bookingService) ExistsByChatID(chatID int64) bool {
-	return b.pgProvider.Booking().ExistsByChatID(chatID)
+	return b.pgProvider.Booking().Exists(chatID)
 }
 
 func (b *bookingService) UpdateStatus(chatID int64, status entity.BookingStatus) error {
@@ -72,7 +76,7 @@ func (b *bookingService) UpdateService(chatID int64, service string) error {
 }
 
 func (b *bookingService) RecalculatePrice(chatID int64) error {
-	booking, err := b.pgProvider.Booking().FindActiveByChatID(chatID)
+	booking, err := b.FindActiveNotPending(chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}

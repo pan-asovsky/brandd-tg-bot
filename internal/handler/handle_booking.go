@@ -36,7 +36,7 @@ func (c *callbackHandler) handleBooking(query *api.CallbackQuery) error {
 func (c *callbackHandler) handleNew(q *api.CallbackQuery) error {
 	info := &types.UserSessionInfo{ChatID: q.Message.Chat.ID}
 
-	booking, err := c.svcProvider.Booking().FindActiveByChatID(info.ChatID)
+	booking, err := c.svcProvider.Booking().FindActiveNotPending(info.ChatID)
 	if booking != nil && err == nil {
 		return c.svcProvider.Telegram().SendBookingRestrictionMessage(info.ChatID, booking)
 	}
@@ -51,14 +51,14 @@ func (c *callbackHandler) handleMy(q *api.CallbackQuery) error {
 	chatID := q.Message.Chat.ID
 	return utils.WrapFunctionError(func() error {
 		return c.svcProvider.Telegram().SendMyBookingsMessage(chatID, func() (*entity.Booking, error) {
-			return c.svcProvider.Booking().FindActiveByChatID(chatID)
+			return c.svcProvider.Booking().FindActiveNotPending(chatID)
 		})
 	})
 }
 
 func (c *callbackHandler) handlePreCancel(q *api.CallbackQuery) error {
 	info := &types.UserSessionInfo{ChatID: q.Message.Chat.ID}
-	booking, err := c.svcProvider.Booking().FindActiveByChatID(q.Message.Chat.ID)
+	booking, err := c.svcProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
 	if err != nil {
 		return utils.WrapError(err)
 	}

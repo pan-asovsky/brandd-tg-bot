@@ -10,7 +10,6 @@ import (
 
 type Config struct {
 	BotToken    string
-	AdminChatID []int64
 	WebhookURL  string
 	WebhookPath string
 	HttpAddress string
@@ -34,7 +33,6 @@ type Config struct {
 func Load() (*Config, error) {
 	cfg := &Config{
 		BotToken:    utils.GetEnvRequired("BOT_TOKEN"),
-		AdminChatID: utils.GetEnv("ADMIN_CHAT_ID", []int64{}),
 		WebhookURL:  utils.GetEnvRequired("WEBHOOK_URL"),
 		WebhookPath: utils.GetEnvRequired("WEBHOOK_PATH"),
 		HttpAddress: utils.GetEnv("HTTP_ADDRESS", "0.0.0.0:8118"),
@@ -49,7 +47,7 @@ func Load() (*Config, error) {
 		RedisURL:      utils.GetEnv("REDIS_URL", "cache:6379"),
 		RedisPassword: utils.GetEnvRequired("REDIS_PASSWORD"),
 		RedisDB:       utils.GetEnv("REDIS_DB", 0),
-		CacheTTL:      utils.GetEnv("SLOT_LOCK_TTL", time.Duration(90)*time.Second),
+		CacheTTL:      utils.GetEnv("CACHE_TTL", time.Duration(180)*time.Second),
 
 		LogLevel:    utils.GetEnv("LOG_LEVEL", "info"),
 		Environment: utils.GetEnv("ENVIRONMENT", "production"),

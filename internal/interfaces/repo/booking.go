@@ -3,8 +3,9 @@ package interfaces
 import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 
 type BookingRepo interface {
-	FindActiveByChatID(telegramID int64) (*entity.Booking, error)
-	ExistsByChatID(id int64) bool
+	FindActiveNotPending(chatID int64) (*entity.Booking, error)
+	FindPending(chatID int64) (*entity.Booking, error)
+	Exists(chatID int64) bool
 	UpdateRimRadius(chatID int64, rimRadius string) error
 	UpdateStatus(chatID int64, status entity.BookingStatus) error
 	UpdatePrice(chatID int64, price int64) error

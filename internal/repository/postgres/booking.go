@@ -14,9 +14,9 @@ type bookingRepo struct {
 	db *sql.DB
 }
 
-func (b *bookingRepo) FindActiveByChatID(chatID int64) (*entity.Booking, error) {
+func (b *bookingRepo) FindActiveNotPending(chatID int64) (*entity.Booking, error) {
 	var booking entity.Booking
-	if err := b.db.QueryRow(FindActive, chatID).Scan(
+	if err := b.db.QueryRow(FindActiveNotPending, chatID).Scan(
 		&booking.ID,
 		&booking.ChatID,
 		&booking.UserPhone,
@@ -41,7 +41,34 @@ func (b *bookingRepo) FindActiveByChatID(chatID int64) (*entity.Booking, error) 
 	return &booking, nil
 }
 
-func (b *bookingRepo) ExistsByChatID(chatID int64) bool {
+func (b *bookingRepo) FindPending(chatID int64) (*entity.Booking, error) {
+	var booking entity.Booking
+	if err := b.db.QueryRow(FindActivePending, chatID).Scan(
+		&booking.ID,
+		&booking.ChatID,
+		&booking.UserPhone,
+		&booking.Date,
+		&booking.Time,
+		&booking.Service,
+		&booking.RimRadius,
+		&booking.TotalPrice,
+		&booking.Status,
+		&booking.IsActive,
+		&booking.CreatedAt,
+		&booking.UpdatedAt,
+		&booking.ConfirmedBy,
+		&booking.CancelledBy,
+		&booking.Notes,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("[find_booking_by_chat_id] failed for %d: %v", chatID, err)
+	}
+	return &booking, nil
+}
+
+func (b *bookingRepo) Exists(chatID int64) bool {
 	var exists bool
 	if err := b.db.QueryRow(BookingExists, chatID).Scan(&exists); err != nil {
 		return false
