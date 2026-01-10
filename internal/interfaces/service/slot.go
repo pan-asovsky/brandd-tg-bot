@@ -7,4 +7,5 @@ type SlotService interface {
 	GetAvailableZones(date string) (entity.Zone, error)
 	FindByDateAndTime(date, start string) (*entity.Slot, error)
 	MarkUnavailable(date, startTime string) error
+	FreeUp(date, startTime string) error
 }

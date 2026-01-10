@@ -70,7 +70,18 @@ func (c *userCallbackHandler) handlePreCancel(q *tg.CallbackQuery) error {
 
 func (c *userCallbackHandler) handleCancel(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
-	if err := c.svcProvider.Booking().Cancel(info.ChatID); err != nil {
+
+	booking, err := c.svcProvider.Booking().FindActiveNotPending(info.ChatID)
+	if err != nil {
+		return utils.WrapError(err)
+	}
+
+	err = c.svcProvider.Slot().FreeUp(booking.Date, booking.Time)
+	if err != nil {
+		return utils.WrapError(err)
+	}
+
+	if err = c.svcProvider.Booking().Cancel(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 

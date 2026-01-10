@@ -7,4 +7,5 @@ type SlotRepo interface {
 	GetAvailableSlots(date string) ([]entity.Slot, error)
 	FindByDateAndTime(date, start string) (*entity.Slot, error)
 	MarkUnavailable(date, startTime string) error
+	FreeUp(date, startTime string) error
 }

@@ -99,3 +99,16 @@ func (s *slotRepo) MarkUnavailable(date, startTime string) error {
 	}
 	return nil
 }
+
+func (s *slotRepo) FreeUp(date, startTime string) error {
+	result, err := s.db.Exec(FreeUpSlot, date, startTime)
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return utils.WrapError(err)
+	}
+	if affected == 0 {
+		return errors.New("[free_up_slot] no free up slot: " + date + " " + startTime)
+	}
+
+	return nil
+}

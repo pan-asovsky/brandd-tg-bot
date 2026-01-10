@@ -112,3 +112,9 @@ func (s *slotService) MarkUnavailable(date, startTime string) error {
 		return s.slotRepo.MarkUnavailable(date, startTime)
 	})
 }
+
+func (s *slotService) FreeUp(date, startTime string) error {
+	return utils.WrapFunctionError(func() error {
+		return s.slotRepo.FreeUp(date, startTime)
+	})
+}

@@ -74,7 +74,6 @@ func (h *updateHandler) handleCallback(callback *tg.CallbackQuery) error {
 			return errors.New("[handle_callback] invalid prefix: " + data)
 		}
 		callback.Data = cut
-		log.Printf("[handle_user] data: %s", callback.Data)
 		return h.userCallbackHandler.Handle(callback)
 
 	default:

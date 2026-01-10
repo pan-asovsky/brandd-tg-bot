@@ -55,5 +55,7 @@ const (
 
 	GetPricePerSet = `SELECT price_per_set FROM prices WHERE service_type_code = $1 AND rim_size = $2 AND is_active = true`
 
+	FreeUpSlot = `UPDATE available_slots SET is_available = true WHERE date = $1 AND start_time = $2`
+
 	GetActiveAdmins = "SELECT * FROM users WHERE role = 'admin' AND is_active = true"
 )
