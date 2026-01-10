@@ -3,9 +3,9 @@ package handler
 import (
 	"log"
 
-	tgbot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
@@ -13,16 +13,16 @@ import (
 )
 
 type messageHandler struct {
-	api           *tgbot.BotAPI
+	tgapi         *tg.BotAPI
 	svcProvider   *service.Provider
 	cacheProvider *cache.Provider
 }
 
-func NewMessageHandler(api *tgbot.BotAPI, svcProvider *service.Provider, cacheProvider *cache.Provider) i.MessageHandler {
-	return &messageHandler{api: api, svcProvider: svcProvider, cacheProvider: cacheProvider}
+func NewMessageHandler(tgapi *tg.BotAPI, svcProvider *service.Provider, cacheProvider *cache.Provider) i.MessageHandler {
+	return &messageHandler{tgapi: tgapi, svcProvider: svcProvider, cacheProvider: cacheProvider}
 }
 
-func (m *messageHandler) Handle(msg *tgbot.Message) error {
+func (m *messageHandler) Handle(msg *tg.Message) error {
 	if msg.Contact != nil {
 		return m.handlePhone(msg.Chat.ID, msg.Contact.PhoneNumber)
 	}
@@ -32,8 +32,8 @@ func (m *messageHandler) Handle(msg *tgbot.Message) error {
 		return m.handlePhone(msg.Chat.ID, detected)
 	}
 
-	message := tgbot.NewMessage(msg.Chat.ID, consts.DontKnowHowToAnswer)
-	if _, err := m.api.Send(message); err != nil {
+	message := tg.NewMessage(msg.Chat.ID, usflow.DontKnowHowToAnswer)
+	if _, err := m.tgapi.Send(message); err != nil {
 		return err
 	}
 	return nil
@@ -93,14 +93,10 @@ func (m *messageHandler) getActiveSlot(chatID int64) (*entity.Slot, *entity.Book
 		return slot, booking, utils.WrapError(err)
 	}
 
-	log.Printf("[get_active_slot] booking: %v", booking)
-
 	slot, err = m.svcProvider.Slot().FindByDateAndTime(booking.Date, booking.Time)
 	if err != nil {
 		return slot, booking, utils.WrapError(err)
 	}
-
-	log.Printf("[get_active_slot] slot: %v", slot)
 
 	return slot, booking, nil
 }
@@ -149,7 +145,7 @@ func (m *messageHandler) handlePendingConfirm(chatID int64) error {
 }
 
 func (m *messageHandler) cleanup(chatID int64, messageID int) {
-	if _, err := m.api.Request(tgbot.NewDeleteMessage(chatID, messageID)); err != nil {
+	if _, err := m.tgapi.Request(tg.NewDeleteMessage(chatID, messageID)); err != nil {
 		log.Printf("error delete previous message %d: %v", messageID, err)
 	}
 }

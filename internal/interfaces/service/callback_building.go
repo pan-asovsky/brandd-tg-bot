@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 
-	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
 type CallbackBuildingService interface {
@@ -15,8 +15,8 @@ type CallbackBuildingService interface {
 	NoCancelBooking() string
 	Date(date time.Time) string
 	Zone(date, zone string) string
-	Time(info *types.UserSessionInfo) string
-	ServiceSelection(service string, info *types.UserSessionInfo) string
-	ServiceConfirmation(info *types.UserSessionInfo) string
-	Rim(info *types.UserSessionInfo) string
+	Time(info *model.UserSessionInfo) string
+	ServiceSelection(service string, info *model.UserSessionInfo) string
+	ServiceConfirmation(info *model.UserSessionInfo) string
+	Rim(info *model.UserSessionInfo) string
 }

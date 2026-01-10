@@ -2,17 +2,17 @@ package service
 
 import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
 type TelegramService interface {
-	RequestDate(bookings []entity.AvailableBooking, info *types.UserSessionInfo) error
-	RequestZone(zone entity.Zone, info *types.UserSessionInfo) error
-	RequestTime(timeslots []entity.Timeslot, info *types.UserSessionInfo) error
-	RequestServiceTypes(types []entity.ServiceType, info *types.UserSessionInfo) error
-	RequestRimRadius(rims []string, info *types.UserSessionInfo) error
-	RequestPreConfirm(booking *entity.Booking, info *types.UserSessionInfo) error
-	RequestUserPhone(info *types.UserSessionInfo) error
+	RequestDate(bookings []entity.AvailableBooking, info *model.UserSessionInfo) error
+	RequestZone(zone entity.Zone, info *model.UserSessionInfo) error
+	RequestTime(timeslots []entity.Timeslot, info *model.UserSessionInfo) error
+	RequestServiceTypes(types []entity.ServiceType, info *model.UserSessionInfo) error
+	RequestRimRadius(rims []string, info *model.UserSessionInfo) error
+	RequestPreConfirm(booking *entity.Booking, info *model.UserSessionInfo) error
+	RequestUserPhone(info *model.UserSessionInfo) error
 
 	RemoveReplyKeyboard(chatID int64) error
 

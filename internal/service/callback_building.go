@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
 const (
@@ -20,56 +20,56 @@ const (
 type callbackBuildingService struct{}
 
 func (cb *callbackBuildingService) Menu() string {
-	return consts.PrefixBack + consts.Menu
+	return usflow.UserPrefix + usflow.PrefixBack + usflow.Menu
 }
 
 func (cb *callbackBuildingService) NewBooking() string {
-	return consts.NewBookingCbk
+	return usflow.NewBookingCbk
 }
 
 func (cb *callbackBuildingService) MyBookings() string {
-	return consts.MyBookingsCbk
+	return usflow.MyBookingsCbk
 }
 
 func (cb *callbackBuildingService) PreCancelBooking() string {
-	return consts.PreCancelBookingCbk
+	return usflow.PreCancelBookingCbk
 }
 
 func (cb *callbackBuildingService) CancelBooking() string {
-	return consts.CancelBookingCbk
+	return usflow.CancelBookingCbk
 }
 
 func (cb *callbackBuildingService) NoCancelBooking() string {
-	return consts.NoCancelBookingCbk
+	return usflow.NoCancelBookingCbk
 }
 
 func (cb *callbackBuildingService) Date(date time.Time) string {
 	return fmt.Sprintf("%s%s%s",
-		consts.PrefixDate,
+		usflow.UserPrefix+usflow.PrefixDate,
 		Date, encodeDate(date.Format("2006-01-02")),
 	)
 }
 
 func (cb *callbackBuildingService) Zone(date, zone string) string {
 	return fmt.Sprintf("%s%s%s|%s%s",
-		consts.PrefixZone,
+		usflow.UserPrefix+usflow.PrefixZone,
 		Date, encodeDate(date),
 		Zone, encodeTime(zone),
 	)
 }
 
-func (cb *callbackBuildingService) Time(info *types.UserSessionInfo) string {
+func (cb *callbackBuildingService) Time(info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s",
-		consts.PrefixTime,
+		usflow.UserPrefix+usflow.PrefixTime,
 		Date, encodeDate(info.Date),
 		Zone, encodeTime(info.Zone),
 		Time, encodeTime(info.Time),
 	)
 }
 
-func (cb *callbackBuildingService) ServiceSelection(service string, info *types.UserSessionInfo) string {
+func (cb *callbackBuildingService) ServiceSelection(service string, info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s",
-		consts.PrefixServiceSelect,
+		usflow.UserPrefix+usflow.PrefixServiceSelect,
 		Date, encodeDate(info.Date),
 		Time, encodeTime(info.Time),
 		Zone, encodeTime(info.Zone),
@@ -77,9 +77,9 @@ func (cb *callbackBuildingService) ServiceSelection(service string, info *types.
 	)
 }
 
-func (cb *callbackBuildingService) ServiceConfirmation(info *types.UserSessionInfo) string {
+func (cb *callbackBuildingService) ServiceConfirmation(info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s",
-		consts.PrefixServiceConfirm,
+		usflow.UserPrefix+usflow.PrefixServiceConfirm,
 		Date, encodeDate(info.Date),
 		Zone, encodeTime(info.Zone),
 		Time, encodeTime(info.Time),
@@ -87,9 +87,9 @@ func (cb *callbackBuildingService) ServiceConfirmation(info *types.UserSessionIn
 	)
 }
 
-func (cb *callbackBuildingService) Rim(info *types.UserSessionInfo) string {
+func (cb *callbackBuildingService) Rim(info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s|%s%s",
-		consts.PrefixRim,
+		usflow.UserPrefix+usflow.PrefixRim,
 		Date, encodeDate(info.Date),
 		Zone, encodeTime(info.Zone),
 		Time, encodeTime(info.Time),

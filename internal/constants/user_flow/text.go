@@ -1,4 +1,4 @@
-package constants
+package user_flow
 
 const (
 	Today         = "Сегодня"
@@ -6,12 +6,10 @@ const (
 	AfterTomorrow = "Послезавтра"
 	New           = "NEW"
 	My            = "MY"
-	Help          = "HELP"
 	Yes           = "YES"
 	No            = "NO"
 	Menu          = "MENU"
-	Calendar      = "CALENDAR"
-	PreCancel     = "PRECANCEL"
+	PreCancel     = "PRE_CANCEL"
 	Cancel        = "CANCEL"
 	NoCancel      = "NO_CANCEL"
 )

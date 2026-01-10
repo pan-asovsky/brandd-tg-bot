@@ -15,6 +15,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
@@ -32,7 +33,7 @@ type App struct {
 	CacheProvider   *cache.Provider
 
 	TelegramBot   *tg.BotAPI
-	UpdateHandler *handler.UpdateHandler
+	UpdateHandler ihandler.UpdateHandler
 	httpServer    *http.Server
 }
 

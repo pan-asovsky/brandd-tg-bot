@@ -1,15 +1,15 @@
-package handler
+package user
 
 import (
 	"errors"
 	"strings"
 
-	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleBack(query *api.CallbackQuery) error {
+func (c *userCallbackHandler) handleBack(query *tg.CallbackQuery) error {
 	_, payload, ok := strings.Cut(query.Data, "::")
 	if !ok {
 		return errors.New("[handle_back] invalid callback" + query.Data)

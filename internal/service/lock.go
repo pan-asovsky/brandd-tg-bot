@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
@@ -16,7 +15,7 @@ type lockService struct {
 	cache  icache.SlotLockCache
 }
 
-func (ls *lockService) Toggle(info *types.UserSessionInfo) error {
+func (ls *lockService) Toggle(info *model.UserSessionInfo) error {
 	newKey := ls.locker.FormatKey(info.Date, info.Time)
 
 	chatID := info.ChatID

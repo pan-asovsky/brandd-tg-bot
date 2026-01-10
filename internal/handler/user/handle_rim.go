@@ -1,12 +1,12 @@
-package handler
+package user
 
 import (
-	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleRim(query *api.CallbackQuery) error {
+func (c *userCallbackHandler) handleRim(query *tg.CallbackQuery) error {
 	provider := c.svcProvider
 
 	info, err := provider.CallbackParsing().Parse(query)
@@ -45,7 +45,6 @@ func (c *callbackHandler) handleRim(query *api.CallbackQuery) error {
 			return utils.WrapError(err)
 		}
 
-		//booking, err = provider.Booking().FindActiveNotPending(info.ChatID)
 		booking, err = provider.Booking().FindPending(info.ChatID)
 		if err != nil {
 			return utils.WrapError(err)

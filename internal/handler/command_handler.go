@@ -1,7 +1,7 @@
 package handler
 
 import (
-	tgbot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
@@ -9,15 +9,15 @@ import (
 )
 
 type commandHandler struct {
-	api         *tgbot.BotAPI
+	tgapi       *tg.BotAPI
 	svcProvider *service.Provider
 }
 
-func NewCommandHandler(api *tgbot.BotAPI, svcProvider *service.Provider) i.CommandHandler {
-	return &commandHandler{api, svcProvider}
+func NewCommandHandler(tgapi *tg.BotAPI, svcProvider *service.Provider) i.MessageHandler {
+	return &commandHandler{tgapi, svcProvider}
 }
 
-func (c *commandHandler) Handle(msg *tgbot.Message) error {
+func (c *commandHandler) Handle(msg *tg.Message) error {
 	chatID := msg.Chat.ID
 	switch msg.Text {
 	case consts.Start:

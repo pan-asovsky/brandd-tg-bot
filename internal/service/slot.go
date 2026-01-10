@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
@@ -25,9 +25,9 @@ func (s *slotService) GetAvailableBookings() []entity.AvailableBooking {
 		label     string
 		available bool
 	}{
-		{0, consts.Today, s.slotRepo.IsTodayAvailable()},
-		{1, consts.Tomorrow, true},
-		{2, consts.AfterTomorrow, true},
+		{0, usflow.Today, s.slotRepo.IsTodayAvailable()},
+		{1, usflow.Tomorrow, true},
+		{2, usflow.AfterTomorrow, true},
 	}
 
 	bookings := make([]entity.AvailableBooking, 0, 3)

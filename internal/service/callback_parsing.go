@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
 type callbackParsingService struct {
@@ -20,14 +20,14 @@ const (
 	KeyRadius  = "R"
 )
 
-func (c *callbackParsingService) Parse(query *api.CallbackQuery) (*types.UserSessionInfo, error) {
+func (c *callbackParsingService) Parse(query *api.CallbackQuery) (*model.UserSessionInfo, error) {
 	log.Printf("[parse_callback] callback: %s", query.Data)
 	_, payload, ok := strings.Cut(query.Data, "::")
 	if !ok {
 		return nil, errors.New("[parse_callback] split callback error " + query.Data)
 	}
 
-	var info types.UserSessionInfo
+	var info model.UserSessionInfo
 
 	parts := strings.Split(payload, "|")
 	for _, part := range parts {

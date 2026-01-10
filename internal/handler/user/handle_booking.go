@@ -1,20 +1,20 @@
-package handler
+package user
 
 import (
 	"errors"
 	"strings"
 
-	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleBooking(query *api.CallbackQuery) error {
+func (c *userCallbackHandler) handleBooking(query *tg.CallbackQuery) error {
 	_, payload, ok := strings.Cut(query.Data, "::")
 	if !ok {
-		return errors.New("[handle_menu]: invalid callback: " + query.Data)
+		return errors.New("[handle_booking]: invalid callback: " + query.Data)
 	}
 
 	switch payload {
@@ -29,12 +29,12 @@ func (c *callbackHandler) handleBooking(query *api.CallbackQuery) error {
 	case consts.NoCancel:
 		return c.handleNoCancel(query)
 	default:
-		return errors.New("[handle_menu]: invalid callback: " + query.Data)
+		return errors.New("[handle_booking]: invalid callback: " + query.Data)
 	}
 }
 
-func (c *callbackHandler) handleNew(q *api.CallbackQuery) error {
-	info := &types.UserSessionInfo{ChatID: q.Message.Chat.ID}
+func (c *userCallbackHandler) handleNew(q *tg.CallbackQuery) error {
+	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
 
 	booking, err := c.svcProvider.Booking().FindActiveNotPending(info.ChatID)
 	if booking != nil && err == nil {
@@ -47,7 +47,7 @@ func (c *callbackHandler) handleNew(q *api.CallbackQuery) error {
 	})
 }
 
-func (c *callbackHandler) handleMy(q *api.CallbackQuery) error {
+func (c *userCallbackHandler) handleMy(q *tg.CallbackQuery) error {
 	chatID := q.Message.Chat.ID
 	return utils.WrapFunctionError(func() error {
 		return c.svcProvider.Telegram().SendMyBookingsMessage(chatID, func() (*entity.Booking, error) {
@@ -56,8 +56,8 @@ func (c *callbackHandler) handleMy(q *api.CallbackQuery) error {
 	})
 }
 
-func (c *callbackHandler) handlePreCancel(q *api.CallbackQuery) error {
-	info := &types.UserSessionInfo{ChatID: q.Message.Chat.ID}
+func (c *userCallbackHandler) handlePreCancel(q *tg.CallbackQuery) error {
+	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
 	booking, err := c.svcProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
 	if err != nil {
 		return utils.WrapError(err)
@@ -68,8 +68,8 @@ func (c *callbackHandler) handlePreCancel(q *api.CallbackQuery) error {
 	})
 }
 
-func (c *callbackHandler) handleCancel(q *api.CallbackQuery) error {
-	info := &types.UserSessionInfo{ChatID: q.Message.Chat.ID}
+func (c *userCallbackHandler) handleCancel(q *tg.CallbackQuery) error {
+	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
 	if err := c.svcProvider.Booking().Cancel(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
@@ -79,8 +79,8 @@ func (c *callbackHandler) handleCancel(q *api.CallbackQuery) error {
 	})
 }
 
-func (c *callbackHandler) handleNoCancel(query *api.CallbackQuery) error {
-	info := &types.UserSessionInfo{ChatID: query.Message.Chat.ID}
+func (c *userCallbackHandler) handleNoCancel(query *tg.CallbackQuery) error {
+	info := &model.UserSessionInfo{ChatID: query.Message.Chat.ID}
 
 	return utils.WrapFunctionError(func() error {
 		return c.svcProvider.Telegram().SendCancelDenyMessage(info.ChatID)

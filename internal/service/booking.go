@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
@@ -17,7 +17,7 @@ type bookingService struct {
 	priceService service.PriceService
 }
 
-func (b *bookingService) Create(info *types.UserSessionInfo) (*entity.Booking, error) {
+func (b *bookingService) Create(info *model.UserSessionInfo) (*entity.Booking, error) {
 	booking := &entity.Booking{
 		ChatID:     info.ChatID,
 		Date:       info.Date,
@@ -76,7 +76,7 @@ func (b *bookingService) UpdateService(chatID int64, service string) error {
 }
 
 func (b *bookingService) RecalculatePrice(chatID int64) error {
-	booking, err := b.FindActiveNotPending(chatID)
+	booking, err := b.FindPending(chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}

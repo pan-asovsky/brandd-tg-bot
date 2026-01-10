@@ -1,16 +1,16 @@
-package handler
+package user
 
 import (
 	"fmt"
 	"strings"
 
-	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *callbackHandler) handleConfirm(query *api.CallbackQuery) error {
+func (c *userCallbackHandler) handleConfirm(query *tg.CallbackQuery) error {
 	userChoice, ok := strings.CutPrefix(query.Data, "CONFIRM::")
 	if !ok {
 		return fmt.Errorf("[handle_confirm] invalid callback: %s", query.Data)
@@ -25,8 +25,8 @@ func (c *callbackHandler) handleConfirm(query *api.CallbackQuery) error {
 	return nil
 }
 
-func (c *callbackHandler) handleYes(query *api.CallbackQuery) error {
-	info := &types.UserSessionInfo{ChatID: query.Message.Chat.ID}
+func (c *userCallbackHandler) handleYes(query *tg.CallbackQuery) error {
+	info := &model.UserSessionInfo{ChatID: query.Message.Chat.ID}
 
 	if err := c.cleanSession(info.ChatID); err != nil {
 		return utils.WrapError(err)
@@ -37,8 +37,8 @@ func (c *callbackHandler) handleYes(query *api.CallbackQuery) error {
 	})
 }
 
-func (c *callbackHandler) handleNo(query *api.CallbackQuery) error {
-	info := &types.UserSessionInfo{ChatID: query.Message.Chat.ID}
+func (c *userCallbackHandler) handleNo(query *tg.CallbackQuery) error {
+	info := &model.UserSessionInfo{ChatID: query.Message.Chat.ID}
 
 	if err := c.cleanSession(info.ChatID); err != nil {
 		return utils.WrapError(err)
@@ -53,7 +53,7 @@ func (c *callbackHandler) handleNo(query *api.CallbackQuery) error {
 	})
 }
 
-func (c *callbackHandler) cleanSession(chatID int64) error {
+func (c *userCallbackHandler) cleanSession(chatID int64) error {
 	if err := c.cacheProvider.ServiceType().Clean(chatID); err != nil {
 		return utils.WrapError(err)
 	}

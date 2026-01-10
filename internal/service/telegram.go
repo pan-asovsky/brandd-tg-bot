@@ -6,7 +6,8 @@ import (
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	msgfmt "github.com/pan-asovsky/brandd-tg-bot/internal/service/message_formatting"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
@@ -19,42 +20,42 @@ type telegramService struct {
 	tgapi          *api.BotAPI
 }
 
-func (t *telegramService) RequestDate(bookings []entity.AvailableBooking, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestDate(bookings []entity.AvailableBooking, info *model.UserSessionInfo) error {
 	kb := t.kb.DateKeyboard(bookings)
 	return utils.WrapFunctionError(func() error {
 		return t.sendKeyboardMessage(info.ChatID, usflow.DateMsg, kb)
 	})
 }
 
-func (t *telegramService) RequestZone(zone entity.Zone, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestZone(zone entity.Zone, info *model.UserSessionInfo) error {
 	kb := t.kb.ZoneKeyboard(zone, info.Date)
 	return utils.WrapFunctionError(func() error {
 		return t.sendKeyboardMessage(info.ChatID, usflow.ZoneMsg, kb)
 	})
 }
 
-func (t *telegramService) RequestTime(timeslots []entity.Timeslot, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestTime(timeslots []entity.Timeslot, info *model.UserSessionInfo) error {
 	kb := t.kb.TimeKeyboard(timeslots, info)
 	return utils.WrapFunctionError(func() error {
 		return t.sendKeyboardMessage(info.ChatID, usflow.TimeMsg, kb)
 	})
 }
 
-func (t *telegramService) RequestServiceTypes(types []entity.ServiceType, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestServiceTypes(types []entity.ServiceType, info *model.UserSessionInfo) error {
 	kb := t.kb.ServiceKeyboard(types, info)
 	return utils.WrapFunctionError(func() error {
 		return t.sendKeyboardMessage(info.ChatID, usflow.ServiceMsg, kb)
 	})
 }
 
-func (t *telegramService) RequestRimRadius(rims []string, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestRimRadius(rims []string, info *model.UserSessionInfo) error {
 	kb := t.kb.RimsKeyboard(rims, info)
 	return utils.WrapFunctionError(func() error {
 		return t.sendKeyboardMessage(info.ChatID, usflow.RimMsg, kb)
 	})
 }
 
-func (t *telegramService) RequestPreConfirm(booking *entity.Booking, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestPreConfirm(booking *entity.Booking, info *model.UserSessionInfo) error {
 	kb := t.kb.ConfirmKeyboard(info)
 	msg, err := t.msgFmtProvider.Booking().PreConfirm(booking)
 	if err != nil {
@@ -66,7 +67,7 @@ func (t *telegramService) RequestPreConfirm(booking *entity.Booking, info *types
 	})
 }
 
-func (t *telegramService) RequestUserPhone(info *types.UserSessionInfo) error {
+func (t *telegramService) RequestUserPhone(info *model.UserSessionInfo) error {
 	kb := t.kb.RequestPhoneKeyboard()
 	return utils.WrapFunctionError(func() error {
 		return t.sendRequestPhoneMessage(info.ChatID, usflow.RequestUserPhone, kb)

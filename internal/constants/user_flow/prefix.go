@@ -1,7 +1,8 @@
-package constants
+package user_flow
 
 const (
-	PrefixMenu = "MENU::"
+	UserPrefix = "USER::"
+
 	PrefixDate = "DATE::"
 	PrefixZone = "ZONE::"
 	PrefixTime = "TIME::"
@@ -12,6 +13,7 @@ const (
 	PrefixRim     = "RIM::"
 	PrefixConfirm = "CONFIRM::"
 
-	PrefixBack    = "BACK::"
+	PrefixBack = "BACK::"
+
 	PrefixBooking = "BOOKING::"
 )
