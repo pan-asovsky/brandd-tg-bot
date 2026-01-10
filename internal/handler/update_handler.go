@@ -2,7 +2,7 @@ package handler
 
 import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
 	repo "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
@@ -14,11 +14,11 @@ type UpdateHandler struct {
 	message  i.MessageHandler
 }
 
-func NewUpdateHandler(api *tg.BotAPI, svcProvider *service.Provider, pgProvider *repo.Provider, serviceTypeCache cache.ServiceTypeCache) *UpdateHandler {
+func NewUpdateHandler(api *tg.BotAPI, svcProvider *service.Provider, pgProvider *repo.Provider, cacheProvider *cache.Provider) *UpdateHandler {
 	return &UpdateHandler{
 		command:  NewCommandHandler(api, svcProvider),
-		callback: NewCallbackHandler(api, svcProvider, pgProvider, serviceTypeCache),
-		message:  NewMessageHandler(api, svcProvider, serviceTypeCache),
+		callback: NewCallbackHandler(api, svcProvider, pgProvider, cacheProvider),
+		message:  NewMessageHandler(api, svcProvider, cacheProvider),
 	}
 }
 

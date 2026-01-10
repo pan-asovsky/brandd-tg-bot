@@ -1,18 +1,18 @@
 package service
 
 import (
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
 type userService struct {
 	repo i.UserRepo
 }
 
-func (u *userService) GetActiveAdmins() []model.User {
+func (u *userService) GetActiveAdmins() []entity.User {
 	admins, err := u.repo.GetActiveAdmins()
 	if err != nil {
-		var empty []model.User
+		var empty []entity.User
 		return empty
 	}
 

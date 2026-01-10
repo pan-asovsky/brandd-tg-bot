@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -20,16 +20,16 @@ func (s *slotRepo) IsTodayAvailable() bool {
 	return err == nil && available
 }
 
-func (s *slotRepo) GetAvailableSlots(date string) ([]model.Slot, error) {
+func (s *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
 	rows, err := s.db.Query(GetZonesByDate, date)
 	if err != nil {
 		return nil, fmt.Errorf("[get_available_slots] query error: %w", err)
 	}
 	defer rows.Close()
 
-	var slots []model.Slot
+	var slots []entity.Slot
 	for rows.Next() {
-		var slot model.Slot
+		var slot entity.Slot
 		var (
 			sqlDate time.Time
 			start   time.Time
@@ -62,13 +62,13 @@ func (s *slotRepo) GetAvailableSlots(date string) ([]model.Slot, error) {
 	return slots, nil
 }
 
-func (s *slotRepo) FindByDateAndTime(date, start string) (*model.Slot, error) {
+func (s *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) {
 	var (
 		sqlDate   time.Time
 		startTime time.Time
 		endTime   time.Time
 		created   time.Time
-		slot      model.Slot
+		slot      entity.Slot
 	)
 
 	if err := s.db.QueryRow(GetSlotByDateAndTime, date, start).Scan(

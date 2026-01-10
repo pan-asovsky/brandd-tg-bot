@@ -3,25 +3,25 @@ package service
 import (
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	msgfmt "github.com/pan-asovsky/brandd-tg-bot/internal/service/message_formatting"
+	"github.com/redis/go-redis/v9"
 )
 
 type Provider struct {
-	pgProvider *pg.Provider
-	slotLocker *locker.SlotLocker
-	lockCache  *cache.LockCache
-	tgapi      *api.BotAPI
+	pgProvider    *pg.Provider
+	cacheProvider *cache.Provider
+	tgapi         *api.BotAPI
+	redisClient   *redis.Client
 }
 
-func NewProvider(pgProvider *pg.Provider, slotLocker *locker.SlotLocker, lockCache *cache.LockCache, tgapi *api.BotAPI) *Provider {
-	return &Provider{pgProvider: pgProvider, slotLocker: slotLocker, lockCache: lockCache, tgapi: tgapi}
+func NewProvider(pgProvider *pg.Provider, cacheProvider *cache.Provider, tgapi *api.BotAPI) *Provider {
+	return &Provider{pgProvider: pgProvider, cacheProvider: cacheProvider, tgapi: tgapi}
 }
 
 func (p *Provider) Slot() i.SlotService {
-	return &slotService{p.pgProvider.Slot(), p.slotLocker}
+	return &slotService{p.pgProvider.Slot(), p.SlotLocking()}
 }
 
 func (p *Provider) Keyboard() i.KeyboardService {
@@ -29,7 +29,7 @@ func (p *Provider) Keyboard() i.KeyboardService {
 }
 
 func (p *Provider) Lock() i.LockService {
-	return &lockService{p.slotLocker, p.lockCache}
+	return &lockService{p.SlotLocking(), p.cacheProvider.SlotLock()}
 }
 
 func (p *Provider) Booking() i.BookingService {
@@ -66,4 +66,16 @@ func (p *Provider) DateTime() i.DateTimeService {
 
 func (p *Provider) User() i.UserService {
 	return &userService{p.pgProvider.User()}
+}
+
+func (p *Provider) SlotLocking() i.SlotLocking {
+	slotLock, err := NewSlotLocking(p.cacheProvider.RedisClient(), p.cacheProvider.TTL())
+	if err != nil {
+		panic(err)
+	}
+	return slotLock
+}
+
+func (p *Provider) Phone() i.PhoneService {
+	return NewPhoneNormalizingService()
 }

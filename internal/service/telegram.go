@@ -4,57 +4,57 @@ import (
 	"fmt"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	msgfmt "github.com/pan-asovsky/brandd-tg-bot/internal/service/message_formatting"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type telegramService struct {
-	kb             service.KeyboardService
-	dateTime       service.DateTimeService
+	kb             i.KeyboardService
+	dateTime       i.DateTimeService
 	msgFmtProvider msgfmt.MessageFormattingProviderService
 	tgapi          *api.BotAPI
 }
 
-func (t *telegramService) RequestDate(bookings []model.AvailableBooking, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestDate(bookings []entity.AvailableBooking, info *types.UserSessionInfo) error {
 	kb := t.kb.DateKeyboard(bookings)
 	return utils.WrapFunctionError(func() error {
-		return t.sendKeyboardMessage(info.ChatID, consts.DateMsg, kb)
+		return t.sendKeyboardMessage(info.ChatID, usflow.DateMsg, kb)
 	})
 }
 
-func (t *telegramService) RequestZone(zone model.Zone, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestZone(zone entity.Zone, info *types.UserSessionInfo) error {
 	kb := t.kb.ZoneKeyboard(zone, info.Date)
 	return utils.WrapFunctionError(func() error {
-		return t.sendKeyboardMessage(info.ChatID, consts.ZoneMsg, kb)
+		return t.sendKeyboardMessage(info.ChatID, usflow.ZoneMsg, kb)
 	})
 }
 
-func (t *telegramService) RequestTime(timeslots []model.Timeslot, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestTime(timeslots []entity.Timeslot, info *types.UserSessionInfo) error {
 	kb := t.kb.TimeKeyboard(timeslots, info)
 	return utils.WrapFunctionError(func() error {
-		return t.sendKeyboardMessage(info.ChatID, consts.TimeMsg, kb)
+		return t.sendKeyboardMessage(info.ChatID, usflow.TimeMsg, kb)
 	})
 }
 
-func (t *telegramService) RequestServiceTypes(types []model.ServiceType, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestServiceTypes(types []entity.ServiceType, info *types.UserSessionInfo) error {
 	kb := t.kb.ServiceKeyboard(types, info)
 	return utils.WrapFunctionError(func() error {
-		return t.sendKeyboardMessage(info.ChatID, consts.ServiceMsg, kb)
+		return t.sendKeyboardMessage(info.ChatID, usflow.ServiceMsg, kb)
 	})
 }
 
 func (t *telegramService) RequestRimRadius(rims []string, info *types.UserSessionInfo) error {
 	kb := t.kb.RimsKeyboard(rims, info)
 	return utils.WrapFunctionError(func() error {
-		return t.sendKeyboardMessage(info.ChatID, consts.RimMsg, kb)
+		return t.sendKeyboardMessage(info.ChatID, usflow.RimMsg, kb)
 	})
 }
 
-func (t *telegramService) RequestPreConfirm(booking *model.Booking, info *types.UserSessionInfo) error {
+func (t *telegramService) RequestPreConfirm(booking *entity.Booking, info *types.UserSessionInfo) error {
 	kb := t.kb.ConfirmKeyboard(info)
 	msg, err := t.msgFmtProvider.Booking().PreConfirm(booking)
 	if err != nil {
@@ -69,7 +69,7 @@ func (t *telegramService) RequestPreConfirm(booking *model.Booking, info *types.
 func (t *telegramService) RequestUserPhone(info *types.UserSessionInfo) error {
 	kb := t.kb.RequestPhoneKeyboard()
 	return utils.WrapFunctionError(func() error {
-		return t.sendRequestPhoneMessage(info.ChatID, consts.RequestUserPhone, kb)
+		return t.sendRequestPhoneMessage(info.ChatID, usflow.RequestUserPhone, kb)
 	})
 }
 
@@ -79,16 +79,13 @@ func (t *telegramService) RemoveReplyKeyboard(chatID int64) error {
 	})
 }
 
-func (t *telegramService) ProcessConfirm(chatID int64, slot *model.Slot) error {
-	//date, err := utils.FormatDate(slot.Date, "2006-01-02", "02.01.2006")
-
+func (t *telegramService) ProcessConfirm(chatID int64, slot *entity.Slot) error {
 	date, err := t.dateTime.FormatDate(slot.Date, "2006-01-02", "02.01.2006")
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	msg := t.msgFmtProvider.Booking().Confirm(date, slot.StartTime)
-	//msg := fmt.Sprintf(consts.ConfirmMsg, date, slot.StartTime)
 	return utils.WrapFunctionError(func() error {
 		return t.sendMessageHTMLMode(chatID, msg)
 	})
@@ -96,13 +93,11 @@ func (t *telegramService) ProcessConfirm(chatID int64, slot *model.Slot) error {
 
 func (t *telegramService) ProcessPendingConfirm(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
-		return t.sendMessage(chatID, consts.PendingConfirmMsg)
+		return t.sendMessage(chatID, usflow.PendingConfirmMsg)
 	})
 }
 
-func (t *telegramService) SendBookingRestrictionMessage(chatID int64, booking *model.Booking) error {
-
-	//msg, err := utils.FmtBookingRestrictionMsg(booking)
+func (t *telegramService) SendBookingRestrictionMessage(chatID int64, booking *entity.Booking) error {
 	msg, err := t.msgFmtProvider.Booking().Restriction(booking)
 	if err != nil {
 		return utils.WrapError(err)
@@ -113,11 +108,11 @@ func (t *telegramService) SendBookingRestrictionMessage(chatID int64, booking *m
 	})
 }
 
-func (t *telegramService) SendMyBookingsMessage(chatID int64, fn func() (*model.Booking, error)) error {
+func (t *telegramService) SendMyBookingsMessage(chatID int64, fn func() (*entity.Booking, error)) error {
 	booking, err := fn()
 	if err != nil || booking == nil {
 		return utils.WrapFunctionError(func() error {
-			return t.sendKeyboardMessage(chatID, consts.NoActiveBookings, t.kb.EmptyMyBookingsKeyboard())
+			return t.sendKeyboardMessage(chatID, usflow.NoActiveBookings, t.kb.EmptyMyBookingsKeyboard())
 		})
 	} else {
 		return utils.WrapFunctionError(func() error {
@@ -132,7 +127,7 @@ func (t *telegramService) SendMyBookingsMessage(chatID int64, fn func() (*model.
 
 func (t *telegramService) SendStartMenu(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
-		return t.sendKeyboardMessage(chatID, consts.GreetingMsg, t.kb.GreetingKeyboard())
+		return t.sendKeyboardMessage(chatID, usflow.GreetingMsg, t.kb.GreetingKeyboard())
 	})
 }
 
@@ -149,17 +144,17 @@ func (t *telegramService) SendPreCancelBookingMessage(chatID int64, date, time s
 
 func (t *telegramService) SendCancellationMessage(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
-		return t.sendKeyboardMessage(chatID, consts.BookingCancelled, t.kb.BackKeyboard())
+		return t.sendKeyboardMessage(chatID, usflow.BookingCancelled, t.kb.BackKeyboard())
 	})
 }
 
 func (t *telegramService) SendCancelDenyMessage(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
-		return t.sendKeyboardMessage(chatID, consts.ThanksForNoLeave, t.kb.BackKeyboard())
+		return t.sendKeyboardMessage(chatID, usflow.ThanksForNoLeave, t.kb.BackKeyboard())
 	})
 }
 
-func (t *telegramService) NewBookingNotify(chatID int64, booking *model.Booking) error {
+func (t *telegramService) NewBookingNotify(chatID int64, booking *entity.Booking) error {
 	msg, err := t.msgFmtProvider.Admin().NewBookingNotify(booking)
 	if err != nil {
 		return utils.WrapError(err)
@@ -235,7 +230,7 @@ func (t *telegramService) sendRequestPhoneMessage(chatID int64, text string, kb 
 }
 
 func (t *telegramService) removeReplyKeyboard(chatID int64) error {
-	msg := api.NewMessage(chatID, consts.UserPhoneSaved)
+	msg := api.NewMessage(chatID, usflow.UserPhoneSaved)
 	msg.ReplyMarkup = api.ReplyKeyboardRemove{RemoveKeyboard: true}
 	if _, err := t.tgapi.Send(msg); err != nil {
 		return utils.WrapError(err)

@@ -14,7 +14,7 @@ func (c *callbackHandler) handleServiceSelect(query *api.CallbackQuery) error {
 	}
 
 	if len(info.Service) > 0 {
-		selected, err := c.serviceTypeCache.Toggle(info.ChatID, info.Service)
+		selected, err := c.cacheProvider.ServiceType().Toggle(info.ChatID, info.Service)
 		if err != nil {
 			return utils.WrapError(err)
 		}

@@ -1,7 +1,7 @@
 package interfaces
 
-import "github.com/pan-asovsky/brandd-tg-bot/internal/model"
+import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 
 type ServiceRepo interface {
-	GetServiceTypes() ([]model.ServiceType, error)
+	GetServiceTypes() ([]entity.ServiceType, error)
 }

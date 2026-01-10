@@ -5,29 +5,28 @@ import (
 	"strings"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	svc "github.com/pan-asovsky/brandd-tg-bot/internal/service"
 )
 
 type callbackHandler struct {
-	api              *api.BotAPI
-	svcProvider      *svc.Provider
-	pgProvider       *pg.Provider
-	serviceTypeCache cache.ServiceTypeCache
-	handlers         map[string]CallbackFunc
+	api           *api.BotAPI
+	svcProvider   *svc.Provider
+	pgProvider    *pg.Provider
+	cacheProvider *cache.Provider
+	handlers      map[string]CallbackFunc
 }
 
-func NewCallbackHandler(api *api.BotAPI, svcProvider *svc.Provider, pgProvider *pg.Provider, serviceTypeCache cache.ServiceTypeCache) i.CallbackHandler {
+func NewCallbackHandler(api *api.BotAPI, svcProvider *svc.Provider, pgProvider *pg.Provider, cacheProvider *cache.Provider) i.CallbackHandler {
 	ch := &callbackHandler{
-		api:              api,
-		svcProvider:      svcProvider,
-		pgProvider:       pgProvider,
-		serviceTypeCache: serviceTypeCache,
-		handlers:         map[string]CallbackFunc{},
+		api:           api,
+		svcProvider:   svcProvider,
+		pgProvider:    pgProvider,
+		cacheProvider: cacheProvider,
+		handlers:      map[string]CallbackFunc{},
 	}
 
 	//ch.register(consts.PrefixMenu, ch.handleMenu)

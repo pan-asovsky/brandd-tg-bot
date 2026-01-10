@@ -1,4 +1,4 @@
-package constants
+package user_flow
 
 const (
 	GreetingMsg = `👋 Bandd — онлайн-запись на шиномонтаж.
@@ -64,11 +64,4 @@ const (
 	BookingCancelled = "Запись отменена"
 
 	ThanksForNoLeave = "Спасибо, что остаётесь с нами!"
-
-	NewBookingNotification = "🟢 <b>Новая запись!</b>\n\n" +
-		"📆 %s\n" +
-		"🛞 Радиус: %s\n" +
-		"🔧 Тип работ: %s\n" +
-		"💰 Ориентировочная цена: %d\n" +
-		"📞 Номер телефона: <code>%s</code>"
 )

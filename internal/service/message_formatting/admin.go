@@ -4,22 +4,24 @@ import (
 	"fmt"
 
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type adminMessageFormattingService struct {
 	dateTime i.DateTimeService
 }
 
-func (a *adminMessageFormattingService) NewBookingNotify(booking *model.Booking) (string, error) {
+func (a *adminMessageFormattingService) NewBookingNotify(booking *entity.Booking) (string, error) {
 	view, err := a.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
 	if err != nil {
-		return "", err
+		return "", utils.WrapError(err)
 	}
 
 	return fmt.Sprintf(
-		consts.NewBookingNotification,
+		admflow.NewBookingNotification,
 		view,
 		booking.RimRadius,
 		consts.ServiceNames[booking.Service],

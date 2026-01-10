@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -37,7 +37,7 @@ func (pr *priceRepo) GetAllRimSizes() ([]string, error) {
 }
 
 func (pr *priceRepo) GetSetPrice(svc string, radius string) (int64, error) {
-	var price model.Price
+	var price entity.Price
 	if err := pr.db.QueryRow(GetPricePerSet, svc, radius).Scan(&price.PricePerSet); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0, fmt.Errorf("[get_set_price] not founded for %s %s %w", svc, radius, err)

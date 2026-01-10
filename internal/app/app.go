@@ -13,28 +13,27 @@ import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/bot"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
-	rd "github.com/pan-asovsky/brandd-tg-bot/internal/repository/redis"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
 	"github.com/redis/go-redis/v9"
 )
 
 type App struct {
-	Context                 context.Context
-	Config                  *config.Config
-	Cache                   *redis.Client
-	Postgres                *sql.DB
-	ServiceTypeCacheService i.ServiceTypeCache
-	pgProvider              *pg.Provider
-	ServiceProvider         *service.Provider
-	TelegramBot             *tg.BotAPI
-	UpdateHandler           *handler.UpdateHandler
-	httpServer              *http.Server
+	Context  context.Context
+	Config   *config.Config
+	Cache    *redis.Client
+	Postgres *sql.DB
+
+	PgProvider      *pg.Provider
+	ServiceProvider *service.Provider
+	CacheProvider   *cache.Provider
+
+	TelegramBot   *tg.BotAPI
+	UpdateHandler *handler.UpdateHandler
+	httpServer    *http.Server
 }
 
 func NewApp(ctx context.Context) *App {
@@ -69,26 +68,19 @@ func (a *App) Init() error {
 	)
 	postgres.RunMigrations(dbURL)
 
-	sl, err := locker.NewSlotLocker(a.Cache, a.Config.SlotLockTTL)
-	if err != nil {
-		return err
-	}
-	lockCache := cache.NewLockCache(a.Cache, a.Config.SlotLockTTL)
-
 	tgbot, err := bot.NewTelegramBot(a.Config.BotToken, a.Config.WebhookURL)
 	if err != nil {
 		return err
 	}
 	a.TelegramBot = tgbot
 
-	a.ServiceTypeCacheService = rd.NewServiceTypeCacheService(a.Cache, a.Config.SlotLockTTL)
-
 	// provider
-	a.pgProvider = pg.NewPgProvider(a.Postgres)
-	a.ServiceProvider = service.NewProvider(a.pgProvider, sl, lockCache, a.TelegramBot)
+	a.PgProvider = pg.NewPgProvider(a.Postgres)
+	a.CacheProvider = cache.NewProvider(a.Cache, a.Config.CacheTTL)
+	a.ServiceProvider = service.NewProvider(a.PgProvider, a.CacheProvider, a.TelegramBot)
 
 	// handler
-	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.pgProvider, a.ServiceTypeCacheService)
+	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.PgProvider, a.CacheProvider)
 
 	return nil
 }

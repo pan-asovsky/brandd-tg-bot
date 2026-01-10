@@ -4,23 +4,23 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 )
 
 type userRepo struct {
 	db *sql.DB
 }
 
-func (u *userRepo) GetActiveAdmins() ([]model.User, error) {
+func (u *userRepo) GetActiveAdmins() ([]entity.User, error) {
 	rows, err := u.db.Query(GetActiveAdmins)
 	if err != nil {
 		return nil, fmt.Errorf("[get_active_admins] query error: %w", err)
 	}
 	defer rows.Close()
 
-	var users []model.User
+	var users []entity.User
 	for rows.Next() {
-		var user model.User
+		var user entity.User
 		if err := rows.Scan(
 			&user.ID,
 			&user.ChatID,

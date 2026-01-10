@@ -6,8 +6,8 @@ import (
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -50,7 +50,7 @@ func (c *callbackHandler) handleNew(q *api.CallbackQuery) error {
 func (c *callbackHandler) handleMy(q *api.CallbackQuery) error {
 	chatID := q.Message.Chat.ID
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().SendMyBookingsMessage(chatID, func() (*model.Booking, error) {
+		return c.svcProvider.Telegram().SendMyBookingsMessage(chatID, func() (*entity.Booking, error) {
 			return c.svcProvider.Booking().FindActiveByChatID(chatID)
 		})
 	})

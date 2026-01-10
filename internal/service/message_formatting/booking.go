@@ -5,8 +5,9 @@ import (
 	"fmt"
 
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -15,17 +16,17 @@ type bookingMessageFormattingService struct {
 }
 
 func (b *bookingMessageFormattingService) Confirm(date, startTime string) string {
-	return fmt.Sprintf(consts.ConfirmMsg, date, startTime)
+	return fmt.Sprintf(usflow.ConfirmMsg, date, startTime)
 }
 
-func (b *bookingMessageFormattingService) PreConfirm(booking *model.Booking) (string, error) {
+func (b *bookingMessageFormattingService) PreConfirm(booking *entity.Booking) (string, error) {
 	date, err := b.dateTime.FormatDate(booking.Date, "2006-01-02", "02.01.2006")
 	if err != nil {
 		return "", utils.WrapError(err)
 	}
 
 	return fmt.Sprintf(
-		consts.PreConfirmMsg,
+		usflow.PreConfirmMsg,
 		date,
 		consts.Time[booking.Time],
 		booking.Time,
@@ -35,27 +36,27 @@ func (b *bookingMessageFormattingService) PreConfirm(booking *model.Booking) (st
 	), nil
 }
 
-func (b *bookingMessageFormattingService) My(booking *model.Booking) (string, error) {
+func (b *bookingMessageFormattingService) My(booking *entity.Booking) (string, error) {
 	view, err := b.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
 	if err != nil {
 		return "", err
 	}
 
 	return fmt.Sprintf(
-		consts.ActiveBooking,
+		usflow.ActiveBooking,
 		view,
 		consts.ServiceNames[booking.Service],
 		SQLNullIntToInt64(booking.TotalPrice),
 	), nil
 }
 
-func (b *bookingMessageFormattingService) Restriction(booking *model.Booking) (string, error) {
+func (b *bookingMessageFormattingService) Restriction(booking *entity.Booking) (string, error) {
 	view, err := b.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
 	if err != nil {
 		return "", utils.WrapError(err)
 	}
 
-	return fmt.Sprintf(consts.BookingRestriction, view), nil
+	return fmt.Sprintf(usflow.BookingRestriction, view), nil
 }
 
 func (b *bookingMessageFormattingService) PreCancel(date, time string) (string, error) {
@@ -64,7 +65,7 @@ func (b *bookingMessageFormattingService) PreCancel(date, time string) (string, 
 		return "", utils.WrapError(err)
 	}
 
-	return fmt.Sprintf(consts.BookingPreCancellation, view), nil
+	return fmt.Sprintf(usflow.BookingPreCancellation, view), nil
 }
 
 func SQLNullIntToInt64(nullable sql.NullInt64) int64 {

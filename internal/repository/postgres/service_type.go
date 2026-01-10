@@ -4,23 +4,23 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 )
 
 type serviceRepo struct {
 	db *sql.DB
 }
 
-func (sr *serviceRepo) GetServiceTypes() ([]model.ServiceType, error) {
+func (sr *serviceRepo) GetServiceTypes() ([]entity.ServiceType, error) {
 	rows, err := sr.db.Query(GetCompositeServiceTypes)
 	if err != nil {
 		return nil, fmt.Errorf("[get_service_types] query error: %w", err)
 	}
 	defer rows.Close()
 
-	var types []model.ServiceType
+	var types []entity.ServiceType
 	for rows.Next() {
-		var svc model.ServiceType
+		var svc entity.ServiceType
 		if err := rows.Scan(
 			&svc.ID,
 			&svc.ServiceCode,

@@ -5,19 +5,19 @@ import (
 	"log"
 	"time"
 
-	rd "github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type slotService struct {
-	slotRepo   i.SlotRepo
-	slotLocker *rd.SlotLocker
+	slotRepo   irepo.SlotRepo
+	slotLocker icache.SlotLocking
 }
 
-func (s *slotService) GetAvailableBookings() []model.AvailableBooking {
+func (s *slotService) GetAvailableBookings() []entity.AvailableBooking {
 	today := time.Now()
 
 	days := []struct {
@@ -30,12 +30,12 @@ func (s *slotService) GetAvailableBookings() []model.AvailableBooking {
 		{2, consts.AfterTomorrow, true},
 	}
 
-	bookings := make([]model.AvailableBooking, 0, 3)
+	bookings := make([]entity.AvailableBooking, 0, 3)
 	for _, day := range days {
 		if !day.available {
 			continue
 		}
-		bookings = append(bookings, model.AvailableBooking{
+		bookings = append(bookings, entity.AvailableBooking{
 			Date:  today.AddDate(0, 0, day.offset),
 			Label: day.label,
 		})
@@ -44,7 +44,7 @@ func (s *slotService) GetAvailableBookings() []model.AvailableBooking {
 	return bookings
 }
 
-func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
+func (s *slotService) GetAvailableZones(date string) (entity.Zone, error) {
 	slots, err := s.slotRepo.GetAvailableSlots(date)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 		return nil, utils.WrapError(err)
 	}
 
-	filtered := make([]model.Slot, 0, len(slots))
+	filtered := make([]entity.Slot, 0, len(slots))
 	for x, key := range keys {
 		if !lockStatus[key] {
 			filtered = append(filtered, slots[x])
@@ -71,8 +71,8 @@ func (s *slotService) GetAvailableZones(date string) (model.Zone, error) {
 	return s.groupByZones(filtered), nil
 }
 
-func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
-	zones := make(model.Zone)
+func (s *slotService) groupByZones(slots []entity.Slot) entity.Zone {
+	zones := make(entity.Zone)
 
 	for _, slot := range slots {
 		if !slot.IsAvailable {
@@ -85,12 +85,12 @@ func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
 			continue
 		}
 
-		for _, z := range model.ZonesDefinition {
+		for _, z := range entity.ZonesDefinition {
 			startTime, _ := time.Parse("15:04", z.Start)
 			endTime, _ := time.Parse("15:04", z.End)
 
 			if !slotTime.Before(startTime) && slotTime.Before(endTime) {
-				zones[z.Name] = append(zones[z.Name], model.Timeslot{
+				zones[z.Name] = append(zones[z.Name], entity.Timeslot{
 					Start: slot.StartTime,
 					End:   slot.EndTime,
 				})
@@ -101,8 +101,8 @@ func (s *slotService) groupByZones(slots []model.Slot) model.Zone {
 	return zones
 }
 
-func (s *slotService) FindByDateAndTime(date, start string) (*model.Slot, error) {
-	return utils.WrapFunction(func() (*model.Slot, error) {
+func (s *slotService) FindByDateAndTime(date, start string) (*entity.Slot, error) {
+	return utils.WrapFunction(func() (*entity.Slot, error) {
 		return s.slotRepo.FindByDateAndTime(date, start)
 	})
 }

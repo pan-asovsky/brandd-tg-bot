@@ -1,4 +1,4 @@
-package model
+package entity
 
 type ServiceType struct {
 	ID          int64  `db:"id"`
@@ -6,10 +6,3 @@ type ServiceType struct {
 	ServiceName string `db:"service_name"`
 	IsComposite bool   `db:"is_composite"`
 }
-
-const (
-	ServiceCodeTireChange = "TIRE_SERVICE"
-	ServiceCodeBalancing  = "BALANCING"
-	ServiceCodeComplex    = "COMPLEX"
-	ServiceCodeTakeItOut  = "TAKE_IT_OUT"
-)

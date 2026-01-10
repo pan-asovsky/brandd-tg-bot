@@ -4,27 +4,32 @@ import (
 	"log"
 
 	tgbot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type messageHandler struct {
-	api              *tgbot.BotAPI
-	svcProvider      *service.Provider
-	serviceTypeCache cache.ServiceTypeCache
+	api           *tgbot.BotAPI
+	svcProvider   *service.Provider
+	cacheProvider *cache.Provider
 }
 
-func NewMessageHandler(api *tgbot.BotAPI, svcProvider *service.Provider, serviceTypeCache cache.ServiceTypeCache) i.MessageHandler {
-	return &messageHandler{api: api, svcProvider: svcProvider, serviceTypeCache: serviceTypeCache}
+func NewMessageHandler(api *tgbot.BotAPI, svcProvider *service.Provider, cacheProvider *cache.Provider) i.MessageHandler {
+	return &messageHandler{api: api, svcProvider: svcProvider, cacheProvider: cacheProvider}
 }
 
 func (m *messageHandler) Handle(msg *tgbot.Message) error {
 	if msg.Contact != nil {
-		return m.handlePhone(msg)
+		return m.handlePhone(msg.Chat.ID, msg.Contact.PhoneNumber)
+	}
+
+	detected, isPhone := m.svcProvider.Phone().Detect(msg.Text)
+	if isPhone {
+		return m.handlePhone(msg.Chat.ID, detected)
 	}
 
 	message := tgbot.NewMessage(msg.Chat.ID, consts.DontKnowHowToAnswer)
@@ -34,14 +39,17 @@ func (m *messageHandler) Handle(msg *tgbot.Message) error {
 	return nil
 }
 
-func (m *messageHandler) handlePhone(msg *tgbot.Message) error {
-	chatID := msg.Chat.ID
-
+func (m *messageHandler) handlePhone(chatID int64, contactPhone string) error {
 	if err := m.svcProvider.Telegram().RemoveReplyKeyboard(chatID); err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err := m.svcProvider.Booking().SetPhone(msg.Contact.PhoneNumber, chatID); err != nil {
+	phone, err := m.svcProvider.Phone().Normalize(contactPhone)
+	if err != nil {
+		return utils.WrapError(err)
+	}
+
+	if err = m.svcProvider.Booking().SetPhone(phone, chatID); err != nil {
 		return utils.WrapError(err)
 	}
 
@@ -76,17 +84,17 @@ func (m *messageHandler) handleAutoConfirm(chatID int64) error {
 	})
 }
 
-func (m *messageHandler) getActiveSlot(chatID int64) (*model.Slot, error) {
+func (m *messageHandler) getActiveSlot(chatID int64) (*entity.Slot, error) {
 	booking, err := m.svcProvider.Booking().FindActiveByChatID(chatID)
 	if err != nil {
 		return nil, utils.WrapError(err)
 	}
-	return utils.WrapFunction(func() (*model.Slot, error) {
+	return utils.WrapFunction(func() (*entity.Slot, error) {
 		return m.svcProvider.Slot().FindByDateAndTime(booking.Date, booking.Time)
 	})
 }
 
-func (m *messageHandler) confirm(chatID int64, slot *model.Slot) error {
+func (m *messageHandler) confirm(chatID int64, slot *entity.Slot) error {
 	if err := m.svcProvider.Slot().MarkUnavailable(slot.Date, slot.StartTime); err != nil {
 		return utils.WrapError(err)
 	}
@@ -99,7 +107,7 @@ func (m *messageHandler) confirm(chatID int64, slot *model.Slot) error {
 		return utils.WrapError(err)
 	}
 
-	if err := m.serviceTypeCache.Clean(chatID); err != nil {
+	if err := m.cacheProvider.ServiceType().Clean(chatID); err != nil {
 		return utils.WrapError(err)
 	}
 
@@ -125,7 +133,7 @@ func (m *messageHandler) notifyAdmins(chatID int64) error {
 }
 
 func (m *messageHandler) handlePendingConfirm(chatID int64) error {
-	if err := m.svcProvider.Booking().UpdateStatus(chatID, model.NotConfirmed); err != nil {
+	if err := m.svcProvider.Booking().UpdateStatus(chatID, entity.NotConfirmed); err != nil {
 		return utils.WrapError(err)
 	}
 

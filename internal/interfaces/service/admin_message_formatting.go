@@ -1,7 +1,7 @@
 package service
 
-import "github.com/pan-asovsky/brandd-tg-bot/internal/model"
+import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 
 type AdminMessageFormattingService interface {
-	NewBookingNotify(booking *model.Booking) (string, error)
+	NewBookingNotify(booking *entity.Booking) (string, error)
 }

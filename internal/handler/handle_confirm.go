@@ -54,7 +54,7 @@ func (c *callbackHandler) handleNo(query *api.CallbackQuery) error {
 }
 
 func (c *callbackHandler) cleanSession(chatID int64) error {
-	if err := c.serviceTypeCache.Clean(chatID); err != nil {
+	if err := c.cacheProvider.ServiceType().Clean(chatID); err != nil {
 		return utils.WrapError(err)
 	}
 

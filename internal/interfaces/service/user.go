@@ -1,7 +1,7 @@
 package service
 
-import "github.com/pan-asovsky/brandd-tg-bot/internal/model"
+import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 
 type UserService interface {
-	GetActiveAdmins() []model.User
+	GetActiveAdmins() []entity.User
 }

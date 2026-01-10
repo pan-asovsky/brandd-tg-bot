@@ -1,10 +1,10 @@
 package service
 
-import "github.com/pan-asovsky/brandd-tg-bot/internal/model"
+import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 
 type SlotService interface {
-	GetAvailableBookings() []model.AvailableBooking
-	GetAvailableZones(date string) (model.Zone, error)
-	FindByDateAndTime(date, start string) (*model.Slot, error)
+	GetAvailableBookings() []entity.AvailableBooking
+	GetAvailableZones(date string) (entity.Zone, error)
+	FindByDateAndTime(date, start string) (*entity.Slot, error)
 	MarkUnavailable(date, startTime string) error
 }

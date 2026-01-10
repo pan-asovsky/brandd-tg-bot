@@ -13,7 +13,7 @@ func (c *callbackHandler) handleTime(query *api.CallbackQuery) error {
 		return utils.WrapError(err)
 	}
 
-	if err = c.serviceTypeCache.Clean(info.ChatID); err != nil {
+	if err = c.cacheProvider.ServiceType().Clean(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 

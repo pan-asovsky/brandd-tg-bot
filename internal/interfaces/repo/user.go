@@ -1,7 +1,7 @@
 package interfaces
 
-import "github.com/pan-asovsky/brandd-tg-bot/internal/model"
+import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 
 type UserRepo interface {
-	GetActiveAdmins() ([]model.User, error)
+	GetActiveAdmins() ([]entity.User, error)
 }

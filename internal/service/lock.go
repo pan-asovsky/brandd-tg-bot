@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/cache/locker"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type lockService struct {
-	locker *locker.SlotLocker
-	cache  *cache.LockCache
+	locker isvc.SlotLocking
+	cache  icache.SlotLockCache
 }
 
 func (ls *lockService) Toggle(info *types.UserSessionInfo) error {
@@ -46,7 +47,7 @@ func (ls *lockService) Toggle(info *types.UserSessionInfo) error {
 		return fmt.Errorf("[time_lock] %w", err)
 	}
 
-	lockInfo := cache.SlotLockInfo{Key: newKey, UUID: uuid}
+	lockInfo := model.SlotLockInfo{Key: newKey, UUID: uuid}
 	ls.cache.Set(chatID, lockInfo)
 
 	return nil

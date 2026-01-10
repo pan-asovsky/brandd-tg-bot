@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"strings"
 
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
@@ -17,14 +17,14 @@ type bookingService struct {
 	priceService service.PriceService
 }
 
-func (b *bookingService) Create(info *types.UserSessionInfo) (*model.Booking, error) {
-	booking := &model.Booking{
+func (b *bookingService) Create(info *types.UserSessionInfo) (*entity.Booking, error) {
+	booking := &entity.Booking{
 		ChatID:     info.ChatID,
 		Date:       info.Date,
 		Service:    info.Service,
 		RimRadius:  info.RimRadius,
 		TotalPrice: sql.NullInt64{Int64: info.TotalPrice, Valid: true},
-		Status:     model.Pending,
+		Status:     entity.Pending,
 	}
 
 	start, _ := b.parseTime(info.Time)
@@ -45,7 +45,7 @@ func (b *bookingService) SetPhone(phone string, chatID int64) error {
 	return b.pgProvider.Booking().SetPhone(phone, chatID)
 }
 
-func (b *bookingService) FindActiveByChatID(chatID int64) (*model.Booking, error) {
+func (b *bookingService) FindActiveByChatID(chatID int64) (*entity.Booking, error) {
 	return b.pgProvider.Booking().FindActiveByChatID(chatID)
 }
 
@@ -53,7 +53,7 @@ func (b *bookingService) ExistsByChatID(chatID int64) bool {
 	return b.pgProvider.Booking().ExistsByChatID(chatID)
 }
 
-func (b *bookingService) UpdateStatus(chatID int64, status model.BookingStatus) error {
+func (b *bookingService) UpdateStatus(chatID int64, status entity.BookingStatus) error {
 	return utils.WrapFunctionError(func() error {
 		return b.pgProvider.Booking().UpdateStatus(chatID, status)
 	})

@@ -6,9 +6,9 @@ import (
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/rules"
 )
 
@@ -24,7 +24,7 @@ func (s *keyboardService) GreetingKeyboard() tg.InlineKeyboardMarkup {
 	)
 }
 
-func (s *keyboardService) DateKeyboard(bookings []model.AvailableBooking) tg.InlineKeyboardMarkup {
+func (s *keyboardService) DateKeyboard(bookings []entity.AvailableBooking) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 
 	row := tg.NewInlineKeyboardRow()
@@ -39,7 +39,7 @@ func (s *keyboardService) DateKeyboard(bookings []model.AvailableBooking) tg.Inl
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *keyboardService) ZoneKeyboard(zones model.Zone, date string) tg.InlineKeyboardMarkup {
+func (s *keyboardService) ZoneKeyboard(zones entity.Zone, date string) tg.InlineKeyboardMarkup {
 	keys := make([]string, 0, len(zones))
 	for k := range zones {
 		keys = append(keys, k)
@@ -67,7 +67,7 @@ func (s *keyboardService) ZoneKeyboard(zones model.Zone, date string) tg.InlineK
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *keyboardService) TimeKeyboard(ts []model.Timeslot, info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
+func (s *keyboardService) TimeKeyboard(ts []entity.Timeslot, info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 	var currentRow []tg.InlineKeyboardButton
 
@@ -95,7 +95,7 @@ func (s *keyboardService) TimeKeyboard(ts []model.Timeslot, info *types.UserSess
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
-func (s *keyboardService) ServiceKeyboard(types []model.ServiceType, info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
+func (s *keyboardService) ServiceKeyboard(types []entity.ServiceType, info *types.UserSessionInfo) tg.InlineKeyboardMarkup {
 	selectedServices := info.SelectedServices
 	var rows [][]tg.InlineKeyboardButton
 
@@ -233,6 +233,6 @@ func (s *keyboardService) BackKeyboard() tg.InlineKeyboardMarkup {
 
 func (s *keyboardService) backKeyboardRow(callback string) []tg.InlineKeyboardButton {
 	return tg.NewInlineKeyboardRow(
-		tg.NewInlineKeyboardButtonData(consts.BackBtn, fmt.Sprintf(callback)),
+		tg.NewInlineKeyboardButtonData(consts.BackBtn, callback),
 	)
 }

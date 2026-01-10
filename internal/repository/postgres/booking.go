@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -14,8 +14,8 @@ type bookingRepo struct {
 	db *sql.DB
 }
 
-func (b *bookingRepo) FindActiveByChatID(chatID int64) (*model.Booking, error) {
-	var booking model.Booking
+func (b *bookingRepo) FindActiveByChatID(chatID int64) (*entity.Booking, error) {
+	var booking entity.Booking
 	if err := b.db.QueryRow(FindActive, chatID).Scan(
 		&booking.ID,
 		&booking.ChatID,
@@ -58,7 +58,7 @@ func (b *bookingRepo) UpdateRimRadius(chatID int64, rimRadius string) error {
 	return nil
 }
 
-func (b *bookingRepo) UpdateStatus(chatID int64, status model.BookingStatus) error {
+func (b *bookingRepo) UpdateStatus(chatID int64, status entity.BookingStatus) error {
 	_, err := b.db.Exec(UpdateStatus, status, chatID)
 	if err != nil {
 		return utils.WrapError(err)
@@ -85,7 +85,7 @@ func (b *bookingRepo) UpdateService(chatID int64, service string) error {
 	return nil
 }
 
-func (b *bookingRepo) Save(booking *model.Booking) (*model.Booking, error) {
+func (b *bookingRepo) Save(booking *entity.Booking) (*entity.Booking, error) {
 	now := time.Now().UTC().Add(3 * time.Hour)
 	err := b.db.QueryRow(SaveBooking,
 		booking.ChatID,
@@ -113,21 +113,21 @@ func (b *bookingRepo) SetPhone(phone string, chatID int64) error {
 }
 
 func (b *bookingRepo) Confirm(chatID int64) error {
-	if _, err := b.db.Exec(ConfirmBooking, model.Confirmed, "an_user", chatID); err != nil {
+	if _, err := b.db.Exec(ConfirmBooking, entity.Confirmed, "an_user", chatID); err != nil {
 		return fmt.Errorf("[confirm_booking] error: %w", err)
 	}
 	return nil
 }
 
 func (b *bookingRepo) AutoConfirm(chatID int64) error {
-	if _, err := b.db.Exec(ConfirmBooking, model.Confirmed, "system", chatID); err != nil {
+	if _, err := b.db.Exec(ConfirmBooking, entity.Confirmed, "system", chatID); err != nil {
 		return fmt.Errorf("[confirm_booking] error: %w", err)
 	}
 	return nil
 }
 
 func (b *bookingRepo) Cancel(chatID int64) error {
-	if _, err := b.db.Exec(CancelBooking, model.Cancelled, chatID); err != nil {
+	if _, err := b.db.Exec(CancelBooking, entity.Cancelled, chatID); err != nil {
 		return fmt.Errorf("[cancel_booking] error: %w", err)
 	}
 	return nil

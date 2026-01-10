@@ -1,4 +1,4 @@
-package model
+package entity
 
 type Slot struct {
 	ID          int64  `db:"id"`

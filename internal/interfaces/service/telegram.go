@@ -1,31 +1,31 @@
 package service
 
 import (
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/types"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
 type TelegramService interface {
-	RequestDate(bookings []model.AvailableBooking, info *types.UserSessionInfo) error
-	RequestZone(zone model.Zone, info *types.UserSessionInfo) error
-	RequestTime(timeslots []model.Timeslot, info *types.UserSessionInfo) error
-	RequestServiceTypes(types []model.ServiceType, info *types.UserSessionInfo) error
+	RequestDate(bookings []entity.AvailableBooking, info *types.UserSessionInfo) error
+	RequestZone(zone entity.Zone, info *types.UserSessionInfo) error
+	RequestTime(timeslots []entity.Timeslot, info *types.UserSessionInfo) error
+	RequestServiceTypes(types []entity.ServiceType, info *types.UserSessionInfo) error
 	RequestRimRadius(rims []string, info *types.UserSessionInfo) error
-	RequestPreConfirm(booking *model.Booking, info *types.UserSessionInfo) error
+	RequestPreConfirm(booking *entity.Booking, info *types.UserSessionInfo) error
 	RequestUserPhone(info *types.UserSessionInfo) error
 
 	RemoveReplyKeyboard(chatID int64) error
 
-	ProcessConfirm(chatID int64, slot *model.Slot) error
+	ProcessConfirm(chatID int64, slot *entity.Slot) error
 	ProcessPendingConfirm(chatID int64) error
 
-	SendBookingRestrictionMessage(chatID int64, booking *model.Booking) error
-	SendMyBookingsMessage(chatID int64, fn func() (*model.Booking, error)) error
+	SendBookingRestrictionMessage(chatID int64, booking *entity.Booking) error
+	SendMyBookingsMessage(chatID int64, fn func() (*entity.Booking, error)) error
 	SendStartMenu(chatID int64) error
 
 	SendPreCancelBookingMessage(chatID int64, date, time string) error
 	SendCancellationMessage(chatID int64) error
 	SendCancelDenyMessage(chatID int64) error
 
-	NewBookingNotify(chatID int64, booking *model.Booking) error
+	NewBookingNotify(chatID int64, booking *entity.Booking) error
 }
