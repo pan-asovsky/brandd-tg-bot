@@ -19,38 +19,38 @@ const (
 
 type callbackBuildingService struct{}
 
-func (cb *callbackBuildingService) Menu() string {
+func (cbs *callbackBuildingService) Menu() string {
 	return usflow.UserPrefix + usflow.PrefixBack + usflow.Menu
 }
 
-func (cb *callbackBuildingService) NewBooking() string {
+func (cbs *callbackBuildingService) NewBooking() string {
 	return usflow.NewBookingCbk
 }
 
-func (cb *callbackBuildingService) MyBookings() string {
+func (cbs *callbackBuildingService) MyBookings() string {
 	return usflow.MyBookingsCbk
 }
 
-func (cb *callbackBuildingService) PreCancelBooking() string {
+func (cbs *callbackBuildingService) PreCancelBooking() string {
 	return usflow.PreCancelBookingCbk
 }
 
-func (cb *callbackBuildingService) CancelBooking() string {
+func (cbs *callbackBuildingService) CancelBooking() string {
 	return usflow.CancelBookingCbk
 }
 
-func (cb *callbackBuildingService) NoCancelBooking() string {
+func (cbs *callbackBuildingService) NoCancelBooking() string {
 	return usflow.NoCancelBookingCbk
 }
 
-func (cb *callbackBuildingService) Date(date time.Time) string {
+func (cbs *callbackBuildingService) Date(date time.Time) string {
 	return fmt.Sprintf("%s%s%s",
 		usflow.UserPrefix+usflow.PrefixDate,
 		Date, encodeDate(date.Format("2006-01-02")),
 	)
 }
 
-func (cb *callbackBuildingService) Zone(date, zone string) string {
+func (cbs *callbackBuildingService) Zone(date, zone string) string {
 	return fmt.Sprintf("%s%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixZone,
 		Date, encodeDate(date),
@@ -58,7 +58,7 @@ func (cb *callbackBuildingService) Zone(date, zone string) string {
 	)
 }
 
-func (cb *callbackBuildingService) Time(info *model.UserSessionInfo) string {
+func (cbs *callbackBuildingService) Time(info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixTime,
 		Date, encodeDate(info.Date),
@@ -67,7 +67,7 @@ func (cb *callbackBuildingService) Time(info *model.UserSessionInfo) string {
 	)
 }
 
-func (cb *callbackBuildingService) ServiceSelection(service string, info *model.UserSessionInfo) string {
+func (cbs *callbackBuildingService) ServiceSelection(service string, info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixServiceSelect,
 		Date, encodeDate(info.Date),
@@ -77,7 +77,7 @@ func (cb *callbackBuildingService) ServiceSelection(service string, info *model.
 	)
 }
 
-func (cb *callbackBuildingService) ServiceConfirmation(info *model.UserSessionInfo) string {
+func (cbs *callbackBuildingService) ServiceConfirmation(info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixServiceConfirm,
 		Date, encodeDate(info.Date),
@@ -87,7 +87,7 @@ func (cb *callbackBuildingService) ServiceConfirmation(info *model.UserSessionIn
 	)
 }
 
-func (cb *callbackBuildingService) Rim(info *model.UserSessionInfo) string {
+func (cbs *callbackBuildingService) Rim(info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixRim,
 		Date, encodeDate(info.Date),
@@ -96,6 +96,14 @@ func (cb *callbackBuildingService) Rim(info *model.UserSessionInfo) string {
 		Service, info.Service,
 		Rim, info.RimRadius,
 	)
+}
+
+func (cbs *callbackBuildingService) StartAdmin() string {
+	return "FLOW::ADMIN"
+}
+
+func (cbs *callbackBuildingService) StartUser() string {
+	return "FLOW::USER"
 }
 
 func encodeDate(date string) string {

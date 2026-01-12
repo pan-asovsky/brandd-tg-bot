@@ -19,4 +19,7 @@ type KeyboardService interface {
 	ExistsMyBookingsKeyboard() tg.InlineKeyboardMarkup
 	BackKeyboard() tg.InlineKeyboardMarkup
 	BookingCancellationKeyboard() tg.InlineKeyboardMarkup
+
+	// AdminGreetingKeyboard todo: split service to common, user and admin
+	AdminGreetingKeyboard() tg.InlineKeyboardMarkup
 }

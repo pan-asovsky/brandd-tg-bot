@@ -19,4 +19,8 @@ type CallbackBuildingService interface {
 	ServiceSelection(service string, info *model.UserSessionInfo) string
 	ServiceConfirmation(info *model.UserSessionInfo) string
 	Rim(info *model.UserSessionInfo) string
+
+	//todo: split service to user and admin (+ maybe common)
+	StartAdmin() string
+	StartUser() string
 }

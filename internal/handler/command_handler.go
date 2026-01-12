@@ -32,7 +32,7 @@ func (ch *commandHandler) Handle(msg *tg.Message) error {
 		switch role {
 		case "admin":
 			return utils.WrapFunctionError(func() error {
-				return ch.tgProvider.Admin().StartMenu(chatID)
+				return ch.tgProvider.Admin().ChoiceMenu(chatID)
 			})
 		}
 	}

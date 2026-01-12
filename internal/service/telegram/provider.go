@@ -17,13 +17,18 @@ func NewTelegramProvider(botAPI *tgapi.BotAPI, svcProvider p.ServiceProvider, ms
 }
 
 func (tp *telegramProvider) User() i.TelegramUserService {
-	return &telegramUserService{kb: tp.svcProvider.Keyboard(), dateTime: tp.svcProvider.DateTime(), msgFmtProvider: tp.msgFmtProvider, botAPI: tp.botAPI}
+	return &telegramUserService{
+		kb:             tp.svcProvider.Keyboard(),
+		dateTime:       tp.svcProvider.DateTime(),
+		msgFmtProvider: tp.msgFmtProvider,
+		tgCommon:       tp.Common(),
+	}
 }
 
 func (tp *telegramProvider) Admin() i.TelegramAdminService {
-	return &adminService{botAPI: tp.botAPI}
+	return &telegramAdminService{tgCommon: tp.Common(), kb: tp.svcProvider.Keyboard()}
 }
 
 func (tp *telegramProvider) Common() i.TelegramCommonService {
-	return &commonService{botAPI: tp.botAPI}
+	return &telegramCommonService{botAPI: tp.botAPI}
 }

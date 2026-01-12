@@ -1,4 +1,4 @@
-package telegram
+package tg
 
 import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
