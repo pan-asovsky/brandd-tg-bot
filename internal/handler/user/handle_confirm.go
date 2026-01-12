@@ -10,55 +10,55 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *userCallbackHandler) handleConfirm(query *tg.CallbackQuery) error {
+func (uch *userCallbackHandler) handleConfirm(query *tg.CallbackQuery) error {
 	userChoice, ok := strings.CutPrefix(query.Data, "CONFIRM::")
 	if !ok {
 		return fmt.Errorf("[handle_confirm] invalid callback: %s", query.Data)
 	}
 	switch userChoice {
 	case consts.Yes:
-		return c.handleYes(query)
+		return uch.handleYes(query)
 	case consts.No:
-		return c.handleNo(query)
+		return uch.handleNo(query)
 	}
 
 	return nil
 }
 
-func (c *userCallbackHandler) handleYes(query *tg.CallbackQuery) error {
+func (uch *userCallbackHandler) handleYes(query *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: query.Message.Chat.ID}
 
-	if err := c.cleanSession(info.ChatID); err != nil {
+	if err := uch.cleanSession(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().RequestUserPhone(info)
+		return uch.tgProvider.User().RequestUserPhone(info)
 	})
 }
 
-func (c *userCallbackHandler) handleNo(query *tg.CallbackQuery) error {
+func (uch *userCallbackHandler) handleNo(query *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: query.Message.Chat.ID}
 
-	if err := c.cleanSession(info.ChatID); err != nil {
+	if err := uch.cleanSession(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err := c.svcProvider.Booking().Cancel(info.ChatID); err != nil {
+	if err := uch.svcProvider.Booking().Cancel(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().SendCancellationMessage(info.ChatID)
+		return uch.tgProvider.User().SendCancellationMessage(info.ChatID)
 	})
 }
 
-func (c *userCallbackHandler) cleanSession(chatID int64) error {
-	if err := c.cacheProvider.ServiceType().Clean(chatID); err != nil {
+func (uch *userCallbackHandler) cleanSession(chatID int64) error {
+	if err := uch.cacheProvider.ServiceType().Clean(chatID); err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Lock().Clean(chatID)
+		return uch.svcProvider.Lock().Clean(chatID)
 	})
 }

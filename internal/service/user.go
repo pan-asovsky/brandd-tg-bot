@@ -9,12 +9,16 @@ type userService struct {
 	repo i.UserRepo
 }
 
-func (u *userService) GetActiveAdmins() []entity.User {
-	admins, err := u.repo.GetActiveAdmins()
+func (us *userService) GetActiveAdmins() []entity.User {
+	admins, err := us.repo.GetActiveAdmins()
 	if err != nil {
 		var empty []entity.User
 		return empty
 	}
 
 	return admins
+}
+
+func (us *userService) GetRole(chatID int64) (bool, string) {
+	return us.repo.GetRole(chatID)
 }

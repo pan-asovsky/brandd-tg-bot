@@ -4,30 +4,31 @@ import (
 	"time"
 
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/redis/go-redis/v9"
 )
 
-type Provider struct {
+type cacheProvider struct {
 	rc       *redis.Client
 	cacheTTL time.Duration
 }
 
-func NewProvider(rc *redis.Client, cacheTTL time.Duration) *Provider {
-	return &Provider{rc: rc, cacheTTL: cacheTTL}
+func NewCacheProvider(rc *redis.Client, cacheTTL time.Duration) p.CacheProvider {
+	return &cacheProvider{rc: rc, cacheTTL: cacheTTL}
 }
 
-func (p *Provider) SlotLock() i.SlotLockCache {
+func (p *cacheProvider) SlotLock() i.SlotLockCache {
 	return NewSlotLockCache(p.rc, p.cacheTTL)
 }
 
-func (p *Provider) ServiceType() i.ServiceTypeCache {
+func (p *cacheProvider) ServiceType() i.ServiceTypeCache {
 	return NewServiceTypeCacheService(p.rc, p.cacheTTL)
 }
 
-func (p *Provider) RedisClient() *redis.Client {
+func (p *cacheProvider) RedisClient() *redis.Client {
 	return p.rc
 }
 
-func (p *Provider) TTL() time.Duration {
+func (p *cacheProvider) TTL() time.Duration {
 	return p.cacheTTL
 }

@@ -58,4 +58,6 @@ const (
 	FreeUpSlot = `UPDATE available_slots SET is_available = true WHERE date = $1 AND start_time = $2`
 
 	GetActiveAdmins = "SELECT * FROM users WHERE role = 'admin' AND is_active = true"
+
+	GetUserRole = "SELECT role FROM users WHERE chat_id = $1"
 )

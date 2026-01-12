@@ -4,12 +4,12 @@ import (
 	"log"
 	"strings"
 
-	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
+	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type priceService struct {
-	pgProvider *pg.Provider
+	repoProvider p.RepoProvider
 }
 
 func (p *priceService) Calculate(service, radius string) (int64, error) {
@@ -17,7 +17,7 @@ func (p *priceService) Calculate(service, radius string) (int64, error) {
 
 	var totalPrice int64
 	for _, svc := range services {
-		price, err := p.pgProvider.Price().GetSetPrice(svc, radius)
+		price, err := p.repoProvider.Price().GetSetPrice(svc, radius)
 		if err != nil {
 			return 0, utils.WrapError(err)
 		}

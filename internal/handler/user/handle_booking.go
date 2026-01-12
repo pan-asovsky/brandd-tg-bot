@@ -11,7 +11,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *userCallbackHandler) handleBooking(query *tg.CallbackQuery) error {
+func (uch *userCallbackHandler) handleBooking(query *tg.CallbackQuery) error {
 	_, payload, ok := strings.Cut(query.Data, "::")
 	if !ok {
 		return errors.New("[handle_booking]: invalid callback: " + query.Data)
@@ -19,81 +19,80 @@ func (c *userCallbackHandler) handleBooking(query *tg.CallbackQuery) error {
 
 	switch payload {
 	case consts.New:
-		return c.handleNew(query)
+		return uch.handleNew(query)
 	case consts.My:
-		return c.handleMy(query)
+		return uch.handleMy(query)
 	case consts.PreCancel:
-		return c.handlePreCancel(query)
+		return uch.handlePreCancel(query)
 	case consts.Cancel:
-		return c.handleCancel(query)
+		return uch.handleCancel(query)
 	case consts.NoCancel:
-		return c.handleNoCancel(query)
+		return uch.handleNoCancel(query)
 	default:
 		return errors.New("[handle_booking]: invalid callback: " + query.Data)
 	}
 }
 
-func (c *userCallbackHandler) handleNew(q *tg.CallbackQuery) error {
+func (uch *userCallbackHandler) handleNew(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
 
-	booking, err := c.svcProvider.Booking().FindActiveNotPending(info.ChatID)
+	booking, err := uch.svcProvider.Booking().FindActiveNotPending(info.ChatID)
 	if booking != nil && err == nil {
-		return c.svcProvider.Telegram().SendBookingRestrictionMessage(info.ChatID, booking)
+		return uch.tgProvider.User().SendBookingRestrictionMessage(info.ChatID, booking)
 	}
 
-	bookings := c.svcProvider.Slot().GetAvailableBookings()
+	bookings := uch.svcProvider.Slot().GetAvailableBookings()
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().RequestDate(bookings, info)
+		return uch.tgProvider.User().RequestDate(bookings, info)
 	})
 }
 
-func (c *userCallbackHandler) handleMy(q *tg.CallbackQuery) error {
-	chatID := q.Message.Chat.ID
+func (uch *userCallbackHandler) handleMy(q *tg.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().SendMyBookingsMessage(chatID, func() (*entity.Booking, error) {
-			return c.svcProvider.Booking().FindActiveNotPending(chatID)
+		return uch.tgProvider.User().SendMyBookingsMessage(q.Message.Chat.ID, func() (*entity.Booking, error) {
+			return uch.svcProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
 		})
 	})
 }
 
-func (c *userCallbackHandler) handlePreCancel(q *tg.CallbackQuery) error {
+func (uch *userCallbackHandler) handlePreCancel(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
-	booking, err := c.svcProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
+	booking, err := uch.svcProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().SendPreCancelBookingMessage(info.ChatID, booking.Date, booking.Time)
+		return uch.tgProvider.User().SendPreCancelBookingMessage(info.ChatID, booking.Date, booking.Time)
 	})
 }
 
-func (c *userCallbackHandler) handleCancel(q *tg.CallbackQuery) error {
+func (uch *userCallbackHandler) handleCancel(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
 
-	booking, err := c.svcProvider.Booking().FindActiveNotPending(info.ChatID)
+	booking, err := uch.svcProvider.Booking().FindActiveNotPending(info.ChatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	err = c.svcProvider.Slot().FreeUp(booking.Date, booking.Time)
+	err = uch.svcProvider.Slot().FreeUp(booking.Date, booking.Time)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err = c.svcProvider.Booking().Cancel(info.ChatID); err != nil {
+	if err = uch.svcProvider.Booking().Cancel(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().SendCancellationMessage(info.ChatID)
+		return uch.tgProvider.User().SendCancellationMessage(info.ChatID)
 	})
 }
 
-func (c *userCallbackHandler) handleNoCancel(query *tg.CallbackQuery) error {
+func (uch *userCallbackHandler) handleNoCancel(query *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: query.Message.Chat.ID}
 
 	return utils.WrapFunctionError(func() error {
-		return c.svcProvider.Telegram().SendCancelDenyMessage(info.ChatID)
+		return uch.tgProvider.User().SendCancelDenyMessage(info.ChatID)
 	})
 }

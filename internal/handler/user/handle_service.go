@@ -5,46 +5,42 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *userCallbackHandler) handleServiceSelect(query *tg.CallbackQuery) error {
-	svcProvider := c.svcProvider
-
-	info, err := svcProvider.CallbackParsing().Parse(query)
+func (uch *userCallbackHandler) handleServiceSelect(query *tg.CallbackQuery) error {
+	info, err := uch.svcProvider.CallbackParsing().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	if len(info.Service) > 0 {
-		selected, err := c.cacheProvider.ServiceType().Toggle(info.ChatID, info.Service)
+		selected, err := uch.cacheProvider.ServiceType().Toggle(info.ChatID, info.Service)
 		if err != nil {
 			return utils.WrapError(err)
 		}
 		info.SelectedServices = selected
 	}
 
-	types, err := c.pgProvider.Service().GetServiceTypes()
+	types, err := uch.repoProvider.Service().GetServiceTypes()
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return svcProvider.Telegram().RequestServiceTypes(types, info)
+		return uch.tgProvider.User().RequestServiceTypes(types, info)
 	})
 }
 
-func (c *userCallbackHandler) handleServiceConfirm(query *tg.CallbackQuery) error {
-	svcProvider := c.svcProvider
-
-	info, err := svcProvider.CallbackParsing().Parse(query)
+func (uch *userCallbackHandler) handleServiceConfirm(query *tg.CallbackQuery) error {
+	info, err := uch.svcProvider.CallbackParsing().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	rims, err := c.pgProvider.Price().GetAllRimSizes()
+	rims, err := uch.repoProvider.Price().GetAllRimSizes()
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return svcProvider.Telegram().RequestRimRadius(rims, info)
+		return uch.tgProvider.User().RequestRimRadius(rims, info)
 	})
 }

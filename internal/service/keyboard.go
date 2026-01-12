@@ -7,15 +7,15 @@ import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
+	service3 "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/rules"
 )
 
 type keyboardService struct {
-	callbackBuilding i.CallbackBuildingService
-	dateTime         i.DateTimeService
+	callbackBuilding service3.CallbackBuildingService
+	dateTime         service3.DateTimeService
 }
 
 func (s *keyboardService) GreetingKeyboard() tg.InlineKeyboardMarkup {

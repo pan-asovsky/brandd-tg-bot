@@ -4,26 +4,37 @@ import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
+	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type commandHandler struct {
-	tgapi       *tg.BotAPI
-	svcProvider *service.Provider
+	tgProvider  p.TelegramProvider
+	svcProvider p.ServiceProvider
 }
 
-func NewCommandHandler(tgapi *tg.BotAPI, svcProvider *service.Provider) i.MessageHandler {
-	return &commandHandler{tgapi, svcProvider}
+func NewCommandHandler(tgProvider p.TelegramProvider, svcProvider p.ServiceProvider) i.MessageHandler {
+	return &commandHandler{tgProvider, svcProvider}
 }
 
-func (c *commandHandler) Handle(msg *tg.Message) error {
+func (ch *commandHandler) Handle(msg *tg.Message) error {
 	chatID := msg.Chat.ID
+	exists, role := ch.svcProvider.User().GetRole(chatID)
+
 	switch msg.Text {
 	case consts.Start:
-		return utils.WrapFunctionError(func() error {
-			return c.svcProvider.Telegram().SendStartMenu(chatID)
-		})
+		if !exists {
+			return utils.WrapFunctionError(func() error {
+				return ch.tgProvider.User().StartMenu(chatID)
+			})
+		}
+
+		switch role {
+		case "admin":
+			return utils.WrapFunctionError(func() error {
+				return ch.tgProvider.Admin().StartMenu(chatID)
+			})
+		}
 	}
 
 	return nil

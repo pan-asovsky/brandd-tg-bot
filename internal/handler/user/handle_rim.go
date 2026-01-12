@@ -6,15 +6,15 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *userCallbackHandler) handleRim(query *tg.CallbackQuery) error {
-	provider := c.svcProvider
+func (uch *userCallbackHandler) handleRim(query *tg.CallbackQuery) error {
+	provider := uch.svcProvider
 
 	info, err := provider.CallbackParsing().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err = c.cacheProvider.ServiceType().Clean(info.ChatID); err != nil {
+	if err = uch.cacheProvider.ServiceType().Clean(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
@@ -52,6 +52,6 @@ func (c *userCallbackHandler) handleRim(query *tg.CallbackQuery) error {
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return provider.Telegram().RequestPreConfirm(booking, info)
+		return uch.tgProvider.User().RequestPreConfirm(booking, info)
 	})
 }

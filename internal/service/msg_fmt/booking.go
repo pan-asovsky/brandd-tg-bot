@@ -1,4 +1,4 @@
-package message_formatting
+package msg_fmt
 
 import (
 	"database/sql"

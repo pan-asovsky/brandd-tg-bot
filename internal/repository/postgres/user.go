@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 )
@@ -11,8 +12,8 @@ type userRepo struct {
 	db *sql.DB
 }
 
-func (u *userRepo) GetActiveAdmins() ([]entity.User, error) {
-	rows, err := u.db.Query(GetActiveAdmins)
+func (ur *userRepo) GetActiveAdmins() ([]entity.User, error) {
+	rows, err := ur.db.Query(GetActiveAdmins)
 	if err != nil {
 		return nil, fmt.Errorf("[get_active_admins] query error: %w", err)
 	}
@@ -38,4 +39,15 @@ func (u *userRepo) GetActiveAdmins() ([]entity.User, error) {
 	}
 
 	return users, nil
+}
+
+func (ur *userRepo) GetRole(chatID int64) (bool, string) {
+	var userRole string
+	err := ur.db.QueryRow(GetUserRole, chatID).Scan(&userRole)
+	if err != nil {
+		log.Printf("[get_user_role] query error: %v", err)
+		return false, ""
+	}
+
+	return true, userRole
 }

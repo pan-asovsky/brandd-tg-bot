@@ -15,10 +15,13 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	h "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
 	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/service/msg_fmt"
+	tg_svc "github.com/pan-asovsky/brandd-tg-bot/internal/service/telegram"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -28,12 +31,14 @@ type App struct {
 	Cache    *redis.Client
 	Postgres *sql.DB
 
-	PgProvider      *pg.Provider
-	ServiceProvider *service.Provider
-	CacheProvider   *cache.Provider
+	RepoProvider     p.RepoProvider
+	ServiceProvider  p.ServiceProvider
+	CacheProvider    p.CacheProvider
+	MsgFmtProvider   p.MessageFormattingProvider
+	TelegramProvider p.TelegramProvider
 
 	TelegramBot   *tg.BotAPI
-	UpdateHandler ihandler.UpdateHandler
+	UpdateHandler h.UpdateHandler
 	httpServer    *http.Server
 }
 
@@ -76,12 +81,14 @@ func (a *App) Init() error {
 	a.TelegramBot = tgbot
 
 	// provider
-	a.PgProvider = pg.NewPgProvider(a.Postgres)
-	a.CacheProvider = cache.NewProvider(a.Cache, a.Config.CacheTTL)
-	a.ServiceProvider = service.NewProvider(a.PgProvider, a.CacheProvider, a.TelegramBot)
+	a.RepoProvider = pg.NewRepoProvider(a.Postgres)
+	a.CacheProvider = cache.NewCacheProvider(a.Cache, a.Config.CacheTTL)
+	a.ServiceProvider = service.NewServiceProvider(a.RepoProvider, a.CacheProvider)
+	a.MsgFmtProvider = msg_fmt.NewMessageFormattingProvider(a.ServiceProvider.DateTime())
+	a.TelegramProvider = tg_svc.NewTelegramProvider(a.TelegramBot, a.ServiceProvider, a.MsgFmtProvider)
 
 	// handler
-	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.PgProvider, a.CacheProvider)
+	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.RepoProvider, a.CacheProvider, a.TelegramProvider)
 
 	return nil
 }

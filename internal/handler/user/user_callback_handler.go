@@ -3,33 +3,34 @@ package user
 import (
 	"strings"
 
-	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
+	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
-	svc "github.com/pan-asovsky/brandd-tg-bot/internal/service"
+	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 )
 
 type userCallbackHandler struct {
-	tgapi         *tg.BotAPI
-	svcProvider   *svc.Provider
-	pgProvider    *pg.Provider
-	cacheProvider *cache.Provider
+	tgapi         *tgapi.BotAPI
+	svcProvider   p.ServiceProvider
+	repoProvider  p.RepoProvider
+	cacheProvider p.CacheProvider
+	tgProvider    p.TelegramProvider
 	handlers      map[string]CallbackFunc
 }
 
 func NewUserCallbackHandler(
-	tgapi *tg.BotAPI,
-	svcProvider *svc.Provider,
-	pgProvider *pg.Provider,
-	cacheProvider *cache.Provider,
+	tgapi *tgapi.BotAPI,
+	svcProvider p.ServiceProvider,
+	repoProvider p.RepoProvider,
+	cacheProvider p.CacheProvider,
+	tgProvider p.TelegramProvider,
 ) i.CallbackHandler {
 	uch := &userCallbackHandler{
 		tgapi:         tgapi,
 		svcProvider:   svcProvider,
-		pgProvider:    pgProvider,
+		repoProvider:  repoProvider,
 		cacheProvider: cacheProvider,
+		tgProvider:    tgProvider,
 		handlers:      map[string]CallbackFunc{},
 	}
 
@@ -47,14 +48,14 @@ func NewUserCallbackHandler(
 	return uch
 }
 
-type CallbackFunc func(cb *tg.CallbackQuery) error
+type CallbackFunc func(cb *tgapi.CallbackQuery) error
 
-func (c *userCallbackHandler) register(prefix string, handler CallbackFunc) {
-	c.handlers[prefix] = handler
+func (uch *userCallbackHandler) register(prefix string, handler CallbackFunc) {
+	uch.handlers[prefix] = handler
 }
 
-func (c *userCallbackHandler) Handle(query *tg.CallbackQuery) error {
-	for prefix, handler := range c.handlers {
+func (uch *userCallbackHandler) Handle(query *tgapi.CallbackQuery) error {
+	for prefix, handler := range uch.handlers {
 		if strings.HasPrefix(query.Data, prefix) {
 			return handler(query)
 		}

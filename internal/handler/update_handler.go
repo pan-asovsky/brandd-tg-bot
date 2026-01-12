@@ -6,54 +6,53 @@ import (
 	"strings"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/admin"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/user"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
+	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 )
 
 type updateHandler struct {
-	tgapi                                     *tg.BotAPI
-	message, command                          i.MessageHandler
-	userCallbackHandler, adminCallbackHandler i.CallbackHandler
+	tgapi                              *tg.BotAPI
+	userMessage, adminMessage, command i.MessageHandler
+	userCallback, adminCallback        i.CallbackHandler
 }
 
-func NewUpdateHandler(tgapi *tg.BotAPI, svcProvider *service.Provider, pgProvider *pg.Provider, cacheProvider *cache.Provider) i.UpdateHandler {
+func NewUpdateHandler(tgapi *tg.BotAPI, svcProvider p.ServiceProvider, repoProvider p.RepoProvider, cacheProvider p.CacheProvider, tgProvider p.TelegramProvider) i.UpdateHandler {
 	return &updateHandler{
-		tgapi:                tgapi,
-		command:              NewCommandHandler(tgapi, svcProvider),
-		userCallbackHandler:  user.NewUserCallbackHandler(tgapi, svcProvider, pgProvider, cacheProvider),
-		adminCallbackHandler: admin.NewAdminCallbackHandler(),
-		message:              NewMessageHandler(tgapi, svcProvider, cacheProvider),
+		tgapi:         tgapi,
+		command:       NewCommandHandler(tgProvider, svcProvider),
+		userCallback:  user.NewUserCallbackHandler(tgapi, svcProvider, repoProvider, cacheProvider, tgProvider),
+		adminCallback: admin.NewAdminCallbackHandler(),
+		userMessage:   user.NewUserMessageHandler(tgapi, svcProvider, cacheProvider, tgProvider),
+		adminMessage:  admin.NewAdminMessageHandler(svcProvider),
 	}
 }
 
-func (h *updateHandler) Handle(update *tg.Update) error {
+func (uh *updateHandler) Handle(update *tg.Update) error {
 	if update == nil {
 		return errors.New("update is nil")
 	}
 
 	if msg := update.Message; msg != nil && msg.IsCommand() {
-		return h.command.Handle(msg)
+		return uh.command.Handle(msg)
 	}
 
 	if callback := update.CallbackQuery; callback != nil {
-		return h.handleCallback(callback)
+		return uh.handleCallback(callback)
 	}
 
 	if msg := update.Message; msg != nil {
-		return h.message.Handle(msg)
+		return uh.userMessage.Handle(msg)
 	}
 
 	return nil
 }
 
-func (h *updateHandler) handleCallback(callback *tg.CallbackQuery) error {
-	h.cleanup(callback)
+func (uh *updateHandler) handleCallback(callback *tg.CallbackQuery) error {
+	uh.cleanup(callback)
 
 	log.Printf("[handle_callback] callback received: %s", callback.Data)
 
@@ -66,7 +65,7 @@ func (h *updateHandler) handleCallback(callback *tg.CallbackQuery) error {
 		}
 		callback.Data = cut
 		log.Printf("[handle_admin] data: %s", callback.Data)
-		return h.adminCallbackHandler.Handle(callback)
+		return uh.adminCallback.Handle(callback)
 
 	case strings.HasPrefix(data, usflow.UserPrefix):
 		cut, ok := strings.CutPrefix(data, usflow.UserPrefix)
@@ -74,7 +73,7 @@ func (h *updateHandler) handleCallback(callback *tg.CallbackQuery) error {
 			return errors.New("[handle_callback] invalid prefix: " + data)
 		}
 		callback.Data = cut
-		return h.userCallbackHandler.Handle(callback)
+		return uh.userCallback.Handle(callback)
 
 	default:
 		log.Printf("[handle_callback] unexpected prefix: %s", data)
@@ -83,22 +82,23 @@ func (h *updateHandler) handleCallback(callback *tg.CallbackQuery) error {
 	return nil
 }
 
-func (h *updateHandler) cleanup(cb *tg.CallbackQuery) {
-	h.answerCallback(cb.ID)
+// todo: вынести это в Telegram ?(Util)? Service
+func (uh *updateHandler) cleanup(cb *tg.CallbackQuery) {
+	uh.answerCallback(cb.ID)
 
 	if cb.Message != nil {
-		h.deletePreviousMsg(cb.Message.Chat.ID, cb.Message.MessageID)
+		uh.deletePreviousMsg(cb.Message.Chat.ID, cb.Message.MessageID)
 	}
 }
 
-func (h *updateHandler) answerCallback(callbackID string) {
-	if _, err := h.tgapi.Request(tg.NewCallback(callbackID, "")); err != nil {
+func (uh *updateHandler) answerCallback(callbackID string) {
+	if _, err := uh.tgapi.Request(tg.NewCallback(callbackID, "")); err != nil {
 		log.Printf("error answer to callback %s: %v", callbackID, err)
 	}
 }
 
-func (h *updateHandler) deletePreviousMsg(chatID int64, messageID int) {
-	if _, err := h.tgapi.Request(tg.NewDeleteMessage(chatID, messageID)); err != nil {
-		log.Printf("error delete previous message %d: %v", messageID, err)
+func (uh *updateHandler) deletePreviousMsg(chatID int64, messageID int) {
+	if _, err := uh.tgapi.Request(tg.NewDeleteMessage(chatID, messageID)); err != nil {
+		log.Printf("error delete previous userMessage, adminMessage %d: %v", messageID, err)
 	}
 }

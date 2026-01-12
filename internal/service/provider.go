@@ -1,81 +1,67 @@
 package service
 
 import (
-	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
+	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
-	msgfmt "github.com/pan-asovsky/brandd-tg-bot/internal/service/message_formatting"
-	"github.com/redis/go-redis/v9"
 )
 
-type Provider struct {
-	pgProvider    *pg.Provider
-	cacheProvider *cache.Provider
-	tgapi         *api.BotAPI
-	redisClient   *redis.Client
+type svcProvider struct {
+	repoProvider  p.RepoProvider
+	cacheProvider p.CacheProvider
 }
 
-func NewProvider(pgProvider *pg.Provider, cacheProvider *cache.Provider, tgapi *api.BotAPI) *Provider {
-	return &Provider{pgProvider: pgProvider, cacheProvider: cacheProvider, tgapi: tgapi}
+func NewServiceProvider(repoProvider p.RepoProvider, cacheProvider p.CacheProvider) p.ServiceProvider {
+	return &svcProvider{repoProvider: repoProvider, cacheProvider: cacheProvider}
 }
 
-func (p *Provider) Slot() i.SlotService {
-	return &slotService{p.pgProvider.Slot(), p.SlotLocking()}
+func (sp *svcProvider) Slot() i.SlotService {
+	return &slotService{sp.repoProvider.Slot(), sp.SlotLocking()}
 }
 
-func (p *Provider) Keyboard() i.KeyboardService {
-	return &keyboardService{callbackBuilding: p.CallbackBuilding(), dateTime: p.DateTime()}
+func (sp *svcProvider) Keyboard() i.KeyboardService {
+	return &keyboardService{callbackBuilding: sp.CallbackBuilding(), dateTime: sp.DateTime()}
 }
 
-func (p *Provider) Lock() i.LockService {
-	return &lockService{p.SlotLocking(), p.cacheProvider.SlotLock()}
+func (sp *svcProvider) Lock() i.LockService {
+	return &lockService{sp.SlotLocking(), sp.cacheProvider.SlotLock()}
 }
 
-func (p *Provider) Booking() i.BookingService {
-	return &bookingService{p.pgProvider, p.Slot(), p.Price()}
+func (sp *svcProvider) Booking() i.BookingService {
+	return &bookingService{sp.repoProvider, sp.Slot(), sp.Price()}
 }
 
-func (p *Provider) Telegram() i.TelegramService {
-	return &telegramService{p.Keyboard(), p.DateTime(), p.MessageFormattingProvider(), p.tgapi}
+func (sp *svcProvider) Price() i.PriceService {
+	return &priceService{sp.repoProvider}
 }
 
-func (p *Provider) Price() i.PriceService {
-	return &priceService{p.pgProvider}
+func (sp *svcProvider) Config() i.ConfigService {
+	return &configService{sp.repoProvider.Config()}
 }
 
-func (p *Provider) Config() i.ConfigService {
-	return &configService{p.pgProvider.Config()}
-}
-
-func (p *Provider) CallbackParsing() i.CallbackParsingService {
+func (sp *svcProvider) CallbackParsing() i.CallbackParsingService {
 	return &callbackParsingService{}
 }
 
-func (p *Provider) CallbackBuilding() i.CallbackBuildingService {
+func (sp *svcProvider) CallbackBuilding() i.CallbackBuildingService {
 	return &callbackBuildingService{}
 }
 
-func (p *Provider) MessageFormattingProvider() msgfmt.MessageFormattingProviderService {
-	return msgfmt.MessageFormattingProviderService{DateTime: p.DateTime()}
-}
-
-func (p *Provider) DateTime() i.DateTimeService {
+func (sp *svcProvider) DateTime() i.DateTimeService {
 	return &dateTimeService{}
 }
 
-func (p *Provider) User() i.UserService {
-	return &userService{p.pgProvider.User()}
+func (sp *svcProvider) User() i.UserService {
+	return &userService{sp.repoProvider.User()}
 }
 
-func (p *Provider) SlotLocking() i.SlotLocking {
-	slotLock, err := NewSlotLocking(p.cacheProvider.RedisClient(), p.cacheProvider.TTL())
+func (sp *svcProvider) SlotLocking() i.SlotLocking {
+	slotLock, err := NewSlotLocking(sp.cacheProvider.RedisClient(), sp.cacheProvider.TTL())
 	if err != nil {
 		panic(err)
 	}
 	return slotLock
 }
 
-func (p *Provider) Phone() i.PhoneService {
+func (sp *svcProvider) Phone() i.PhoneService {
 	return NewPhoneNormalizingService()
 }

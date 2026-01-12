@@ -3,37 +3,38 @@ package postgres
 import (
 	"database/sql"
 
+	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 )
 
-type Provider struct {
+type provider struct {
 	db *sql.DB
 }
 
-func NewPgProvider(db *sql.DB) *Provider {
-	return &Provider{db: db}
+func NewRepoProvider(db *sql.DB) p.RepoProvider {
+	return &provider{db: db}
 }
 
-func (p *Provider) Service() i.ServiceRepo {
+func (p *provider) Service() i.ServiceRepo {
 	return &serviceRepo{db: p.db}
 }
 
-func (p *Provider) Price() i.PriceRepo {
+func (p *provider) Price() i.PriceRepo {
 	return &priceRepo{db: p.db}
 }
 
-func (p *Provider) Config() i.ConfigRepo {
+func (p *provider) Config() i.ConfigRepo {
 	return &configRepo{db: p.db}
 }
 
-func (p *Provider) Slot() i.SlotRepo {
+func (p *provider) Slot() i.SlotRepo {
 	return &slotRepo{db: p.db}
 }
 
-func (p *Provider) Booking() i.BookingRepo {
+func (p *provider) Booking() i.BookingRepo {
 	return &bookingRepo{db: p.db}
 }
 
-func (p *Provider) User() i.UserRepo {
+func (p *provider) User() i.UserRepo {
 	return &userRepo{db: p.db}
 }

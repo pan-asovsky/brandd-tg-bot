@@ -9,7 +9,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *userCallbackHandler) handleBack(query *tg.CallbackQuery) error {
+func (uch *userCallbackHandler) handleBack(query *tg.CallbackQuery) error {
 	_, payload, ok := strings.Cut(query.Data, "::")
 	if !ok {
 		return errors.New("[handle_back] invalid callback" + query.Data)
@@ -18,7 +18,7 @@ func (c *userCallbackHandler) handleBack(query *tg.CallbackQuery) error {
 	switch payload {
 	case consts.Menu:
 		return utils.WrapFunctionError(func() error {
-			return c.svcProvider.Telegram().SendStartMenu(query.Message.Chat.ID)
+			return uch.tgProvider.User().StartMenu(query.Message.Chat.ID)
 		})
 	default:
 		return nil

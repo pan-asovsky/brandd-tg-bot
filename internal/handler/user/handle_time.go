@@ -5,28 +5,27 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
-func (c *userCallbackHandler) handleTime(query *tg.CallbackQuery) error {
-	provider := c.svcProvider
+func (uch *userCallbackHandler) handleTime(query *tg.CallbackQuery) error {
 
-	info, err := provider.CallbackParsing().Parse(query)
+	info, err := uch.svcProvider.CallbackParsing().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err = c.cacheProvider.ServiceType().Clean(info.ChatID); err != nil {
+	if err = uch.cacheProvider.ServiceType().Clean(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err := provider.Lock().Toggle(info); err != nil {
+	if err := uch.svcProvider.Lock().Toggle(info); err != nil {
 		return utils.WrapError(err)
 	}
 
-	types, err := c.pgProvider.Service().GetServiceTypes()
+	types, err := uch.repoProvider.Service().GetServiceTypes()
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return provider.Telegram().RequestServiceTypes(types, info)
+		return uch.tgProvider.User().RequestServiceTypes(types, info)
 	})
 }
