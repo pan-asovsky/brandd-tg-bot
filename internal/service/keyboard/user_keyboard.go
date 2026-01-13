@@ -77,7 +77,7 @@ func (uks *userKeyboardService) TimeKeyboard(ts []entity.Timeslot, info *model.U
 	var currentRow []tg.InlineKeyboardButton
 
 	for x, t := range ts {
-		time := fmt.Sprintf("%uks-%uks", t.Start, t.End)
+		time := fmt.Sprintf("%s-%s", t.Start, t.End)
 		info.Time = time
 		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(time, uks.callbackBuilding.Time(info)))
 

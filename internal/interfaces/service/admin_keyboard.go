@@ -5,5 +5,5 @@ import (
 )
 
 type AdminKeyboardService interface {
-	AdminGreetingKeyboard() tg.InlineKeyboardMarkup
+	ChoiceFlowKeyboard() tg.InlineKeyboardMarkup
 }

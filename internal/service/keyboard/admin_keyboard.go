@@ -15,7 +15,7 @@ func NewAdminKeyboardService(cbBuilding isvc.CallbackBuildingService, dateTime i
 	return &adminKeyboardService{callbackBuilding: cbBuilding, dateTime: dateTime}
 }
 
-func (aks *adminKeyboardService) AdminGreetingKeyboard() tg.InlineKeyboardMarkup {
+func (aks *adminKeyboardService) ChoiceFlowKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
 			tg.NewInlineKeyboardButtonData(admflow.StartUser, aks.callbackBuilding.StartUser()),

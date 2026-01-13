@@ -24,6 +24,6 @@ func (tas *adminTelegramService) StartMenu(chatID int64) error {
 
 func (tas *adminTelegramService) ChoiceMenu(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
-		return tas.tgCommon.SendKeyboardMessage(chatID, admflow.ChoiceContinueFlow, tas.kb.AdminGreetingKeyboard())
+		return tas.tgCommon.SendKeyboardMessage(chatID, admflow.ChoiceContinueFlow, tas.kb.ChoiceFlowKeyboard())
 	})
 }
