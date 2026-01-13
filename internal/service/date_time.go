@@ -4,10 +4,15 @@ import (
 	"fmt"
 	"time"
 
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type dateTimeService struct{}
+
+func NewDateTimeService() isvc.DateTimeService {
+	return &dateTimeService{}
+}
 
 func (c *dateTimeService) FormatDateTimeToShortView(d, t, inLayout string) (string, error) {
 	date, err := time.Parse(inLayout, d)

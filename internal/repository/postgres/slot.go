@@ -7,11 +7,16 @@ import (
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type slotRepo struct {
 	db *sql.DB
+}
+
+func NewSlotRepo(db *sql.DB) i.SlotRepo {
+	return &slotRepo{db: db}
 }
 
 func (s *slotRepo) IsTodayAvailable() bool {

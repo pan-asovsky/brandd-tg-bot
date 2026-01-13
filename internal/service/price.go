@@ -4,12 +4,17 @@ import (
 	"log"
 	"strings"
 
-	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type priceService struct {
-	repoProvider p.RepoProvider
+	priceRepo irepo.PriceRepo
+}
+
+func NewPriceService(priceRepo irepo.PriceRepo) isvc.PriceService {
+	return &priceService{priceRepo: priceRepo}
 }
 
 func (p *priceService) Calculate(service, radius string) (int64, error) {
@@ -17,7 +22,7 @@ func (p *priceService) Calculate(service, radius string) (int64, error) {
 
 	var totalPrice int64
 	for _, svc := range services {
-		price, err := p.repoProvider.Price().GetSetPrice(svc, radius)
+		price, err := p.priceRepo.GetSetPrice(svc, radius)
 		if err != nil {
 			return 0, utils.WrapError(err)
 		}

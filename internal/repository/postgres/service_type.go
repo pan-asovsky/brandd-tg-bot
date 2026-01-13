@@ -5,10 +5,15 @@ import (
 	"fmt"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 )
 
 type serviceRepo struct {
 	db *sql.DB
+}
+
+func NewServiceRepo(db *sql.DB) i.ServiceRepo {
+	return &serviceRepo{db: db}
 }
 
 func (sr *serviceRepo) GetServiceTypes() ([]entity.ServiceType, error) {

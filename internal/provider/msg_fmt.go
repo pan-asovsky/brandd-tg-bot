@@ -1,8 +1,9 @@
-package msg_fmt
+package provider
 
 import (
 	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/service/msg_fmt"
 )
 
 type messageFormattingProvider struct {
@@ -14,9 +15,9 @@ func NewMessageFormattingProvider(dateTimeSvc i.DateTimeService) p.MessageFormat
 }
 
 func (m *messageFormattingProvider) Booking() i.BookingMessageFormattingService {
-	return &bookingMessageFormattingService{dateTime: m.dateTimeSvc}
+	return msg_fmt.NewBookingMessageFormattingService(m.dateTimeSvc)
 }
 
 func (m *messageFormattingProvider) Admin() i.AdminMessageFormattingService {
-	return &adminMessageFormattingService{dateTime: m.dateTimeSvc}
+	return msg_fmt.NewAdminMessageFormattingService(m.dateTimeSvc)
 }

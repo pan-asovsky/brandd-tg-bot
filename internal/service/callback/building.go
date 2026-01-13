@@ -1,4 +1,4 @@
-package service
+package callback
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
@@ -18,6 +19,10 @@ const (
 )
 
 type callbackBuildingService struct{}
+
+func NewCallbackBuildingService() isvc.CallbackBuildingService {
+	return &callbackBuildingService{}
+}
 
 func (cbs *callbackBuildingService) Menu() string {
 	return usflow.UserPrefix + usflow.PrefixBack + usflow.Menu

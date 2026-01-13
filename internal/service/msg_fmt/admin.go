@@ -6,12 +6,16 @@ import (
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type adminMessageFormattingService struct {
-	dateTime i.DateTimeService
+	dateTime isvc.DateTimeService
+}
+
+func NewAdminMessageFormattingService(dateTime isvc.DateTimeService) isvc.AdminMessageFormattingService {
+	return &adminMessageFormattingService{dateTime: dateTime}
 }
 
 func (a *adminMessageFormattingService) NewBookingNotify(booking *entity.Booking) (string, error) {

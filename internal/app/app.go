@@ -18,10 +18,7 @@ import (
 	h "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
 	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
-	pg "github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/service/msg_fmt"
-	tg_svc "github.com/pan-asovsky/brandd-tg-bot/internal/service/telegram"
+	pg "github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -82,10 +79,10 @@ func (a *App) Init() error {
 
 	// provider
 	a.RepoProvider = pg.NewRepoProvider(a.Postgres)
-	a.CacheProvider = cache.NewCacheProvider(a.Cache, a.Config.CacheTTL)
-	a.ServiceProvider = service.NewServiceProvider(a.RepoProvider, a.CacheProvider)
-	a.MsgFmtProvider = msg_fmt.NewMessageFormattingProvider(a.ServiceProvider.DateTime())
-	a.TelegramProvider = tg_svc.NewTelegramProvider(a.TelegramBot, a.ServiceProvider, a.MsgFmtProvider)
+	a.CacheProvider = pg.NewCacheProvider(a.Cache, a.Config.CacheTTL)
+	a.ServiceProvider = pg.NewServiceProvider(a.RepoProvider, a.CacheProvider)
+	a.MsgFmtProvider = pg.NewMessageFormattingProvider(a.ServiceProvider.DateTime())
+	a.TelegramProvider = pg.NewTelegramProvider(a.TelegramBot, a.ServiceProvider, a.MsgFmtProvider)
 
 	// handler
 	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.RepoProvider, a.CacheProvider, a.TelegramProvider)

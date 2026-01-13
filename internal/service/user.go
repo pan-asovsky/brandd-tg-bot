@@ -2,11 +2,16 @@ package service
 
 import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 )
 
 type userService struct {
-	repo i.UserRepo
+	repo irepo.UserRepo
+}
+
+func NewUserService(userRepo irepo.UserRepo) isvc.UserService {
+	return &userService{repo: userRepo}
 }
 
 func (us *userService) GetActiveAdmins() []entity.User {

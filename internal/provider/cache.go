@@ -1,8 +1,9 @@
-package cache
+package provider
 
 import (
 	"time"
 
+	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
 	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/redis/go-redis/v9"
@@ -18,11 +19,11 @@ func NewCacheProvider(rc *redis.Client, cacheTTL time.Duration) p.CacheProvider 
 }
 
 func (p *cacheProvider) SlotLock() i.SlotLockCache {
-	return NewSlotLockCache(p.rc, p.cacheTTL)
+	return cache.NewSlotLockCache(p.rc, p.cacheTTL)
 }
 
 func (p *cacheProvider) ServiceType() i.ServiceTypeCache {
-	return NewServiceTypeCacheService(p.rc, p.cacheTTL)
+	return cache.NewServiceTypeCacheService(p.rc, p.cacheTTL)
 }
 
 func (p *cacheProvider) RedisClient() *redis.Client {

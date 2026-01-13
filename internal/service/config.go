@@ -1,12 +1,17 @@
 package service
 
 import (
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type configService struct {
-	configRepo i.ConfigRepo
+	configRepo irepo.ConfigRepo
+}
+
+func NewConfigService(configRepo irepo.ConfigRepo) isvc.ConfigService {
+	return &configService{configRepo}
 }
 
 func (c *configService) IsAutoConfirm() (bool, error) {

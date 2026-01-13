@@ -6,7 +6,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
-type KeyboardService interface {
+type UserKeyboardService interface {
 	GreetingKeyboard() tg.InlineKeyboardMarkup
 	DateKeyboard([]entity.AvailableBooking) tg.InlineKeyboardMarkup
 	ZoneKeyboard(zone entity.Zone, date string) tg.InlineKeyboardMarkup
@@ -19,7 +19,4 @@ type KeyboardService interface {
 	ExistsMyBookingsKeyboard() tg.InlineKeyboardMarkup
 	BackKeyboard() tg.InlineKeyboardMarkup
 	BookingCancellationKeyboard() tg.InlineKeyboardMarkup
-
-	// AdminGreetingKeyboard todo: split service to common, user and admin
-	AdminGreetingKeyboard() tg.InlineKeyboardMarkup
 }

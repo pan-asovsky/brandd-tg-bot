@@ -15,6 +15,10 @@ type lockService struct {
 	cache  icache.SlotLockCache
 }
 
+func NewLockService(locker isvc.SlotLocking, cache icache.SlotLockCache) isvc.LockService {
+	return &lockService{locker, cache}
+}
+
 func (ls *lockService) Toggle(info *model.UserSessionInfo) error {
 	newKey := ls.locker.FormatKey(info.Date, info.Time)
 

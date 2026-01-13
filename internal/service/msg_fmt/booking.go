@@ -7,12 +7,16 @@ import (
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type bookingMessageFormattingService struct {
-	dateTime i.DateTimeService
+	dateTime isvc.DateTimeService
+}
+
+func NewBookingMessageFormattingService(dateTime isvc.DateTimeService) isvc.BookingMessageFormattingService {
+	return &bookingMessageFormattingService{dateTime: dateTime}
 }
 
 func (b *bookingMessageFormattingService) Confirm(date, startTime string) string {

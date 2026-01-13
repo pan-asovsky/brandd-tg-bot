@@ -1,4 +1,4 @@
-package service
+package callback
 
 import (
 	"errors"
@@ -6,10 +6,15 @@ import (
 	"strings"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
 type callbackParsingService struct {
+}
+
+func NewCallbackParsingService() isvc.CallbackParsingService {
+	return &callbackParsingService{}
 }
 
 const (

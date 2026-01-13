@@ -8,13 +8,17 @@ import (
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
-	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type slotService struct {
 	slotRepo   irepo.SlotRepo
-	slotLocker icache.SlotLocking
+	slotLocker isvc.SlotLocking
+}
+
+func NewSlotService(slotRepo irepo.SlotRepo, slotLocker isvc.SlotLocking) isvc.SlotService {
+	return &slotService{slotRepo: slotRepo, slotLocker: slotLocker}
 }
 
 func (s *slotService) GetAvailableBookings() []entity.AvailableBooking {

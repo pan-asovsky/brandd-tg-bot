@@ -6,10 +6,15 @@ import (
 	"log"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 )
 
 type userRepo struct {
 	db *sql.DB
+}
+
+func NewUserRepo(db *sql.DB) i.UserRepo {
+	return &userRepo{db: db}
 }
 
 func (ur *userRepo) GetActiveAdmins() ([]entity.User, error) {
@@ -45,7 +50,7 @@ func (ur *userRepo) GetRole(chatID int64) (bool, string) {
 	var userRole string
 	err := ur.db.QueryRow(GetUserRole, chatID).Scan(&userRole)
 	if err != nil {
-		log.Printf("[get_user_role] query error: %v", err)
+		log.Printf("[get_user_role] user not exists: %d", chatID)
 		return false, ""
 	}
 

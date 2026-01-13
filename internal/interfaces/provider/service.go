@@ -4,7 +4,8 @@ import i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 
 type ServiceProvider interface {
 	Slot() i.SlotService
-	Keyboard() i.KeyboardService
+	UserKeyboard() i.UserKeyboardService
+	AdminKeyboard() i.AdminKeyboardService
 	Lock() i.LockService
 	Booking() i.BookingService
 	Price() i.PriceService

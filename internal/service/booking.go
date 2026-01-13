@@ -5,16 +5,20 @@ import (
 	"strings"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type bookingService struct {
-	repoProvider p.RepoProvider
-	slotService  i.SlotService
-	priceService i.PriceService
+	repoProvider iprovider.RepoProvider
+	slotService  isvc.SlotService
+	priceService isvc.PriceService
+}
+
+func NewBookingService(repoProvider iprovider.RepoProvider, slotService isvc.SlotService, priceService isvc.PriceService) isvc.BookingService {
+	return &bookingService{repoProvider, slotService, priceService}
 }
 
 func (b *bookingService) Create(info *model.UserSessionInfo) (*entity.Booking, error) {

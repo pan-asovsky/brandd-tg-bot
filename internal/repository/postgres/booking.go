@@ -7,11 +7,16 @@ import (
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
+	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type bookingRepo struct {
 	db *sql.DB
+}
+
+func NewBookingRepo(db *sql.DB) i.BookingRepo {
+	return &bookingRepo{db: db}
 }
 
 func (b *bookingRepo) FindActiveNotPending(chatID int64) (*entity.Booking, error) {

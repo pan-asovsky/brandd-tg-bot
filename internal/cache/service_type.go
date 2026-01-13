@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/rules"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 	"github.com/redis/go-redis/v9"
@@ -19,7 +19,7 @@ type serviceTypeCache struct {
 	ctx   context.Context
 }
 
-func NewServiceTypeCacheService(r *redis.Client, ttl time.Duration) i.ServiceTypeCache {
+func NewServiceTypeCacheService(r *redis.Client, ttl time.Duration) icache.ServiceTypeCache {
 	return &serviceTypeCache{
 		cache: r,
 		ttl:   ttl,
@@ -30,7 +30,6 @@ func NewServiceTypeCacheService(r *redis.Client, ttl time.Duration) i.ServiceTyp
 func (s *serviceTypeCache) Toggle(chatID int64, clickedService string) (map[string]bool, error) {
 	key := s.formatKey(chatID)
 
-	//log.Printf("[toggle_service] chatID: %d, clicked: %s", chatID, clickedService)
 	currentMap, err := s.cache.HGetAll(s.ctx, key).Result()
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, utils.WrapError(err)
