@@ -6,15 +6,15 @@ import (
 	"strings"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
-type callbackParsingService struct {
+type userCallbackParserService struct {
 }
 
-func NewCallbackParsingService() isvc.CallbackParsingService {
-	return &callbackParsingService{}
+func NewUserCallbackParserService() isvc.UserCallbackParserService {
+	return &userCallbackParserService{}
 }
 
 const (
@@ -25,7 +25,7 @@ const (
 	KeyRadius  = "R"
 )
 
-func (c *callbackParsingService) Parse(query *api.CallbackQuery) (*model.UserSessionInfo, error) {
+func (c *userCallbackParserService) Parse(query *api.CallbackQuery) (*model.UserSessionInfo, error) {
 	log.Printf("[parse_callback] callback: %s", query.Data)
 	_, payload, ok := strings.Cut(query.Data, "::")
 	if !ok {

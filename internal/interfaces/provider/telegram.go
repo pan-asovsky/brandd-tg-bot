@@ -1,11 +1,11 @@
 package provider
 
 import (
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
+	itelegram "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
 )
 
 type TelegramProvider interface {
-	Admin() i.TelegramAdminService
-	User() i.TelegramUserService
-	Common() i.TelegramCommonService
+	Admin() itelegram.TelegramAdminService
+	User() itelegram.TelegramUserService
+	Common() itelegram.TelegramCommonService
 }

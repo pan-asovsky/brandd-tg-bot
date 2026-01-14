@@ -5,33 +5,36 @@ import (
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 )
 
 type userCallbackHandler struct {
-	tgapi         *tgapi.BotAPI
-	svcProvider   p.ServiceProvider
-	repoProvider  p.RepoProvider
-	cacheProvider p.CacheProvider
-	tgProvider    p.TelegramProvider
-	handlers      map[string]CallbackFunc
+	botAPI           *tgapi.BotAPI
+	serviceProvider  iprovider.ServiceProvider
+	repoProvider     iprovider.RepoProvider
+	cacheProvider    iprovider.CacheProvider
+	telegramProvider iprovider.TelegramProvider
+	callbackProvider iprovider.CallbackProvider
+	handlers         map[string]CallbackFunc
 }
 
 func NewUserCallbackHandler(
-	tgapi *tgapi.BotAPI,
-	svcProvider p.ServiceProvider,
-	repoProvider p.RepoProvider,
-	cacheProvider p.CacheProvider,
-	tgProvider p.TelegramProvider,
-) i.CallbackHandler {
+	botAPI *tgapi.BotAPI,
+	serviceProvider iprovider.ServiceProvider,
+	repoProvider iprovider.RepoProvider,
+	cacheProvider iprovider.CacheProvider,
+	telegramProvider iprovider.TelegramProvider,
+	callbackProvider iprovider.CallbackProvider,
+) ihandler.CallbackHandler {
 	uch := &userCallbackHandler{
-		tgapi:         tgapi,
-		svcProvider:   svcProvider,
-		repoProvider:  repoProvider,
-		cacheProvider: cacheProvider,
-		tgProvider:    tgProvider,
-		handlers:      map[string]CallbackFunc{},
+		botAPI:           botAPI,
+		serviceProvider:  serviceProvider,
+		repoProvider:     repoProvider,
+		cacheProvider:    cacheProvider,
+		telegramProvider: telegramProvider,
+		callbackProvider: callbackProvider,
+		handlers:         map[string]CallbackFunc{},
 	}
 
 	uch.register(usflow.PrefixDate, uch.handleDate)

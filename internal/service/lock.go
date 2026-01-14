@@ -11,11 +11,11 @@ import (
 )
 
 type lockService struct {
-	locker isvc.SlotLocking
+	locker isvc.SlotLocker
 	cache  icache.SlotLockCache
 }
 
-func NewLockService(locker isvc.SlotLocking, cache icache.SlotLockCache) isvc.LockService {
+func NewLockService(locker isvc.SlotLocker, cache icache.SlotLockCache) isvc.LockService {
 	return &lockService{locker, cache}
 }
 

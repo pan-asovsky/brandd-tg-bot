@@ -5,18 +5,18 @@ import (
 	"time"
 
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
-func NewSlotService(todayAvailable bool) i.SlotService {
-	return &slotService{slotRepo: &mocks.SlotRepoMock{TodayAvailable: todayAvailable}, slotLocker: mocks.NewSlotLockingMock()}
+func NewSlotServiceMock(todayAvailable bool) isvc.SlotService {
+	return &slotService{slotRepo: &mocks.SlotRepoMock{TodayAvailable: todayAvailable}, slotLocker: mocks.NewSlotLockerMock()}
 }
 
 func TestGetAvailableBookings_TodayAvailable(t *testing.T) {
-	slotSvc := NewSlotService(true)
-	result := slotSvc.GetAvailableBookings()
+	slotSvc := NewSlotServiceMock(true)
+	result := slotSvc.GetAvailableDates()
 	assert.Len(t, result, 3)
 
 	now := time.Now()
@@ -32,8 +32,8 @@ func TestGetAvailableBookings_TodayAvailable(t *testing.T) {
 }
 
 func TestGetAvailableBookings_TodayNotAvailable(t *testing.T) {
-	slotSvc := NewSlotService(false)
-	result := slotSvc.GetAvailableBookings()
+	slotSvc := NewSlotServiceMock(false)
+	result := slotSvc.GetAvailableDates()
 	assert.Len(t, result, 2)
 
 	now := time.Now()

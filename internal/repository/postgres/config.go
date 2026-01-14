@@ -3,7 +3,7 @@ package postgres
 import (
 	"database/sql"
 
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -11,7 +11,7 @@ type configRepo struct {
 	db *sql.DB
 }
 
-func NewConfigRepo(db *sql.DB) i.ConfigRepo {
+func NewConfigRepo(db *sql.DB) irepo.ConfigRepo {
 	return &configRepo{db: db}
 }
 

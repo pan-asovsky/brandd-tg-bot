@@ -14,7 +14,7 @@ type adminMessageFormattingService struct {
 	dateTime isvc.DateTimeService
 }
 
-func NewAdminMessageFormattingService(dateTime isvc.DateTimeService) isvc.AdminMessageFormattingService {
+func NewAdminMessageFormattingService(dateTime isvc.DateTimeService) isvc.AdminMessageFormatterService {
 	return &adminMessageFormattingService{dateTime: dateTime}
 }
 

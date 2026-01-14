@@ -5,12 +5,13 @@ import (
 	"time"
 )
 
-type AvailableBooking struct {
+type AvailableDate struct {
 	Date  time.Time
 	Label string
 }
 type BookingStatus string
 
+// todo: statuses!
 const (
 	Pending      BookingStatus = "PENDING"
 	NotConfirmed BookingStatus = "NOT_CONFIRMED"

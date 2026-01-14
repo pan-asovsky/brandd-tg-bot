@@ -21,3 +21,7 @@ func (m *SlotRepoMock) FindByDateAndTime(date, time string) (*entity.Slot, error
 func (m *SlotRepoMock) MarkUnavailable(date, startTime string) error {
 	return nil
 }
+
+func (m *SlotRepoMock) FreeUp(date, startTime string) error {
+	return nil
+}

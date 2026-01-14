@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 )
 
 type phoneService struct {
@@ -13,7 +13,7 @@ type phoneService struct {
 	detectRegex    *regexp.Regexp
 }
 
-func NewPhoneNormalizingService() i.PhoneService {
+func NewPhoneNormalizingService() isvc.PhoneService {
 	return &phoneService{normalizeRegex: regexp.MustCompile(`\d`), detectRegex: regexp.MustCompile(`\D`)}
 }
 

@@ -89,6 +89,7 @@ func (tcs *commonTelegramService) SendKeyboardMessageHTMLMode(chatID int64, text
 
 func (tcs *commonTelegramService) SendRequestPhoneMessage(chatID int64, text string, kb tgapi.ReplyKeyboardMarkup) error {
 	msg := tgapi.NewMessage(chatID, text)
+	msg.ParseMode = tgapi.ModeHTML
 	msg.ReplyMarkup = kb
 
 	if _, err := tcs.botAPI.Send(msg); err != nil {

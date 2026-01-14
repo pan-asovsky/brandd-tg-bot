@@ -10,15 +10,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/bot"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
-	h "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
-	pg "github.com/pan-asovsky/brandd-tg-bot/internal/provider"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -28,14 +28,15 @@ type App struct {
 	Cache    *redis.Client
 	Postgres *sql.DB
 
-	RepoProvider     p.RepoProvider
-	ServiceProvider  p.ServiceProvider
-	CacheProvider    p.CacheProvider
-	MsgFmtProvider   p.MessageFormattingProvider
-	TelegramProvider p.TelegramProvider
+	RepoProvider     iprovider.RepoProvider
+	ServiceProvider  iprovider.ServiceProvider
+	CacheProvider    iprovider.CacheProvider
+	TelegramProvider iprovider.TelegramProvider
+	CallbackProvider iprovider.CallbackProvider
+	MsgFmtProvider   iprovider.MessageFormatterProvider
 
-	TelegramBot   *tg.BotAPI
-	UpdateHandler h.UpdateHandler
+	BotAPI        *tgapi.BotAPI
+	UpdateHandler ihandler.UpdateHandler
 	httpServer    *http.Server
 }
 
@@ -75,17 +76,18 @@ func (a *App) Init() error {
 	if err != nil {
 		return err
 	}
-	a.TelegramBot = tgbot
+	a.BotAPI = tgbot
 
 	// provider
-	a.RepoProvider = pg.NewRepoProvider(a.Postgres)
-	a.CacheProvider = pg.NewCacheProvider(a.Cache, a.Config.CacheTTL)
-	a.ServiceProvider = pg.NewServiceProvider(a.RepoProvider, a.CacheProvider)
-	a.MsgFmtProvider = pg.NewMessageFormattingProvider(a.ServiceProvider.DateTime())
-	a.TelegramProvider = pg.NewTelegramProvider(a.TelegramBot, a.ServiceProvider, a.MsgFmtProvider)
+	a.CallbackProvider = provider.NewCallbackProvider()
+	a.RepoProvider = provider.NewRepoProvider(a.Postgres)
+	a.CacheProvider = provider.NewCacheProvider(a.Cache, a.Config.CacheTTL)
+	a.ServiceProvider = provider.NewServiceProvider(a.RepoProvider, a.CacheProvider, a.CallbackProvider)
+	a.MsgFmtProvider = provider.NewMessageFormatterProvider(a.ServiceProvider.DateTime())
+	a.TelegramProvider = provider.NewTelegramProvider(a.BotAPI, a.ServiceProvider, a.MsgFmtProvider)
 
 	// handler
-	a.UpdateHandler = handler.NewUpdateHandler(a.TelegramBot, a.ServiceProvider, a.RepoProvider, a.CacheProvider, a.TelegramProvider)
+	a.UpdateHandler = handler.NewUpdateHandler(a.BotAPI, a.ServiceProvider, a.RepoProvider, a.CacheProvider, a.CallbackProvider, a.TelegramProvider)
 
 	return nil
 }
@@ -97,7 +99,7 @@ func (a *App) Run() error {
 	_ = router.SetTrustedProxies([]string{"127.0.0.1"})
 
 	router.POST(a.Config.WebhookPath, func(c *gin.Context) {
-		var update tg.Update
+		var update tgapi.Update
 		if err := c.ShouldBindJSON(&update); err != nil {
 			c.Status(400)
 			log.Printf("Invalid update payload: %v", err)

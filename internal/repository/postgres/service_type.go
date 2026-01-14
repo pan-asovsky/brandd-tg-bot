@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 )
 
 type serviceRepo struct {
 	db *sql.DB
 }
 
-func NewServiceRepo(db *sql.DB) i.ServiceRepo {
+func NewServiceRepo(db *sql.DB) irepo.ServiceRepo {
 	return &serviceRepo{db: db}
 }
 

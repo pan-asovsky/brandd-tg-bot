@@ -15,7 +15,7 @@ type bookingMessageFormattingService struct {
 	dateTime isvc.DateTimeService
 }
 
-func NewBookingMessageFormattingService(dateTime isvc.DateTimeService) isvc.BookingMessageFormattingService {
+func NewBookingMessageFormattingService(dateTime isvc.DateTimeService) isvc.BookingMessageFormatterService {
 	return &bookingMessageFormattingService{dateTime: dateTime}
 }
 

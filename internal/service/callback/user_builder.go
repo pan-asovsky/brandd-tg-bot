@@ -6,7 +6,7 @@ import (
 	"time"
 
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
@@ -18,44 +18,44 @@ const (
 	Rim     = "R~"
 )
 
-type callbackBuildingService struct{}
+type userCallbackBuilderService struct{}
 
-func NewCallbackBuildingService() isvc.CallbackBuildingService {
-	return &callbackBuildingService{}
+func NewUserCallbackBuilderService() icallback.UserCallbackBuilderService {
+	return &userCallbackBuilderService{}
 }
 
-func (cbs *callbackBuildingService) Menu() string {
+func (ucbs *userCallbackBuilderService) Menu() string {
 	return usflow.UserPrefix + usflow.PrefixBack + usflow.Menu
 }
 
-func (cbs *callbackBuildingService) NewBooking() string {
+func (ucbs *userCallbackBuilderService) NewBooking() string {
 	return usflow.NewBookingCbk
 }
 
-func (cbs *callbackBuildingService) MyBookings() string {
+func (ucbs *userCallbackBuilderService) MyBookings() string {
 	return usflow.MyBookingsCbk
 }
 
-func (cbs *callbackBuildingService) PreCancelBooking() string {
+func (ucbs *userCallbackBuilderService) PreCancelBooking() string {
 	return usflow.PreCancelBookingCbk
 }
 
-func (cbs *callbackBuildingService) CancelBooking() string {
+func (ucbs *userCallbackBuilderService) CancelBooking() string {
 	return usflow.CancelBookingCbk
 }
 
-func (cbs *callbackBuildingService) NoCancelBooking() string {
+func (ucbs *userCallbackBuilderService) NoCancelBooking() string {
 	return usflow.NoCancelBookingCbk
 }
 
-func (cbs *callbackBuildingService) Date(date time.Time) string {
+func (ucbs *userCallbackBuilderService) Date(date time.Time) string {
 	return fmt.Sprintf("%s%s%s",
 		usflow.UserPrefix+usflow.PrefixDate,
 		Date, encodeDate(date.Format("2006-01-02")),
 	)
 }
 
-func (cbs *callbackBuildingService) Zone(date, zone string) string {
+func (ucbs *userCallbackBuilderService) Zone(date, zone string) string {
 	return fmt.Sprintf("%s%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixZone,
 		Date, encodeDate(date),
@@ -63,7 +63,7 @@ func (cbs *callbackBuildingService) Zone(date, zone string) string {
 	)
 }
 
-func (cbs *callbackBuildingService) Time(info *model.UserSessionInfo) string {
+func (ucbs *userCallbackBuilderService) Time(info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixTime,
 		Date, encodeDate(info.Date),
@@ -72,7 +72,7 @@ func (cbs *callbackBuildingService) Time(info *model.UserSessionInfo) string {
 	)
 }
 
-func (cbs *callbackBuildingService) ServiceSelection(service string, info *model.UserSessionInfo) string {
+func (ucbs *userCallbackBuilderService) ServiceSelection(service string, info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixServiceSelect,
 		Date, encodeDate(info.Date),
@@ -82,7 +82,7 @@ func (cbs *callbackBuildingService) ServiceSelection(service string, info *model
 	)
 }
 
-func (cbs *callbackBuildingService) ServiceConfirmation(info *model.UserSessionInfo) string {
+func (ucbs *userCallbackBuilderService) ServiceConfirmation(info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixServiceConfirm,
 		Date, encodeDate(info.Date),
@@ -92,7 +92,7 @@ func (cbs *callbackBuildingService) ServiceConfirmation(info *model.UserSessionI
 	)
 }
 
-func (cbs *callbackBuildingService) Rim(info *model.UserSessionInfo) string {
+func (ucbs *userCallbackBuilderService) Rim(info *model.UserSessionInfo) string {
 	return fmt.Sprintf("%s%s%s|%s%s|%s%s|%s%s|%s%s",
 		usflow.UserPrefix+usflow.PrefixRim,
 		Date, encodeDate(info.Date),
@@ -101,14 +101,6 @@ func (cbs *callbackBuildingService) Rim(info *model.UserSessionInfo) string {
 		Service, info.Service,
 		Rim, info.RimRadius,
 	)
-}
-
-func (cbs *callbackBuildingService) StartAdmin() string {
-	return "FLOW::ADMIN"
-}
-
-func (cbs *callbackBuildingService) StartUser() string {
-	return "FLOW::USER"
 }
 
 func encodeDate(date string) string {

@@ -7,7 +7,7 @@ import (
 
 func (uch *userCallbackHandler) handleTime(query *tg.CallbackQuery) error {
 
-	info, err := uch.svcProvider.CallbackParsing().Parse(query)
+	info, err := uch.callbackProvider.UserCallbackParser().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -16,7 +16,7 @@ func (uch *userCallbackHandler) handleTime(query *tg.CallbackQuery) error {
 		return utils.WrapError(err)
 	}
 
-	if err := uch.svcProvider.Lock().Toggle(info); err != nil {
+	if err := uch.serviceProvider.Lock().Toggle(info); err != nil {
 		return utils.WrapError(err)
 	}
 
@@ -26,6 +26,6 @@ func (uch *userCallbackHandler) handleTime(query *tg.CallbackQuery) error {
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.tgProvider.User().RequestServiceTypes(types, info)
+		return uch.telegramProvider.User().RequestServiceTypes(types, info)
 	})
 }

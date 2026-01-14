@@ -1,12 +1,12 @@
 package provider
 
-import i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+import irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 
 type RepoProvider interface {
-	Price() i.PriceRepo
-	Config() i.ConfigRepo
-	Slot() i.SlotRepo
-	Booking() i.BookingRepo
-	User() i.UserRepo
-	Service() i.ServiceRepo
+	Price() irepo.PriceRepo
+	Config() irepo.ConfigRepo
+	Slot() irepo.SlotRepo
+	Booking() irepo.BookingRepo
+	User() irepo.UserRepo
+	Service() irepo.ServiceRepo
 }

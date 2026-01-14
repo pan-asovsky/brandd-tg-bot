@@ -2,7 +2,7 @@ package service
 
 import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 
-type BookingMessageFormattingService interface {
+type BookingMessageFormatterService interface {
 	Confirm(date, startTime string) string
 	PreConfirm(booking *entity.Booking) (string, error)
 	My(booking *entity.Booking) (string, error)

@@ -6,7 +6,7 @@ import (
 )
 
 func (uch *userCallbackHandler) handleServiceSelect(query *tg.CallbackQuery) error {
-	info, err := uch.svcProvider.CallbackParsing().Parse(query)
+	info, err := uch.callbackProvider.UserCallbackParser().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -25,12 +25,12 @@ func (uch *userCallbackHandler) handleServiceSelect(query *tg.CallbackQuery) err
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.tgProvider.User().RequestServiceTypes(types, info)
+		return uch.telegramProvider.User().RequestServiceTypes(types, info)
 	})
 }
 
 func (uch *userCallbackHandler) handleServiceConfirm(query *tg.CallbackQuery) error {
-	info, err := uch.svcProvider.CallbackParsing().Parse(query)
+	info, err := uch.callbackProvider.UserCallbackParser().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -41,6 +41,6 @@ func (uch *userCallbackHandler) handleServiceConfirm(query *tg.CallbackQuery) er
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.tgProvider.User().RequestRimRadius(rims, info)
+		return uch.telegramProvider.User().RequestRimRadius(rims, info)
 	})
 }

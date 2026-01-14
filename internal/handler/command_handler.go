@@ -1,23 +1,23 @@
 package handler
 
 import (
-	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type commandHandler struct {
-	tgProvider  p.TelegramProvider
-	svcProvider p.ServiceProvider
+	tgProvider  iprovider.TelegramProvider
+	svcProvider iprovider.ServiceProvider
 }
 
-func NewCommandHandler(tgProvider p.TelegramProvider, svcProvider p.ServiceProvider) i.MessageHandler {
+func NewCommandHandler(tgProvider iprovider.TelegramProvider, svcProvider iprovider.ServiceProvider) ihandler.MessageHandler {
 	return &commandHandler{tgProvider, svcProvider}
 }
 
-func (ch *commandHandler) Handle(msg *tg.Message) error {
+func (ch *commandHandler) Handle(msg *tgapi.Message) error {
 	chatID := msg.Chat.ID
 	exists, role := ch.svcProvider.User().GetRole(chatID)
 

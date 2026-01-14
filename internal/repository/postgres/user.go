@@ -6,14 +6,14 @@ import (
 	"log"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 )
 
 type userRepo struct {
 	db *sql.DB
 }
 
-func NewUserRepo(db *sql.DB) i.UserRepo {
+func NewUserRepo(db *sql.DB) irepo.UserRepo {
 	return &userRepo{db: db}
 }
 

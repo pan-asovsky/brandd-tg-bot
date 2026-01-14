@@ -6,7 +6,7 @@ import (
 )
 
 type TelegramUserService interface {
-	RequestDate(bookings []entity.AvailableBooking, info *model.UserSessionInfo) error
+	RequestDate(bookings []entity.AvailableDate, info *model.UserSessionInfo) error
 	RequestZone(zone entity.Zone, info *model.UserSessionInfo) error
 	RequestTime(timeslots []entity.Timeslot, info *model.UserSessionInfo) error
 	RequestServiceTypes(types []entity.ServiceType, info *model.UserSessionInfo) error

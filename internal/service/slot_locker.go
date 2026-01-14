@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/redis/go-redis/v9"
 )
 
-type slotLocking struct {
+type slotLockerService struct {
 	rc        *redis.Client
 	ttl       time.Duration
 	lockSha   string
@@ -20,7 +20,7 @@ type slotLocking struct {
 	ctx       context.Context
 }
 
-func NewSlotLocking(rc *redis.Client, ttl time.Duration) (i.SlotLocking, error) {
+func NewSlotLockerService(rc *redis.Client, ttl time.Duration) (isvc.SlotLocker, error) {
 	lock, err := os.ReadFile("/app/script/lock.lua")
 	if err != nil {
 		return nil, fmt.Errorf("[slot_locker] failed to read lock.lua: %w", err)
@@ -40,7 +40,7 @@ func NewSlotLocking(rc *redis.Client, ttl time.Duration) (i.SlotLocking, error) 
 		return nil, fmt.Errorf("[slot_locker] failed load unlock.lua: %w", err)
 	}
 
-	return &slotLocking{
+	return &slotLockerService{
 		rc:        rc,
 		ttl:       ttl,
 		lockSha:   lockSha,
@@ -49,7 +49,7 @@ func NewSlotLocking(rc *redis.Client, ttl time.Duration) (i.SlotLocking, error) 
 	}, nil
 }
 
-func (sl *slotLocking) Lock(date, time string) (uid string, ok bool, err error) {
+func (sl *slotLockerService) Lock(date, time string) (uid string, ok bool, err error) {
 	key := sl.FormatKey(date, time)
 	u := uuid.NewString()
 
@@ -61,7 +61,7 @@ func (sl *slotLocking) Lock(date, time string) (uid string, ok bool, err error) 
 	return u, res.(int64) == 1, nil
 }
 
-func (sl *slotLocking) Unlock(key, u string) error {
+func (sl *slotLockerService) Unlock(key, u string) error {
 	res, err := sl.rc.EvalSha(sl.ctx, sl.unlockSha, []string{key}, u).Result()
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (sl *slotLocking) Unlock(key, u string) error {
 	return nil
 }
 
-func (sl *slotLocking) IsLocked(date, time string) (bool, error) {
+func (sl *slotLockerService) IsLocked(date, time string) (bool, error) {
 	key := sl.FormatKey(date, time)
 	val, err := sl.rc.Get(sl.ctx, key).Result()
 	if errors.Is(err, redis.Nil) {
@@ -84,12 +84,12 @@ func (sl *slotLocking) IsLocked(date, time string) (bool, error) {
 	return val != "", nil
 }
 
-func (sl *slotLocking) RefreshTTL(key string) error {
+func (sl *slotLockerService) RefreshTTL(key string) error {
 	_, err := sl.rc.PExpire(sl.ctx, key, sl.ttl).Result()
 	return err
 }
 
-func (sl *slotLocking) AreLocked(keys ...string) (map[string]bool, error) {
+func (sl *slotLockerService) AreLocked(keys ...string) (map[string]bool, error) {
 	res, err := sl.rc.MGet(sl.ctx, keys...).Result()
 	if err != nil {
 		return nil, err
@@ -101,6 +101,6 @@ func (sl *slotLocking) AreLocked(keys ...string) (map[string]bool, error) {
 	return status, nil
 }
 
-func (sl *slotLocking) FormatKey(date, time string) string {
+func (sl *slotLockerService) FormatKey(date, time string) string {
 	return fmt.Sprintf("s_lock:%s_%s", date, time)
 }

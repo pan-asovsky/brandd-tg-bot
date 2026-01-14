@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"log"
 	"strings"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
@@ -12,16 +13,22 @@ import (
 )
 
 type bookingService struct {
-	repoProvider iprovider.RepoProvider
-	slotService  isvc.SlotService
-	priceService isvc.PriceService
+	repoProvider    iprovider.RepoProvider
+	slotService     isvc.SlotService
+	priceService    isvc.PriceService
+	dateTimeService isvc.DateTimeService
 }
 
-func NewBookingService(repoProvider iprovider.RepoProvider, slotService isvc.SlotService, priceService isvc.PriceService) isvc.BookingService {
-	return &bookingService{repoProvider, slotService, priceService}
+func NewBookingService(
+	repoProvider iprovider.RepoProvider,
+	slotService isvc.SlotService,
+	priceService isvc.PriceService,
+	dateTimeService isvc.DateTimeService,
+) isvc.BookingService {
+	return &bookingService{repoProvider: repoProvider, slotService: slotService, priceService: priceService, dateTimeService: dateTimeService}
 }
 
-func (b *bookingService) Create(info *model.UserSessionInfo) (*entity.Booking, error) {
+func (bs *bookingService) Create(info *model.UserSessionInfo) (*entity.Booking, error) {
 	booking := &entity.Booking{
 		ChatID:     info.ChatID,
 		Date:       info.Date,
@@ -31,76 +38,86 @@ func (b *bookingService) Create(info *model.UserSessionInfo) (*entity.Booking, e
 		Status:     entity.Pending,
 	}
 
-	//todo: parse func!!!
-	start, _ := b.parseTime(info.Time)
+	start, _ := bs.dateTimeService.ParseToStartEndTime(info.Time)
 	booking.Time = start
 
-	return b.repoProvider.Booking().Save(booking)
+	return bs.repoProvider.Booking().Save(booking)
 }
 
-func (b *bookingService) Confirm(chatID int64) error {
-	return b.repoProvider.Booking().Confirm(chatID)
+func (bs *bookingService) Confirm(chatID int64) error {
+	return bs.repoProvider.Booking().Confirm(chatID)
 }
 
-func (b *bookingService) AutoConfirm(chatID int64) error {
-	return b.repoProvider.Booking().AutoConfirm(chatID)
+func (bs *bookingService) AutoConfirm(chatID int64) error {
+	return bs.repoProvider.Booking().AutoConfirm(chatID)
 }
 
-func (b *bookingService) SetPhone(phone string, chatID int64) error {
-	return b.repoProvider.Booking().SetPhone(phone, chatID)
+func (bs *bookingService) SetPhone(phone string, chatID int64) error {
+	return bs.repoProvider.Booking().SetPhone(phone, chatID)
 }
 
-func (b *bookingService) FindActiveNotPending(chatID int64) (*entity.Booking, error) {
-	return b.repoProvider.Booking().FindActiveNotPending(chatID)
+func (bs *bookingService) FindActiveNotPending(chatID int64) (*entity.Booking, error) {
+	return bs.repoProvider.Booking().FindActiveNotPending(chatID)
 }
 
-func (b *bookingService) FindPending(chatID int64) (*entity.Booking, error) {
-	return b.repoProvider.Booking().FindPending(chatID)
+func (bs *bookingService) FindPending(chatID int64) (*entity.Booking, error) {
+	return bs.repoProvider.Booking().FindPending(chatID)
 }
 
-func (b *bookingService) ExistsByChatID(chatID int64) bool {
-	return b.repoProvider.Booking().Exists(chatID)
+func (bs *bookingService) CancelOldIfExists(chatID int64) error {
+	oldBooking, err := bs.FindPending(chatID)
+	if err == nil && oldBooking != nil {
+		log.Printf("[cancel_old_if_exists] cancelled for chatID: %d", chatID)
+		if err = bs.Cancel(chatID); err != nil {
+			return utils.WrapError(err)
+		}
+	}
+	return nil
 }
 
-func (b *bookingService) UpdateStatus(chatID int64, status entity.BookingStatus) error {
+func (bs *bookingService) ExistsByChatID(chatID int64) bool {
+	return bs.repoProvider.Booking().Exists(chatID)
+}
+
+func (bs *bookingService) UpdateStatus(chatID int64, status entity.BookingStatus) error {
 	return utils.WrapFunctionError(func() error {
-		return b.repoProvider.Booking().UpdateStatus(chatID, status)
+		return bs.repoProvider.Booking().UpdateStatus(chatID, status)
 	})
 }
 
-func (b *bookingService) UpdateRimRadius(chatID int64, rimRadius string) error {
+func (bs *bookingService) UpdateRimRadius(chatID int64, rimRadius string) error {
 	return utils.WrapFunctionError(func() error {
-		return b.repoProvider.Booking().UpdateRimRadius(chatID, rimRadius)
+		return bs.repoProvider.Booking().UpdateRimRadius(chatID, rimRadius)
 	})
 }
 
-func (b *bookingService) UpdateService(chatID int64, service string) error {
+func (bs *bookingService) UpdateService(chatID int64, service string) error {
 	return utils.WrapFunctionError(func() error {
-		return b.repoProvider.Booking().UpdateService(chatID, service)
+		return bs.repoProvider.Booking().UpdateService(chatID, service)
 	})
 }
 
-func (b *bookingService) RecalculatePrice(chatID int64) error {
-	booking, err := b.FindPending(chatID)
+func (bs *bookingService) RecalculatePrice(chatID int64) error {
+	booking, err := bs.FindPending(chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	newPrice, err := b.priceService.Calculate(booking.Service, booking.RimRadius)
+	newPrice, err := bs.priceService.Calculate(booking.Service, booking.RimRadius)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return b.repoProvider.Booking().UpdatePrice(chatID, newPrice)
+		return bs.repoProvider.Booking().UpdatePrice(chatID, newPrice)
 	})
 }
 
-func (b *bookingService) Cancel(chatID int64) error {
-	return b.repoProvider.Booking().Cancel(chatID)
+func (bs *bookingService) Cancel(chatID int64) error {
+	return bs.repoProvider.Booking().Cancel(chatID)
 }
 
-func (b *bookingService) parseTime(time string) (start, end string) {
+func (bs *bookingService) parseToStartEndTime(time string) (start, end string) {
 	split := strings.Split(time, "-")
 	start = split[0]
 	end = split[1]

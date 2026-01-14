@@ -7,9 +7,9 @@ import (
 )
 
 func (uch *userCallbackHandler) handleRim(query *tg.CallbackQuery) error {
-	provider := uch.svcProvider
+	provider := uch.serviceProvider
 
-	info, err := provider.CallbackParsing().Parse(query)
+	info, err := uch.callbackProvider.UserCallbackParser().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -52,6 +52,6 @@ func (uch *userCallbackHandler) handleRim(query *tg.CallbackQuery) error {
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.tgProvider.User().RequestPreConfirm(booking, info)
+		return uch.telegramProvider.User().RequestPreConfirm(booking, info)
 	})
 }

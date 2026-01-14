@@ -14,20 +14,20 @@ import (
 type userTelegramService struct {
 	kb             isvc.UserKeyboardService
 	dateTime       isvc.DateTimeService
-	msgFmtProvider iprovider.MessageFormattingProvider
+	msgFmtProvider iprovider.MessageFormatterProvider
 	tgCommon       itg.TelegramCommonService
 }
 
 func NewTelegramUserService(
 	kb isvc.UserKeyboardService,
 	dateTime isvc.DateTimeService,
-	msgFmtProvider iprovider.MessageFormattingProvider,
+	msgFmtProvider iprovider.MessageFormatterProvider,
 	tgCommon itg.TelegramCommonService,
 ) itg.TelegramUserService {
 	return &userTelegramService{kb: kb, dateTime: dateTime, msgFmtProvider: msgFmtProvider, tgCommon: tgCommon}
 }
 
-func (tcs *userTelegramService) RequestDate(bookings []entity.AvailableBooking, info *model.UserSessionInfo) error {
+func (tcs *userTelegramService) RequestDate(bookings []entity.AvailableDate, info *model.UserSessionInfo) error {
 	kb := tcs.kb.DateKeyboard(bookings)
 	return utils.WrapFunctionError(func() error {
 		return tcs.tgCommon.SendKeyboardMessage(info.ChatID, usflow.DateMsg, kb)

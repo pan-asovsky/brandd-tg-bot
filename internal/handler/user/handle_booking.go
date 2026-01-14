@@ -36,56 +36,60 @@ func (uch *userCallbackHandler) handleBooking(query *tg.CallbackQuery) error {
 func (uch *userCallbackHandler) handleNew(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
 
-	booking, err := uch.svcProvider.Booking().FindActiveNotPending(info.ChatID)
-	if booking != nil && err == nil {
-		return uch.tgProvider.User().SendBookingRestrictionMessage(info.ChatID, booking)
+	if err := uch.serviceProvider.Booking().CancelOldIfExists(q.Message.Chat.ID); err != nil {
+		return utils.WrapError(err)
 	}
 
-	bookings := uch.svcProvider.Slot().GetAvailableBookings()
+	booking, err := uch.serviceProvider.Booking().FindActiveNotPending(info.ChatID)
+	if booking != nil && err == nil {
+		return uch.telegramProvider.User().SendBookingRestrictionMessage(info.ChatID, booking)
+	}
+
+	bookings := uch.serviceProvider.Slot().GetAvailableDates()
 	return utils.WrapFunctionError(func() error {
-		return uch.tgProvider.User().RequestDate(bookings, info)
+		return uch.telegramProvider.User().RequestDate(bookings, info)
 	})
 }
 
 func (uch *userCallbackHandler) handleMy(q *tg.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return uch.tgProvider.User().SendMyBookingsMessage(q.Message.Chat.ID, func() (*entity.Booking, error) {
-			return uch.svcProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
+		return uch.telegramProvider.User().SendMyBookingsMessage(q.Message.Chat.ID, func() (*entity.Booking, error) {
+			return uch.serviceProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
 		})
 	})
 }
 
 func (uch *userCallbackHandler) handlePreCancel(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
-	booking, err := uch.svcProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
+	booking, err := uch.serviceProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.tgProvider.User().SendPreCancelBookingMessage(info.ChatID, booking.Date, booking.Time)
+		return uch.telegramProvider.User().SendPreCancelBookingMessage(info.ChatID, booking.Date, booking.Time)
 	})
 }
 
 func (uch *userCallbackHandler) handleCancel(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
 
-	booking, err := uch.svcProvider.Booking().FindActiveNotPending(info.ChatID)
+	booking, err := uch.serviceProvider.Booking().FindActiveNotPending(info.ChatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	err = uch.svcProvider.Slot().FreeUp(booking.Date, booking.Time)
+	err = uch.serviceProvider.Slot().FreeUp(booking.Date, booking.Time)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err = uch.svcProvider.Booking().Cancel(info.ChatID); err != nil {
+	if err = uch.serviceProvider.Booking().Cancel(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.tgProvider.User().SendCancellationMessage(info.ChatID)
+		return uch.telegramProvider.User().SendCancellationMessage(info.ChatID)
 	})
 }
 
@@ -93,6 +97,6 @@ func (uch *userCallbackHandler) handleNoCancel(query *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: query.Message.Chat.ID}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.tgProvider.User().SendCancelDenyMessage(info.ChatID)
+		return uch.telegramProvider.User().SendCancelDenyMessage(info.ChatID)
 	})
 }

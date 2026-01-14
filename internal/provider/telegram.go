@@ -10,10 +10,10 @@ import (
 type telegramProvider struct {
 	botAPI         *tgapi.BotAPI
 	svcProvider    iprovider.ServiceProvider
-	msgFmtProvider iprovider.MessageFormattingProvider
+	msgFmtProvider iprovider.MessageFormatterProvider
 }
 
-func NewTelegramProvider(botAPI *tgapi.BotAPI, svcProvider iprovider.ServiceProvider, msgFmtProvider iprovider.MessageFormattingProvider) iprovider.TelegramProvider {
+func NewTelegramProvider(botAPI *tgapi.BotAPI, svcProvider iprovider.ServiceProvider, msgFmtProvider iprovider.MessageFormatterProvider) iprovider.TelegramProvider {
 	return &telegramProvider{botAPI: botAPI, svcProvider: svcProvider, msgFmtProvider: msgFmtProvider}
 }
 

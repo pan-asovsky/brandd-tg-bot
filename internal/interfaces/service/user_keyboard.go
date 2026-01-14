@@ -8,7 +8,7 @@ import (
 
 type UserKeyboardService interface {
 	GreetingKeyboard() tg.InlineKeyboardMarkup
-	DateKeyboard([]entity.AvailableBooking) tg.InlineKeyboardMarkup
+	DateKeyboard([]entity.AvailableDate) tg.InlineKeyboardMarkup
 	ZoneKeyboard(zone entity.Zone, date string) tg.InlineKeyboardMarkup
 	TimeKeyboard(ts []entity.Timeslot, info *model.UserSessionInfo) tg.InlineKeyboardMarkup
 	ServiceKeyboard(types []entity.ServiceType, info *model.UserSessionInfo) tg.InlineKeyboardMarkup

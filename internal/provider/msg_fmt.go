@@ -1,23 +1,23 @@
 package provider
 
 import (
-	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service/msg_fmt"
 )
 
-type messageFormattingProvider struct {
-	dateTimeSvc i.DateTimeService
+type messageFormatterProvider struct {
+	dateTimeSvc isvc.DateTimeService
 }
 
-func NewMessageFormattingProvider(dateTimeSvc i.DateTimeService) p.MessageFormattingProvider {
-	return &messageFormattingProvider{dateTimeSvc: dateTimeSvc}
+func NewMessageFormatterProvider(dateTimeSvc isvc.DateTimeService) iprovider.MessageFormatterProvider {
+	return &messageFormatterProvider{dateTimeSvc: dateTimeSvc}
 }
 
-func (m *messageFormattingProvider) Booking() i.BookingMessageFormattingService {
+func (m *messageFormatterProvider) Booking() isvc.BookingMessageFormatterService {
 	return msg_fmt.NewBookingMessageFormattingService(m.dateTimeSvc)
 }
 
-func (m *messageFormattingProvider) Admin() i.AdminMessageFormattingService {
+func (m *messageFormatterProvider) Admin() isvc.AdminMessageFormatterService {
 	return msg_fmt.NewAdminMessageFormattingService(m.dateTimeSvc)
 }

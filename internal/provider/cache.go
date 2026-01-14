@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
-	p "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -14,15 +14,15 @@ type cacheProvider struct {
 	cacheTTL time.Duration
 }
 
-func NewCacheProvider(rc *redis.Client, cacheTTL time.Duration) p.CacheProvider {
+func NewCacheProvider(rc *redis.Client, cacheTTL time.Duration) iprovider.CacheProvider {
 	return &cacheProvider{rc: rc, cacheTTL: cacheTTL}
 }
 
-func (p *cacheProvider) SlotLock() i.SlotLockCache {
+func (p *cacheProvider) SlotLock() icache.SlotLockCache {
 	return cache.NewSlotLockCache(p.rc, p.cacheTTL)
 }
 
-func (p *cacheProvider) ServiceType() i.ServiceTypeCache {
+func (p *cacheProvider) ServiceType() icache.ServiceTypeCache {
 	return cache.NewServiceTypeCacheService(p.rc, p.cacheTTL)
 }
 

@@ -14,14 +14,14 @@ import (
 
 type slotService struct {
 	slotRepo   irepo.SlotRepo
-	slotLocker isvc.SlotLocking
+	slotLocker isvc.SlotLocker
 }
 
-func NewSlotService(slotRepo irepo.SlotRepo, slotLocker isvc.SlotLocking) isvc.SlotService {
+func NewSlotService(slotRepo irepo.SlotRepo, slotLocker isvc.SlotLocker) isvc.SlotService {
 	return &slotService{slotRepo: slotRepo, slotLocker: slotLocker}
 }
 
-func (s *slotService) GetAvailableBookings() []entity.AvailableBooking {
+func (s *slotService) GetAvailableDates() []entity.AvailableDate {
 	today := time.Now()
 
 	days := []struct {
@@ -34,12 +34,12 @@ func (s *slotService) GetAvailableBookings() []entity.AvailableBooking {
 		{2, usflow.AfterTomorrow, true},
 	}
 
-	bookings := make([]entity.AvailableBooking, 0, 3)
+	bookings := make([]entity.AvailableDate, 0, 3)
 	for _, day := range days {
 		if !day.available {
 			continue
 		}
-		bookings = append(bookings, entity.AvailableBooking{
+		bookings = append(bookings, entity.AvailableDate{
 			Date:  today.AddDate(0, 0, day.offset),
 			Label: day.label,
 		})
@@ -75,6 +75,24 @@ func (s *slotService) GetAvailableZones(date string) (entity.Zone, error) {
 	return s.groupByZones(filtered), nil
 }
 
+func (s *slotService) FindByDateTime(date, start string) (*entity.Slot, error) {
+	return utils.WrapFunction(func() (*entity.Slot, error) {
+		return s.slotRepo.FindByDateAndTime(date, start)
+	})
+}
+
+func (s *slotService) MarkUnavailable(date, startTime string) error {
+	return utils.WrapFunctionError(func() error {
+		return s.slotRepo.MarkUnavailable(date, startTime)
+	})
+}
+
+func (s *slotService) FreeUp(date, startTime string) error {
+	return utils.WrapFunctionError(func() error {
+		return s.slotRepo.FreeUp(date, startTime)
+	})
+}
+
 func (s *slotService) groupByZones(slots []entity.Slot) entity.Zone {
 	zones := make(entity.Zone)
 
@@ -103,22 +121,4 @@ func (s *slotService) groupByZones(slots []entity.Slot) entity.Zone {
 		}
 	}
 	return zones
-}
-
-func (s *slotService) FindByDateAndTime(date, start string) (*entity.Slot, error) {
-	return utils.WrapFunction(func() (*entity.Slot, error) {
-		return s.slotRepo.FindByDateAndTime(date, start)
-	})
-}
-
-func (s *slotService) MarkUnavailable(date, startTime string) error {
-	return utils.WrapFunctionError(func() error {
-		return s.slotRepo.MarkUnavailable(date, startTime)
-	})
-}
-
-func (s *slotService) FreeUp(date, startTime string) error {
-	return utils.WrapFunctionError(func() error {
-		return s.slotRepo.FreeUp(date, startTime)
-	})
 }

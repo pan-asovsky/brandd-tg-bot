@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	i "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -14,7 +14,7 @@ type priceRepo struct {
 	db *sql.DB
 }
 
-func NewPriceRepo(db *sql.DB) i.PriceRepo {
+func NewPriceRepo(db *sql.DB) irepo.PriceRepo {
 	return &priceRepo{db: db}
 }
 

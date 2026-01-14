@@ -1,6 +1,6 @@
 package service
 
-type SlotLocking interface {
+type SlotLocker interface {
 	Lock(date, time string) (uid string, ok bool, err error)
 	Unlock(date, uid string) error
 	IsLocked(date, time string) (bool, error)

@@ -8,39 +8,40 @@ import (
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/rules"
 )
 
 type userKeyboardService struct {
-	callbackBuilding isvc.CallbackBuildingService
-	dateTime         isvc.DateTimeService
+	cbBuilder icallback.UserCallbackBuilderService
+	dateTime  isvc.DateTimeService
 }
 
-func NewUserKeyboardService(cbBuilding isvc.CallbackBuildingService, dateTime isvc.DateTimeService) isvc.UserKeyboardService {
-	return &userKeyboardService{callbackBuilding: cbBuilding, dateTime: dateTime}
+func NewUserKeyboardService(cbBuilder icallback.UserCallbackBuilderService, dateTime isvc.DateTimeService) isvc.UserKeyboardService {
+	return &userKeyboardService{cbBuilder: cbBuilder, dateTime: dateTime}
 }
 
 func (uks *userKeyboardService) GreetingKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
-		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(usflow.NewBookingBtn, uks.callbackBuilding.NewBooking())),
-		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(usflow.MyBookingsBtn, uks.callbackBuilding.MyBookings())),
+		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(usflow.NewBookingBtn, uks.cbBuilder.NewBooking())),
+		tg.NewInlineKeyboardRow(tg.NewInlineKeyboardButtonData(usflow.MyBookingsBtn, uks.cbBuilder.MyBookings())),
 	)
 }
 
-func (uks *userKeyboardService) DateKeyboard(bookings []entity.AvailableBooking) tg.InlineKeyboardMarkup {
+func (uks *userKeyboardService) DateKeyboard(bookings []entity.AvailableDate) tg.InlineKeyboardMarkup {
 	var rows [][]tg.InlineKeyboardButton
 
 	row := tg.NewInlineKeyboardRow()
 	for _, b := range bookings {
 		row = append(row, tg.NewInlineKeyboardButtonData(
 			b.Label,
-			uks.callbackBuilding.Date(b.Date),
+			uks.cbBuilder.Date(b.Date),
 		))
 	}
 
-	rows = append(rows, row, uks.backKeyboardRow(uks.callbackBuilding.Menu()))
+	rows = append(rows, row, uks.backKeyboardRow(uks.cbBuilder.Menu()))
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
@@ -55,7 +56,7 @@ func (uks *userKeyboardService) ZoneKeyboard(zones entity.Zone, date string) tg.
 	var currentRow []tg.InlineKeyboardButton
 
 	for x, zone := range keys {
-		cb := uks.callbackBuilding.Zone(date, zone)
+		cb := uks.cbBuilder.Zone(date, zone)
 		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(zone, cb))
 
 		if x%2 == 1 {
@@ -68,7 +69,7 @@ func (uks *userKeyboardService) ZoneKeyboard(zones entity.Zone, date string) tg.
 		rows = append(rows, currentRow)
 	}
 
-	rows = append(rows, uks.backKeyboardRow(uks.callbackBuilding.NewBooking()))
+	rows = append(rows, uks.backKeyboardRow(uks.cbBuilder.NewBooking()))
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
@@ -79,7 +80,7 @@ func (uks *userKeyboardService) TimeKeyboard(ts []entity.Timeslot, info *model.U
 	for x, t := range ts {
 		time := fmt.Sprintf("%s-%s", t.Start, t.End)
 		info.Time = time
-		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(time, uks.callbackBuilding.Time(info)))
+		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(time, uks.cbBuilder.Time(info)))
 
 		if x%2 == 1 {
 			rows = append(rows, currentRow)
@@ -96,7 +97,7 @@ func (uks *userKeyboardService) TimeKeyboard(ts []entity.Timeslot, info *model.U
 		fmt.Printf("[time_keyboard] %v", err)
 	}
 
-	rows = append(rows, uks.backKeyboardRow(uks.callbackBuilding.Date(date)))
+	rows = append(rows, uks.backKeyboardRow(uks.cbBuilder.Date(date)))
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
@@ -114,7 +115,7 @@ func (uks *userKeyboardService) ServiceKeyboard(types []entity.ServiceType, info
 				buttonText = "✅ " + buttonText
 			}
 
-			cb := uks.callbackBuilding.ServiceSelection(t.ServiceCode, info)
+			cb := uks.cbBuilder.ServiceSelection(t.ServiceCode, info)
 			row = append(row, tg.NewInlineKeyboardButtonData(buttonText, cb))
 		}
 
@@ -125,7 +126,7 @@ func (uks *userKeyboardService) ServiceKeyboard(types []entity.ServiceType, info
 				buttonText = "✅ " + buttonText
 			}
 
-			cb := uks.callbackBuilding.ServiceSelection(t.ServiceCode, info)
+			cb := uks.cbBuilder.ServiceSelection(t.ServiceCode, info)
 			row = append(row, tg.NewInlineKeyboardButtonData(buttonText, cb))
 		}
 
@@ -149,11 +150,11 @@ func (uks *userKeyboardService) ServiceKeyboard(types []entity.ServiceType, info
 		service := serviceRules.MapServices(selectedTrue)
 		info.Service = service
 
-		controlRow = append(controlRow, tg.NewInlineKeyboardButtonData(usflow.ReadyBtn, uks.callbackBuilding.ServiceConfirmation(info)))
+		controlRow = append(controlRow, tg.NewInlineKeyboardButtonData(usflow.ReadyBtn, uks.cbBuilder.ServiceConfirmation(info)))
 		rows = append(rows, controlRow)
 	}
 
-	rows = append(rows, uks.backKeyboardRow(uks.callbackBuilding.Zone(info.Date, info.Zone)))
+	rows = append(rows, uks.backKeyboardRow(uks.cbBuilder.Zone(info.Date, info.Zone)))
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
@@ -164,7 +165,7 @@ func (uks *userKeyboardService) RimsKeyboard(rims []string, info *model.UserSess
 	sort.Strings(rims)
 	for x, rim := range rims {
 		info.RimRadius = rim
-		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(rim, uks.callbackBuilding.Rim(info)))
+		currentRow = append(currentRow, tg.NewInlineKeyboardButtonData(rim, uks.cbBuilder.Rim(info)))
 
 		if x%3 == 1 {
 			rows = append(rows, currentRow)
@@ -176,7 +177,7 @@ func (uks *userKeyboardService) RimsKeyboard(rims []string, info *model.UserSess
 		rows = append(rows, currentRow)
 	}
 
-	rows = append(rows, uks.backKeyboardRow(uks.callbackBuilding.Time(info)))
+	rows = append(rows, uks.backKeyboardRow(uks.cbBuilder.Time(info)))
 	return tg.NewInlineKeyboardMarkup(rows...)
 }
 
@@ -186,7 +187,7 @@ func (uks *userKeyboardService) ConfirmKeyboard(info *model.UserSessionInfo) tg.
 			tg.NewInlineKeyboardButtonData(usflow.ConfirmBtn, usflow.ConfirmBookingCbk),
 			tg.NewInlineKeyboardButtonData(usflow.RejectBtn, usflow.RejectCbk),
 		),
-		uks.backKeyboardRow(uks.callbackBuilding.ServiceConfirmation(info)),
+		uks.backKeyboardRow(uks.cbBuilder.ServiceConfirmation(info)),
 	)
 }
 
@@ -204,8 +205,8 @@ func (uks *userKeyboardService) RequestPhoneKeyboard() tg.ReplyKeyboardMarkup {
 func (uks *userKeyboardService) EmptyMyBookingsKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonData(usflow.BackBtn, uks.callbackBuilding.Menu()),
-			tg.NewInlineKeyboardButtonData(usflow.NewBookingBtn, uks.callbackBuilding.NewBooking()),
+			tg.NewInlineKeyboardButtonData(usflow.BackBtn, uks.cbBuilder.Menu()),
+			tg.NewInlineKeyboardButtonData(usflow.NewBookingBtn, uks.cbBuilder.NewBooking()),
 		),
 	)
 }
@@ -213,8 +214,8 @@ func (uks *userKeyboardService) EmptyMyBookingsKeyboard() tg.InlineKeyboardMarku
 func (uks *userKeyboardService) ExistsMyBookingsKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonData(usflow.CancelBtn, uks.callbackBuilding.PreCancelBooking()),
-			tg.NewInlineKeyboardButtonData(usflow.BackBtn, uks.callbackBuilding.Menu()),
+			tg.NewInlineKeyboardButtonData(usflow.CancelBtn, uks.cbBuilder.PreCancelBooking()),
+			tg.NewInlineKeyboardButtonData(usflow.BackBtn, uks.cbBuilder.Menu()),
 		),
 	)
 }
@@ -222,8 +223,8 @@ func (uks *userKeyboardService) ExistsMyBookingsKeyboard() tg.InlineKeyboardMark
 func (uks *userKeyboardService) BookingCancellationKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonData(usflow.NoBtn, uks.callbackBuilding.NoCancelBooking()),
-			tg.NewInlineKeyboardButtonData(usflow.YesBtn, uks.callbackBuilding.CancelBooking()),
+			tg.NewInlineKeyboardButtonData(usflow.NoBtn, uks.cbBuilder.NoCancelBooking()),
+			tg.NewInlineKeyboardButtonData(usflow.YesBtn, uks.cbBuilder.CancelBooking()),
 		),
 	)
 }
@@ -231,7 +232,7 @@ func (uks *userKeyboardService) BookingCancellationKeyboard() tg.InlineKeyboardM
 func (uks *userKeyboardService) BackKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonData(usflow.BackBtn, uks.callbackBuilding.Menu()),
+			tg.NewInlineKeyboardButtonData(usflow.BackBtn, uks.cbBuilder.Menu()),
 		),
 	)
 }
