@@ -40,6 +40,16 @@ type App struct {
 	httpServer    *http.Server
 }
 
+// ProviderContainer todo: maybe?
+type ProviderContainer struct {
+	RepoProvider     iprovider.RepoProvider
+	ServiceProvider  iprovider.ServiceProvider
+	CacheProvider    iprovider.CacheProvider
+	TelegramProvider iprovider.TelegramProvider
+	CallbackProvider iprovider.CallbackProvider
+	MsgFmtProvider   iprovider.MessageFormatterProvider
+}
+
 func NewApp(ctx context.Context) *App {
 	return &App{Context: ctx}
 }

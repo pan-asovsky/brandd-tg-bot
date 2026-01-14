@@ -17,7 +17,8 @@ import (
 
 type updateHandler struct {
 	botAPI                             *tgapi.BotAPI
-	tgProvider                         iprovider.TelegramProvider
+	callbackProvider                   iprovider.CallbackProvider
+	telegramProvider                   iprovider.TelegramProvider
 	userMessage, adminMessage, command ihandler.MessageHandler
 	userCallback, adminCallback        ihandler.CallbackHandler
 }
@@ -27,16 +28,18 @@ func NewUpdateHandler(
 	svcProvider iprovider.ServiceProvider,
 	repoProvider iprovider.RepoProvider,
 	cacheProvider iprovider.CacheProvider,
-	tgProvider iprovider.TelegramProvider,
+	callbackProvider iprovider.CallbackProvider,
+	telegramProvider iprovider.TelegramProvider,
 ) ihandler.UpdateHandler {
 	return &updateHandler{
-		botAPI:        botAPI,
-		tgProvider:    tgProvider,
-		command:       NewCommandHandler(tgProvider, svcProvider),
-		userCallback:  user.NewUserCallbackHandler(botAPI, svcProvider, repoProvider, cacheProvider, tgProvider),
-		adminCallback: admin.NewAdminCallbackHandler(),
-		userMessage:   user.NewUserMessageHandler(botAPI, svcProvider, cacheProvider, tgProvider),
-		adminMessage:  admin.NewAdminMessageHandler(svcProvider),
+		botAPI:           botAPI,
+		callbackProvider: callbackProvider,
+		telegramProvider: telegramProvider,
+		command:          NewCommandHandler(telegramProvider, svcProvider),
+		userCallback:     user.NewUserCallbackHandler(botAPI, svcProvider, repoProvider, cacheProvider, telegramProvider, callbackProvider),
+		adminCallback:    admin.NewAdminCallbackHandler(),
+		userMessage:      user.NewUserMessageHandler(botAPI, svcProvider, cacheProvider, telegramProvider),
+		adminMessage:     admin.NewAdminMessageHandler(svcProvider),
 	}
 }
 
@@ -61,7 +64,7 @@ func (uh *updateHandler) Handle(update *tgapi.Update) error {
 }
 
 func (uh *updateHandler) handleCallback(callback *tgapi.CallbackQuery) error {
-	uh.tgProvider.Common().AfterCallbackCleanup(callback)
+	uh.telegramProvider.Common().AfterCallbackCleanup(callback)
 	log.Printf("[handle_callback] callback received: %s", callback.Data)
 
 	data := callback.Data
@@ -101,9 +104,9 @@ func (uh *updateHandler) handleFlow(callback *tgapi.CallbackQuery) error {
 	}
 	switch cut {
 	case consts.ADMIN:
-		return uh.tgProvider.Admin().StartMenu(callback.Message.Chat.ID)
+		return uh.telegramProvider.Admin().StartMenu(callback.Message.Chat.ID)
 	case consts.USER:
-		return uh.tgProvider.User().StartMenu(callback.Message.Chat.ID)
+		return uh.telegramProvider.User().StartMenu(callback.Message.Chat.ID)
 	}
 
 	return nil
