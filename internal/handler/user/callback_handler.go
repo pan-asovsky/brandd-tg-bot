@@ -7,10 +7,10 @@ import (
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
 	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 )
 
 type userCallbackHandler struct {
-	botAPI           *tgapi.BotAPI
 	serviceProvider  iprovider.ServiceProvider
 	repoProvider     iprovider.RepoProvider
 	cacheProvider    iprovider.CacheProvider
@@ -19,21 +19,13 @@ type userCallbackHandler struct {
 	handlers         map[string]CallbackFunc
 }
 
-func NewUserCallbackHandler(
-	botAPI *tgapi.BotAPI,
-	serviceProvider iprovider.ServiceProvider,
-	repoProvider iprovider.RepoProvider,
-	cacheProvider iprovider.CacheProvider,
-	telegramProvider iprovider.TelegramProvider,
-	callbackProvider iprovider.CallbackProvider,
-) ihandler.CallbackHandler {
+func NewUserCallbackHandler(container provider.Container) ihandler.CallbackHandler {
 	uch := &userCallbackHandler{
-		botAPI:           botAPI,
-		serviceProvider:  serviceProvider,
-		repoProvider:     repoProvider,
-		cacheProvider:    cacheProvider,
-		telegramProvider: telegramProvider,
-		callbackProvider: callbackProvider,
+		serviceProvider:  container.ServiceProvider,
+		repoProvider:     container.RepoProvider,
+		cacheProvider:    container.CacheProvider,
+		telegramProvider: container.TelegramProvider,
+		callbackProvider: container.CallbackProvider,
 		handlers:         map[string]CallbackFunc{},
 	}
 

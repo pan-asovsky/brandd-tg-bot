@@ -13,33 +13,23 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/user"
 	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
 	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 )
 
 type updateHandler struct {
-	botAPI                             *tgapi.BotAPI
-	callbackProvider                   iprovider.CallbackProvider
 	telegramProvider                   iprovider.TelegramProvider
 	userMessage, adminMessage, command ihandler.MessageHandler
 	userCallback, adminCallback        ihandler.CallbackHandler
 }
 
-func NewUpdateHandler(
-	botAPI *tgapi.BotAPI,
-	svcProvider iprovider.ServiceProvider,
-	repoProvider iprovider.RepoProvider,
-	cacheProvider iprovider.CacheProvider,
-	callbackProvider iprovider.CallbackProvider,
-	telegramProvider iprovider.TelegramProvider,
-) ihandler.UpdateHandler {
+func NewUpdateHandler(container provider.Container) ihandler.UpdateHandler {
 	return &updateHandler{
-		botAPI:           botAPI,
-		callbackProvider: callbackProvider,
-		telegramProvider: telegramProvider,
-		command:          NewCommandHandler(telegramProvider, svcProvider),
-		userCallback:     user.NewUserCallbackHandler(botAPI, svcProvider, repoProvider, cacheProvider, telegramProvider, callbackProvider),
+		telegramProvider: container.TelegramProvider,
+		command:          NewCommandHandler(container.TelegramProvider, container.ServiceProvider),
+		userCallback:     user.NewUserCallbackHandler(container),
 		adminCallback:    admin.NewAdminCallbackHandler(),
-		userMessage:      user.NewUserMessageHandler(botAPI, svcProvider, cacheProvider, telegramProvider),
-		adminMessage:     admin.NewAdminMessageHandler(svcProvider),
+		userMessage:      user.NewUserMessageHandler(container),
+		adminMessage:     admin.NewAdminMessageHandler(container.ServiceProvider),
 	}
 }
 

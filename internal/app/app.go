@@ -16,7 +16,6 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
 	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 	"github.com/redis/go-redis/v9"
@@ -28,26 +27,11 @@ type App struct {
 	Cache    *redis.Client
 	Postgres *sql.DB
 
-	RepoProvider     iprovider.RepoProvider
-	ServiceProvider  iprovider.ServiceProvider
-	CacheProvider    iprovider.CacheProvider
-	TelegramProvider iprovider.TelegramProvider
-	CallbackProvider iprovider.CallbackProvider
-	MsgFmtProvider   iprovider.MessageFormatterProvider
+	ProviderContainer provider.Container
 
 	BotAPI        *tgapi.BotAPI
 	UpdateHandler ihandler.UpdateHandler
 	httpServer    *http.Server
-}
-
-// ProviderContainer todo: maybe?
-type ProviderContainer struct {
-	RepoProvider     iprovider.RepoProvider
-	ServiceProvider  iprovider.ServiceProvider
-	CacheProvider    iprovider.CacheProvider
-	TelegramProvider iprovider.TelegramProvider
-	CallbackProvider iprovider.CallbackProvider
-	MsgFmtProvider   iprovider.MessageFormatterProvider
 }
 
 func NewApp(ctx context.Context) *App {
@@ -89,15 +73,18 @@ func (a *App) Init() error {
 	a.BotAPI = tgbot
 
 	// provider
-	a.CallbackProvider = provider.NewCallbackProvider()
-	a.RepoProvider = provider.NewRepoProvider(a.Postgres)
-	a.CacheProvider = provider.NewCacheProvider(a.Cache, a.Config.CacheTTL)
-	a.ServiceProvider = provider.NewServiceProvider(a.RepoProvider, a.CacheProvider, a.CallbackProvider)
-	a.MsgFmtProvider = provider.NewMessageFormatterProvider(a.ServiceProvider.DateTime())
-	a.TelegramProvider = provider.NewTelegramProvider(a.BotAPI, a.ServiceProvider, a.MsgFmtProvider)
+	callbackProvider := provider.NewCallbackProvider()
+	repoProvider := provider.NewRepoProvider(a.Postgres)
+	cacheProvider := provider.NewCacheProvider(a.Cache, a.Config.CacheTTL)
+	serviceProvider := provider.NewServiceProvider(repoProvider, cacheProvider, callbackProvider)
+	msgFmtProvider := provider.NewMessageFormatterProvider(serviceProvider.DateTime())
+	telegramProvider := provider.NewTelegramProvider(a.BotAPI, serviceProvider, msgFmtProvider)
+
+	// container
+	a.ProviderContainer = *provider.NewContainer(repoProvider, serviceProvider, cacheProvider, telegramProvider, callbackProvider, msgFmtProvider)
 
 	// handler
-	a.UpdateHandler = handler.NewUpdateHandler(a.BotAPI, a.ServiceProvider, a.RepoProvider, a.CacheProvider, a.CallbackProvider, a.TelegramProvider)
+	a.UpdateHandler = handler.NewUpdateHandler(a.ProviderContainer)
 
 	return nil
 }
