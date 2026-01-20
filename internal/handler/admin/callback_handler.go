@@ -1,17 +1,53 @@
 package admin
 
 import (
+	"strings"
+
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
 	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 )
 
-type adminCallbackHandler struct{}
-
-func NewAdminCallbackHandler() ihandler.CallbackHandler {
-	return &adminCallbackHandler{}
+type adminCallbackHandler struct {
+	serviceProvider  iprovider.ServiceProvider
+	repoProvider     iprovider.RepoProvider
+	telegramProvider iprovider.TelegramProvider
+	callbackProvider iprovider.CallbackProvider
+	handlers         map[string]CallbackFunc
 }
 
-func (a *adminCallbackHandler) Handle(callback *tgapi.CallbackQuery) error {
+func NewAdminCallbackHandler(container provider.Container) ihandler.CallbackHandler {
+	ach := &adminCallbackHandler{
+		serviceProvider:  container.ServiceProvider,
+		repoProvider:     container.RepoProvider,
+		telegramProvider: container.TelegramProvider,
+		callbackProvider: container.CallbackProvider,
+		handlers:         map[string]CallbackFunc{},
+	}
+
+	ach.register(admflow.MenuPrefix, ach.handleMenu)
+	ach.register(admflow.PrefixBooking, ach.handleBookings)
+	ach.register(admflow.PrefixStatistics, ach.handleStatistics)
+	ach.register(admflow.PrefixSettings, ach.handleSettings)
+	ach.register(admflow.PrefixBack, ach.handleBack)
+
+	return ach
+}
+
+type CallbackFunc func(cb *tgapi.CallbackQuery) error
+
+func (ach *adminCallbackHandler) register(prefix string, handler CallbackFunc) {
+	ach.handlers[prefix] = handler
+}
+
+func (ach *adminCallbackHandler) Handle(query *tgapi.CallbackQuery) error {
+	for prefix, handler := range ach.handlers {
+		if strings.HasPrefix(query.Data, prefix) {
+			return handler(query)
+		}
+	}
 
 	return nil
 }

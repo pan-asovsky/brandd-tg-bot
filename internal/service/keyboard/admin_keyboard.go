@@ -19,8 +19,45 @@ func NewAdminKeyboardService(cbBuilder icallback.AdminCallbackBuilderService, da
 func (aks *adminKeyboardService) ChoiceFlowKeyboard() tg.InlineKeyboardMarkup {
 	return tg.NewInlineKeyboardMarkup(
 		tg.NewInlineKeyboardRow(
-			tg.NewInlineKeyboardButtonData(admflow.StartUser, aks.cbBuilder.StartUser()),
-			tg.NewInlineKeyboardButtonData(admflow.StartAdmin, aks.cbBuilder.StartAdmin()),
+			tg.NewInlineKeyboardButtonData(admflow.StartUserBtn, aks.cbBuilder.StartUser()),
+			tg.NewInlineKeyboardButtonData(admflow.StartAdminBtn, aks.cbBuilder.StartAdmin()),
+		),
+	)
+}
+
+func (aks *adminKeyboardService) MainMenu() tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(admflow.BookingsBtn, aks.cbBuilder.Bookings()),
+			tg.NewInlineKeyboardButtonData(admflow.StatisticsBtn, aks.cbBuilder.Statistics()),
+			tg.NewInlineKeyboardButtonData(admflow.SettingsBtn, aks.cbBuilder.Settings()),
+		),
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(admflow.BackBtn, aks.cbBuilder.Back(admflow.Flow)),
+		),
+	)
+}
+
+func (aks *adminKeyboardService) Bookings() tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(admflow.BackBtn, aks.cbBuilder.Back(admflow.Menu)),
+		),
+	)
+}
+
+func (aks *adminKeyboardService) Statistics() tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(admflow.BackBtn, aks.cbBuilder.Back(admflow.Menu)),
+		),
+	)
+}
+
+func (aks *adminKeyboardService) Settings() tg.InlineKeyboardMarkup {
+	return tg.NewInlineKeyboardMarkup(
+		tg.NewInlineKeyboardRow(
+			tg.NewInlineKeyboardButtonData(admflow.BackBtn, aks.cbBuilder.Back(admflow.Menu)),
 		),
 	)
 }

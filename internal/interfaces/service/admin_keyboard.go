@@ -6,4 +6,8 @@ import (
 
 type AdminKeyboardService interface {
 	ChoiceFlowKeyboard() tg.InlineKeyboardMarkup
+	MainMenu() tg.InlineKeyboardMarkup
+	Bookings() tg.InlineKeyboardMarkup
+	Statistics() tg.InlineKeyboardMarkup
+	Settings() tg.InlineKeyboardMarkup
 }

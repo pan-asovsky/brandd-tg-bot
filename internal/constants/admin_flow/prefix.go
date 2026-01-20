@@ -1,6 +1,13 @@
 package admin_flow
 
 const (
-	PrefixBack  = AdminPrefix + "BACK::"
-	AdminPrefix = "ADMIN::"
+	AdminBackPrefix = AdminPrefix + "BACK::"
+	PrefixBack      = "BACK::"
+	AdminPrefix     = "ADMIN::"
+	FlowPrefix      = "FLOW::"
+	MenuPrefix      = "MENU::"
+
+	PrefixBooking    = "BOOKINGS::"
+	PrefixStatistics = "STATISTICS::"
+	PrefixSettings   = "SETTINGS::"
 )

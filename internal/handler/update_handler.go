@@ -27,9 +27,9 @@ func NewUpdateHandler(container provider.Container) ihandler.UpdateHandler {
 		telegramProvider: container.TelegramProvider,
 		command:          NewCommandHandler(container.TelegramProvider, container.ServiceProvider),
 		userCallback:     user.NewUserCallbackHandler(container),
-		adminCallback:    admin.NewAdminCallbackHandler(),
+		adminCallback:    admin.NewAdminCallbackHandler(container),
 		userMessage:      user.NewUserMessageHandler(container),
-		adminMessage:     admin.NewAdminMessageHandler(container.ServiceProvider),
+		adminMessage:     admin.NewAdminMessageHandler(container.TelegramProvider, container.ServiceProvider),
 	}
 }
 
@@ -58,11 +58,10 @@ func (uh *updateHandler) handleCallback(callback *tgapi.CallbackQuery) error {
 	log.Printf("[handle_callback] callback received: %s", callback.Data)
 
 	data := callback.Data
-	if strings.HasPrefix(data, consts.Flow) {
-		return uh.handleFlow(callback)
-	}
-
 	switch {
+	case strings.HasPrefix(data, consts.Flow):
+		return uh.handleFlow(callback)
+
 	case strings.HasPrefix(data, admflow.AdminPrefix):
 		cut, ok := strings.CutPrefix(data, admflow.AdminPrefix)
 		if !ok {

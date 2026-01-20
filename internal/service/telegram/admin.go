@@ -16,14 +16,14 @@ func NewTelegramAdminService(tgCommon itg.TelegramCommonService, kb isvc.AdminKe
 	return &adminTelegramService{tgCommon: tgCommon, kb: kb}
 }
 
-func (tas *adminTelegramService) StartMenu(chatID int64) error {
-	return utils.WrapFunctionError(func() error {
-		return tas.tgCommon.SendMessage(chatID, "Тут потом всякое будет, ух! А пока...")
-	})
-}
-
 func (tas *adminTelegramService) ChoiceMenu(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
 		return tas.tgCommon.SendKeyboardMessage(chatID, admflow.ChoiceContinueFlow, tas.kb.ChoiceFlowKeyboard())
+	})
+}
+
+func (tas *adminTelegramService) StartMenu(chatID int64) error {
+	return utils.WrapFunctionError(func() error {
+		return tas.tgCommon.SendKeyboardMessage(chatID, admflow.AnyMsg, tas.kb.MainMenu())
 	})
 }

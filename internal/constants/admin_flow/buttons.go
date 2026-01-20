@@ -1,9 +1,13 @@
 package admin_flow
 
 const (
-	StartAdmin = "Администратор"
-	StartUser  = "Пользователь"
-	BackBtn    = "⬅️ Назад"
-	YesBtn     = "Да"
-	NoBtn      = "Нет"
+	StartAdminBtn = "Администратор"
+	StartUserBtn  = "Пользователь"
+	BackBtn       = "⬅️ Назад"
+	YesBtn        = "Да"
+	NoBtn         = "Нет"
+
+	BookingsBtn   = "Записи"
+	StatisticsBtn = "Статистика"
+	SettingsBtn   = "Настройки"
 )
