@@ -9,6 +9,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
+	keyboard2 "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/rules"
@@ -19,7 +20,7 @@ type userKeyboardService struct {
 	dateTime  isvc.DateTimeService
 }
 
-func NewUserKeyboardService(cbBuilder icallback.UserCallbackBuilderService, dateTime isvc.DateTimeService) isvc.UserKeyboardService {
+func NewUserKeyboardService(cbBuilder icallback.UserCallbackBuilderService, dateTime isvc.DateTimeService) keyboard2.UserKeyboardService {
 	return &userKeyboardService{cbBuilder: cbBuilder, dateTime: dateTime}
 }
 

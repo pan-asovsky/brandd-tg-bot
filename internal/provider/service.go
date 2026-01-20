@@ -4,7 +4,6 @@ import (
 	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/service/keyboard"
 )
 
 type svcProvider struct {
@@ -23,14 +22,6 @@ func NewServiceProvider(
 
 func (sp *svcProvider) Slot() isvc.SlotService {
 	return service.NewSlotService(sp.repoProvider.Slot(), sp.SlotLocker())
-}
-
-func (sp *svcProvider) UserKeyboard() isvc.UserKeyboardService {
-	return keyboard.NewUserKeyboardService(sp.callbackProvider.UserCallbackBuilder(), sp.DateTime())
-}
-
-func (sp *svcProvider) AdminKeyboard() isvc.AdminKeyboardService {
-	return keyboard.NewAdminKeyboardService(sp.callbackProvider.AdminCallbackBuilder(), sp.DateTime())
 }
 
 func (sp *svcProvider) Lock() isvc.LockService {

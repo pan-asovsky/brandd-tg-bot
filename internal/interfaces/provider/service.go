@@ -6,8 +6,6 @@ import (
 
 type ServiceProvider interface {
 	Slot() isvc.SlotService
-	UserKeyboard() isvc.UserKeyboardService
-	AdminKeyboard() isvc.AdminKeyboardService
 	Lock() isvc.LockService
 	Booking() isvc.BookingService
 	Price() isvc.PriceService

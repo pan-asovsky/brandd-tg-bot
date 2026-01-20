@@ -1,4 +1,4 @@
-package service
+package msg_fmt
 
 import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 

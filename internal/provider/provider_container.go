@@ -9,6 +9,7 @@ type Container struct {
 	TelegramProvider iprovider.TelegramProvider
 	CallbackProvider iprovider.CallbackProvider
 	MsgFmtProvider   iprovider.MessageFormatterProvider
+	KeyboardProvider iprovider.KeyboardProvider
 }
 
 func NewContainer(
@@ -18,6 +19,7 @@ func NewContainer(
 	telegram iprovider.TelegramProvider,
 	callback iprovider.CallbackProvider,
 	msgFmt iprovider.MessageFormatterProvider,
+	keyboardProvider iprovider.KeyboardProvider,
 ) *Container {
 	return &Container{
 		RepoProvider:     repo,
@@ -26,5 +28,6 @@ func NewContainer(
 		TelegramProvider: telegram,
 		CallbackProvider: callback,
 		MsgFmtProvider:   msgFmt,
+		KeyboardProvider: keyboardProvider,
 	}
 }

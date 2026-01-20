@@ -2,7 +2,7 @@ package telegram
 
 import (
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )

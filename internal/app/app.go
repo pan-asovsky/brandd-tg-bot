@@ -78,10 +78,11 @@ func (a *App) Init() error {
 	cacheProvider := provider.NewCacheProvider(a.Cache, a.Config.CacheTTL)
 	serviceProvider := provider.NewServiceProvider(repoProvider, cacheProvider, callbackProvider)
 	msgFmtProvider := provider.NewMessageFormatterProvider(serviceProvider.DateTime())
-	telegramProvider := provider.NewTelegramProvider(a.BotAPI, serviceProvider, msgFmtProvider)
+	keyboardProvider := provider.NewKeyboardProvider(serviceProvider.DateTime(), callbackProvider)
+	telegramProvider := provider.NewTelegramProvider(a.BotAPI, serviceProvider, keyboardProvider, msgFmtProvider)
 
 	// container
-	a.ProviderContainer = *provider.NewContainer(repoProvider, serviceProvider, cacheProvider, telegramProvider, callbackProvider, msgFmtProvider)
+	a.ProviderContainer = *provider.NewContainer(repoProvider, serviceProvider, cacheProvider, telegramProvider, callbackProvider, msgFmtProvider, keyboardProvider)
 
 	// handler
 	a.UpdateHandler = handler.NewUpdateHandler(a.ProviderContainer)

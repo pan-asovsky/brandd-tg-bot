@@ -5,6 +5,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 
@@ -12,14 +13,14 @@ import (
 )
 
 type userTelegramService struct {
-	kb             isvc.UserKeyboardService
+	kb             keyboard.UserKeyboardService
 	dateTime       isvc.DateTimeService
 	msgFmtProvider iprovider.MessageFormatterProvider
 	tgCommon       itg.TelegramCommonService
 }
 
 func NewTelegramUserService(
-	kb isvc.UserKeyboardService,
+	kb keyboard.UserKeyboardService,
 	dateTime isvc.DateTimeService,
 	msgFmtProvider iprovider.MessageFormatterProvider,
 	tgCommon itg.TelegramCommonService,

@@ -5,6 +5,7 @@ import (
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
+	keyboard2 "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 )
 
 type adminKeyboardService struct {
@@ -12,7 +13,7 @@ type adminKeyboardService struct {
 	dateTime  isvc.DateTimeService
 }
 
-func NewAdminKeyboardService(cbBuilder icallback.AdminCallbackBuilderService, dateTime isvc.DateTimeService) isvc.AdminKeyboardService {
+func NewAdminKeyboardService(cbBuilder icallback.AdminCallbackBuilderService, dateTime isvc.DateTimeService) keyboard2.AdminKeyboardService {
 	return &adminKeyboardService{cbBuilder: cbBuilder, dateTime: dateTime}
 }
 

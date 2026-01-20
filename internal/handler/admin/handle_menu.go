@@ -29,18 +29,18 @@ func (ach *adminCallbackHandler) handleMenu(query *tgapi.CallbackQuery) error {
 
 func (ach *adminCallbackHandler) menuBookings(query *tgapi.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return ach.telegramProvider.Common().SendMessage(query.Message.Chat.ID, "Тут будут заявки")
+		return ach.telegramProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, "Тут будут заявки", ach.keyboardProvider.AdminKeyboard().Bookings())
 	})
 }
 
 func (ach *adminCallbackHandler) menuStatistics(query *tgapi.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return ach.telegramProvider.Common().SendMessage(query.Message.Chat.ID, "Тут какая-нибудь статистика")
+		return ach.telegramProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, "Тут какая-нибудь статистика", ach.keyboardProvider.AdminKeyboard().Statistics())
 	})
 }
 
 func (ach *adminCallbackHandler) menuSettings(query *tgapi.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return ach.telegramProvider.Common().SendMessage(query.Message.Chat.ID, "Тут настройки")
+		return ach.telegramProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, "Тут настройки", ach.keyboardProvider.AdminKeyboard().Settings())
 	})
 }

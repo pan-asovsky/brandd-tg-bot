@@ -8,6 +8,7 @@ import (
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	msg_fmt2 "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/msg_fmt"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -15,7 +16,7 @@ type bookingMessageFormattingService struct {
 	dateTime isvc.DateTimeService
 }
 
-func NewBookingMessageFormattingService(dateTime isvc.DateTimeService) isvc.BookingMessageFormatterService {
+func NewBookingMessageFormattingService(dateTime isvc.DateTimeService) msg_fmt2.BookingMessageFormatterService {
 	return &bookingMessageFormattingService{dateTime: dateTime}
 }
 
