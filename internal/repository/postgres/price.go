@@ -49,6 +49,5 @@ func (pr *priceRepo) GetSetPrice(svc string, radius string) (int64, error) {
 		}
 		return 0, utils.WrapError(err)
 	}
-
 	return price.PricePerSet, nil
 }

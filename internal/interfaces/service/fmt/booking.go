@@ -1,4 +1,4 @@
-package msg_fmt
+package fmt
 
 import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 
@@ -8,4 +8,5 @@ type BookingMessageFormatterService interface {
 	My(booking *entity.Booking) (string, error)
 	Restriction(booking *entity.Booking) (string, error)
 	PreCancel(date, time string) (string, error)
+	BookingPreview(booking *entity.Booking) (string, error)
 }

@@ -117,6 +117,14 @@ func (bs *bookingService) Cancel(chatID int64) error {
 	return bs.repoProvider.Booking().Cancel(chatID)
 }
 
+func (bs *bookingService) FindAllActive() ([]entity.Booking, error) {
+	return bs.repoProvider.Booking().FindAllActive()
+}
+
+func (bs *bookingService) Find(bookingID int64) (*entity.Booking, error) {
+	return bs.repoProvider.Booking().Find(bookingID)
+}
+
 func (bs *bookingService) parseToStartEndTime(time string) (start, end string) {
 	split := strings.Split(time, "-")
 	start = split[0]

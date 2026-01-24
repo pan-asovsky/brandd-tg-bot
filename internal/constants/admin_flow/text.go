@@ -2,8 +2,8 @@ package admin_flow
 
 const (
 	Bookings   = "BOOKINGS"
-	Statistics = "STATISTICS"
-	Settings   = "SETTINGS"
+	Statistics = "STAT"
+	Settings   = "STNG"
 	Flow       = "FLOW"
 	Menu       = "MENU"
 )

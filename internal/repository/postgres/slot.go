@@ -19,14 +19,14 @@ func NewSlotRepo(db *sql.DB) irepo.SlotRepo {
 	return &slotRepo{db: db}
 }
 
-func (s *slotRepo) IsTodayAvailable() bool {
+func (sr *slotRepo) IsTodayAvailable() bool {
 	var available bool
-	err := s.db.QueryRow(IsTodayAvailable).Scan(&available)
+	err := sr.db.QueryRow(IsTodayAvailable).Scan(&available)
 	return err == nil && available
 }
 
-func (s *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
-	rows, err := s.db.Query(GetZonesByDate, date)
+func (sr *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
+	rows, err := sr.db.Query(GetZonesByDate, date)
 	if err != nil {
 		return nil, fmt.Errorf("[get_available_slots] query error: %w", err)
 	}
@@ -67,7 +67,7 @@ func (s *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
 	return slots, nil
 }
 
-func (s *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) {
+func (sr *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) {
 	var (
 		sqlDate   time.Time
 		startTime time.Time
@@ -76,7 +76,7 @@ func (s *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) {
 		slot      entity.Slot
 	)
 
-	if err := s.db.QueryRow(GetSlotByDateAndTime, date, start).Scan(
+	if err := sr.db.QueryRow(GetSlotByDateAndTime, date, start).Scan(
 		&slot.ID,
 		&sqlDate,
 		&startTime,
@@ -85,7 +85,7 @@ func (s *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) {
 		&created,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("[find_slot_by_date_time] not founded for %s %s %v", date, start, err)
+			return nil, fmt.Errorf("[find_slot_by_date_time] not founded for %sr %sr %v", date, start, err)
 		}
 		return nil, fmt.Errorf("[find_slot_by_date_time] failed: %w", err)
 	}
@@ -98,15 +98,15 @@ func (s *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) {
 	return &slot, nil
 }
 
-func (s *slotRepo) MarkUnavailable(date, startTime string) error {
-	if _, err := s.db.Exec(MarkSlotUnavailable, date, startTime); err != nil {
+func (sr *slotRepo) MarkUnavailable(date, startTime string) error {
+	if _, err := sr.db.Exec(MarkSlotUnavailable, date, startTime); err != nil {
 		return utils.WrapError(err)
 	}
 	return nil
 }
 
-func (s *slotRepo) FreeUp(date, startTime string) error {
-	result, err := s.db.Exec(FreeUpSlot, date, startTime)
+func (sr *slotRepo) FreeUp(date, startTime string) error {
+	result, err := sr.db.Exec(FreeUpSlot, date, startTime)
 	affected, err := result.RowsAffected()
 	if err != nil {
 		return utils.WrapError(err)

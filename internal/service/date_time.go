@@ -28,6 +28,19 @@ func (dts *dateTimeService) FormatDateTimeToShortView(d, t, inLayout string) (st
 	return fmt.Sprintf("%s.%s (%s), %s", day, monthNumber, weekDayRu, t), nil
 }
 
+func (dts *dateTimeService) FormatDateTimeToExtendedView(d, t, inLayout string) (string, error) {
+	date, err := time.Parse(inLayout, d)
+	if err != nil {
+		return "", utils.WrapError(err)
+	}
+
+	day := fmt.Sprintf("%02d", date.Day())
+	monthRuName := monthNamesRu[int(date.Month())]
+	weekDayRu := daysOfWeekFullRu[date.Weekday().String()]
+
+	return fmt.Sprintf("%s.%s (%s), %s", day, monthRuName, weekDayRu, t), nil
+}
+
 func (dts *dateTimeService) FormatDate(date, inLayout, outLayout string) (string, error) {
 	t, err := time.Parse(inLayout, date)
 	if err != nil {
@@ -61,4 +74,29 @@ var daysOfWeekShortRu = map[string]string{
 	"Friday":    "пт",
 	"Saturday":  "сб",
 	"Sunday":    "вс",
+}
+
+var daysOfWeekFullRu = map[string]string{
+	"Monday":    "понедельник",
+	"Tuesday":   "вторник",
+	"Wednesday": "среда",
+	"Thursday":  "четверг",
+	"Friday":    "пятница",
+	"Saturday":  "суббота",
+	"Sunday":    "воскресенье",
+}
+
+var monthNamesRu = map[int]string{
+	1:  "Январь",
+	2:  "Февраль",
+	3:  "Март",
+	4:  "Апрель",
+	5:  "Май",
+	6:  "Июнь",
+	7:  "Июль",
+	8:  "Август",
+	9:  "Сентябрь",
+	10: "Октябрь",
+	11: "Ноябрь",
+	12: "Декабрь",
 }

@@ -19,4 +19,6 @@ type BookingService interface {
 	UpdateService(chatID int64, service string) error
 	RecalculatePrice(chatID int64) error
 	Cancel(chatID int64) error
+	FindAllActive() ([]entity.Booking, error)
+	Find(bookingID int64) (*entity.Booking, error)
 }

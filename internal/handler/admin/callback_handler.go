@@ -13,8 +13,9 @@ import (
 type adminCallbackHandler struct {
 	serviceProvider  iprovider.ServiceProvider
 	repoProvider     iprovider.RepoProvider
-	telegramProvider iprovider.TelegramProvider
+	tgProvider       iprovider.TelegramProvider
 	callbackProvider iprovider.CallbackProvider
+	keyboardProvider iprovider.KeyboardProvider
 	handlers         map[string]CallbackFunc
 }
 
@@ -22,8 +23,9 @@ func NewAdminCallbackHandler(container provider.Container) ihandler.CallbackHand
 	ach := &adminCallbackHandler{
 		serviceProvider:  container.ServiceProvider,
 		repoProvider:     container.RepoProvider,
-		telegramProvider: container.TelegramProvider,
+		tgProvider:       container.TelegramProvider,
 		callbackProvider: container.CallbackProvider,
+		keyboardProvider: container.KeyboardProvider,
 		handlers:         map[string]CallbackFunc{},
 	}
 
@@ -32,6 +34,9 @@ func NewAdminCallbackHandler(container provider.Container) ihandler.CallbackHand
 	ach.register(admflow.PrefixStatistics, ach.handleStatistics)
 	ach.register(admflow.PrefixSettings, ach.handleSettings)
 	ach.register(admflow.PrefixBack, ach.handleBack)
+	ach.register(admflow.PrefixComplete, ach.handleComplete)
+	ach.register(admflow.PrefixNoShow, ach.handleNoShow)
+	ach.register(admflow.PrefixReject, ach.handleReject)
 
 	return ach
 }

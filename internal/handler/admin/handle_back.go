@@ -18,9 +18,9 @@ func (ach *adminCallbackHandler) handleBack(query *tgapi.CallbackQuery) error {
 
 	switch payload {
 	case admflow.Flow:
-		return ach.telegramProvider.Admin().ChoiceMenu(query.Message.Chat.ID)
+		return ach.tgProvider.Admin().ChoiceMenu(query.Message.Chat.ID)
 	case admflow.Menu:
-		return ach.telegramProvider.Admin().StartMenu(query.Message.Chat.ID)
+		return ach.tgProvider.Admin().StartMenu(query.Message.Chat.ID)
 	default:
 		return errors.New("[handle_back] invalid callback: " + query.Data)
 	}

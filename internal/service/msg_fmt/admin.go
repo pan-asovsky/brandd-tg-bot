@@ -7,7 +7,7 @@ import (
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	msg_fmt2 "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/msg_fmt"
+	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/fmt"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -15,12 +15,12 @@ type adminMessageFormattingService struct {
 	dateTime isvc.DateTimeService
 }
 
-func NewAdminMessageFormattingService(dateTime isvc.DateTimeService) msg_fmt2.AdminMessageFormatterService {
+func NewAdminMessageFormattingService(dateTime isvc.DateTimeService) ifmt.AdminMessageFormatterService {
 	return &adminMessageFormattingService{dateTime: dateTime}
 }
 
-func (a *adminMessageFormattingService) NewBookingNotify(booking *entity.Booking) (string, error) {
-	view, err := a.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+func (amfs *adminMessageFormattingService) NewBookingNotify(booking *entity.Booking) (string, error) {
+	view, err := amfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
 	if err != nil {
 		return "", utils.WrapError(err)
 	}

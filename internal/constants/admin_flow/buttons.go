@@ -4,10 +4,13 @@ const (
 	StartAdminBtn = "Администратор"
 	StartUserBtn  = "Пользователь"
 	BackBtn       = "⬅️ Назад"
-	YesBtn        = "Да"
-	NoBtn         = "Нет"
+	ConfirmBtn    = "Подтвердить"
+	RejectBtn     = "Отменить"
 
-	BookingsBtn   = "Записи"
-	StatisticsBtn = "Статистика"
-	SettingsBtn   = "Настройки"
+	BookingsBtn        = "📒 Записи"
+	StatisticsBtn      = "📊 Статистика"
+	SettingsBtn        = "⚙️ Настройки"
+	StartChatBtn       = "✒ Сообщение"
+	CompleteBookingBtn = "✅ Подтверждение"
+	NoShowBtn          = "❌ Отсутствие"
 )

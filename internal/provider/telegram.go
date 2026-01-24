@@ -8,21 +8,42 @@ import (
 )
 
 type telegramProvider struct {
-	botAPI         *tgapi.BotAPI
-	svcProvider    iprovider.ServiceProvider
-	msgFmtProvider iprovider.MessageFormatterProvider
+	botAPI           *tgapi.BotAPI
+	svcProvider      iprovider.ServiceProvider
+	keyboardProvider iprovider.KeyboardProvider
+	msgFmtProvider   iprovider.MessageFormatterProvider
 }
 
-func NewTelegramProvider(botAPI *tgapi.BotAPI, svcProvider iprovider.ServiceProvider, msgFmtProvider iprovider.MessageFormatterProvider) iprovider.TelegramProvider {
-	return &telegramProvider{botAPI: botAPI, svcProvider: svcProvider, msgFmtProvider: msgFmtProvider}
+func NewTelegramProvider(
+	botAPI *tgapi.BotAPI,
+	svcProvider iprovider.ServiceProvider,
+	keyboardProvider iprovider.KeyboardProvider,
+	msgFmtProvider iprovider.MessageFormatterProvider,
+) iprovider.TelegramProvider {
+	return &telegramProvider{
+		botAPI:           botAPI,
+		svcProvider:      svcProvider,
+		keyboardProvider: keyboardProvider,
+		msgFmtProvider:   msgFmtProvider,
+	}
 }
 
 func (tp *telegramProvider) User() itg.TelegramUserService {
-	return telegram.NewTelegramUserService(tp.svcProvider.UserKeyboard(), tp.svcProvider.DateTime(), tp.msgFmtProvider, tp.Common())
+	return telegram.NewTelegramUserService(
+		tp.keyboardProvider.UserKeyboard(),
+		tp.svcProvider.DateTime(),
+		tp.msgFmtProvider,
+		tp.Common(),
+	)
 }
 
 func (tp *telegramProvider) Admin() itg.TelegramAdminService {
-	return telegram.NewTelegramAdminService(tp.Common(), tp.svcProvider.AdminKeyboard())
+	return telegram.NewTelegramAdminService(
+		tp.Common(),
+		tp.keyboardProvider.AdminKeyboard(),
+		tp.msgFmtProvider,
+		tp.svcProvider.DateTime(),
+	)
 }
 
 func (tp *telegramProvider) Common() itg.TelegramCommonService {

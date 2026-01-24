@@ -3,7 +3,7 @@ package provider
 import (
 	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	msg_fmt2 "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/msg_fmt"
+	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/fmt"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service/msg_fmt"
 )
 
@@ -15,10 +15,10 @@ func NewMessageFormatterProvider(dateTimeSvc isvc.DateTimeService) iprovider.Mes
 	return &messageFormatterProvider{dateTimeSvc: dateTimeSvc}
 }
 
-func (m *messageFormatterProvider) Booking() msg_fmt2.BookingMessageFormatterService {
+func (m *messageFormatterProvider) Booking() ifmt.BookingMessageFormatterService {
 	return msg_fmt.NewBookingMessageFormattingService(m.dateTimeSvc)
 }
 
-func (m *messageFormatterProvider) Admin() msg_fmt2.AdminMessageFormatterService {
+func (m *messageFormatterProvider) Admin() ifmt.AdminMessageFormatterService {
 	return msg_fmt.NewAdminMessageFormattingService(m.dateTimeSvc)
 }

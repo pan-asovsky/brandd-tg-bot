@@ -2,28 +2,56 @@ package telegram
 
 import (
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type adminTelegramService struct {
-	tgCommon itg.TelegramCommonService
-	kb       isvc.AdminKeyboardService
+	tgCommon       itg.TelegramCommonService
+	kb             ikeyboard.AdminKeyboardService
+	msgFmtProvider iprovider.MessageFormatterProvider
+	dateTime       isvc.DateTimeService
 }
 
-func NewTelegramAdminService(tgCommon itg.TelegramCommonService, kb isvc.AdminKeyboardService) itg.TelegramAdminService {
-	return &adminTelegramService{tgCommon: tgCommon, kb: kb}
+func NewTelegramAdminService(
+	tgCommon itg.TelegramCommonService,
+	kb ikeyboard.AdminKeyboardService,
+	msgFmtProvider iprovider.MessageFormatterProvider,
+	dateTime isvc.DateTimeService,
+) itg.TelegramAdminService {
+	return &adminTelegramService{tgCommon: tgCommon, kb: kb, msgFmtProvider: msgFmtProvider, dateTime: dateTime}
 }
 
-func (tas *adminTelegramService) ChoiceMenu(chatID int64) error {
+func (ats *adminTelegramService) ChoiceMenu(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
-		return tas.tgCommon.SendKeyboardMessage(chatID, admflow.ChoiceContinueFlow, tas.kb.ChoiceFlowKeyboard())
+		return ats.tgCommon.SendKeyboardMessage(chatID, admflow.ChoiceContinueFlow, ats.kb.ChoiceFlowKeyboard())
 	})
 }
 
-func (tas *adminTelegramService) StartMenu(chatID int64) error {
+func (ats *adminTelegramService) StartMenu(chatID int64) error {
 	return utils.WrapFunctionError(func() error {
-		return tas.tgCommon.SendKeyboardMessage(chatID, admflow.AnyMsg, tas.kb.MainMenu())
+		return ats.tgCommon.SendKeyboardMessage(chatID, admflow.AnyMsg, ats.kb.MainMenu())
+	})
+}
+
+func (ats *adminTelegramService) BookingPreview(chatID int64, booking *entity.Booking) error {
+	msg, err := ats.msgFmtProvider.Booking().BookingPreview(booking)
+	if err != nil {
+		return utils.WrapError(err)
+	}
+
+	return utils.WrapFunctionError(func() error {
+		return ats.tgCommon.SendKeyboardMessageHTMLMode(chatID, msg, ats.kb.BookingInfo(booking.ChatID, booking.ID))
+	})
+}
+
+func (ats *adminTelegramService) ConfirmNoShow(chatID int64, info *model.BookingInfo) error {
+	return utils.WrapFunctionError(func() error {
+		return ats.tgCommon.SendKeyboardMessage(chatID, admflow.ClientNoShow, ats.kb.ConfirmationKeyboard(info))
 	})
 }

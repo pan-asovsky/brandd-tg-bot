@@ -19,9 +19,9 @@ func NewBookingRepo(db *sql.DB) irepo.BookingRepo {
 	return &bookingRepo{db: db}
 }
 
-func (b *bookingRepo) FindActiveNotPending(chatID int64) (*entity.Booking, error) {
+func (br *bookingRepo) FindActiveNotPending(chatID int64) (*entity.Booking, error) {
 	var booking entity.Booking
-	if err := b.db.QueryRow(FindActiveNotPending, chatID).Scan(
+	if err := br.db.QueryRow(FindActiveNotPending, chatID).Scan(
 		&booking.ID,
 		&booking.ChatID,
 		&booking.UserPhone,
@@ -46,9 +46,9 @@ func (b *bookingRepo) FindActiveNotPending(chatID int64) (*entity.Booking, error
 	return &booking, nil
 }
 
-func (b *bookingRepo) FindPending(chatID int64) (*entity.Booking, error) {
+func (br *bookingRepo) FindPending(chatID int64) (*entity.Booking, error) {
 	var booking entity.Booking
-	if err := b.db.QueryRow(FindActivePending, chatID).Scan(
+	if err := br.db.QueryRow(FindActivePending, chatID).Scan(
 		&booking.ID,
 		&booking.ChatID,
 		&booking.UserPhone,
@@ -73,16 +73,16 @@ func (b *bookingRepo) FindPending(chatID int64) (*entity.Booking, error) {
 	return &booking, nil
 }
 
-func (b *bookingRepo) Exists(chatID int64) bool {
+func (br *bookingRepo) Exists(chatID int64) bool {
 	var exists bool
-	if err := b.db.QueryRow(BookingExists, chatID).Scan(&exists); err != nil {
+	if err := br.db.QueryRow(BookingExists, chatID).Scan(&exists); err != nil {
 		return false
 	}
 	return exists
 }
 
-func (b *bookingRepo) UpdateRimRadius(chatID int64, rimRadius string) error {
-	_, err := b.db.Exec(UpdateRimRadius, rimRadius, chatID)
+func (br *bookingRepo) UpdateRimRadius(chatID int64, rimRadius string) error {
+	_, err := br.db.Exec(UpdateRimRadius, rimRadius, chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -90,8 +90,8 @@ func (b *bookingRepo) UpdateRimRadius(chatID int64, rimRadius string) error {
 	return nil
 }
 
-func (b *bookingRepo) UpdateStatus(chatID int64, status entity.BookingStatus) error {
-	_, err := b.db.Exec(UpdateStatus, status, chatID)
+func (br *bookingRepo) UpdateStatus(chatID int64, status entity.BookingStatus) error {
+	_, err := br.db.Exec(UpdateStatus, status, chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -99,8 +99,8 @@ func (b *bookingRepo) UpdateStatus(chatID int64, status entity.BookingStatus) er
 	return nil
 }
 
-func (b *bookingRepo) UpdatePrice(chatID int64, price int64) error {
-	_, err := b.db.Exec(UpdatePrice, price, chatID)
+func (br *bookingRepo) UpdatePrice(chatID int64, price int64) error {
+	_, err := br.db.Exec(UpdatePrice, price, chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -108,8 +108,8 @@ func (b *bookingRepo) UpdatePrice(chatID int64, price int64) error {
 	return nil
 }
 
-func (b *bookingRepo) UpdateService(chatID int64, service string) error {
-	_, err := b.db.Exec(UpdateService, service, chatID)
+func (br *bookingRepo) UpdateService(chatID int64, service string) error {
+	_, err := br.db.Exec(UpdateService, service, chatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -117,9 +117,9 @@ func (b *bookingRepo) UpdateService(chatID int64, service string) error {
 	return nil
 }
 
-func (b *bookingRepo) Save(booking *entity.Booking) (*entity.Booking, error) {
+func (br *bookingRepo) Save(booking *entity.Booking) (*entity.Booking, error) {
 	now := time.Now().UTC().Add(3 * time.Hour)
-	err := b.db.QueryRow(SaveBooking,
+	err := br.db.QueryRow(SaveBooking,
 		booking.ChatID,
 		booking.Date,
 		booking.Time,
@@ -137,30 +137,96 @@ func (b *bookingRepo) Save(booking *entity.Booking) (*entity.Booking, error) {
 	return booking, nil
 }
 
-func (b *bookingRepo) SetPhone(phone string, chatID int64) error {
-	if _, err := b.db.Exec(SetPhone, phone, chatID); err != nil {
+func (br *bookingRepo) SetPhone(phone string, chatID int64) error {
+	if _, err := br.db.Exec(SetPhone, phone, chatID); err != nil {
 		return fmt.Errorf("[set_phone_by_chat_id] query error: %w", err)
 	}
 	return nil
 }
 
-func (b *bookingRepo) Confirm(chatID int64) error {
-	if _, err := b.db.Exec(ConfirmBooking, entity.Confirmed, "an_user", chatID); err != nil {
+func (br *bookingRepo) Confirm(chatID int64) error {
+	if _, err := br.db.Exec(ConfirmBooking, entity.Confirmed, "an_user", chatID); err != nil {
 		return fmt.Errorf("[confirm_booking] error: %w", err)
 	}
 	return nil
 }
 
-func (b *bookingRepo) AutoConfirm(chatID int64) error {
-	if _, err := b.db.Exec(ConfirmBooking, entity.Confirmed, "system", chatID); err != nil {
+func (br *bookingRepo) AutoConfirm(chatID int64) error {
+	if _, err := br.db.Exec(ConfirmBooking, entity.Confirmed, "system", chatID); err != nil {
 		return fmt.Errorf("[confirm_booking] error: %w", err)
 	}
 	return nil
 }
 
-func (b *bookingRepo) Cancel(chatID int64) error {
-	if _, err := b.db.Exec(CancelBooking, entity.Cancelled, chatID); err != nil {
+func (br *bookingRepo) Cancel(chatID int64) error {
+	if _, err := br.db.Exec(CancelBooking, entity.Cancelled, chatID); err != nil {
 		return fmt.Errorf("[cancel_booking] error: %w", err)
 	}
 	return nil
+}
+
+func (br *bookingRepo) FindAllActive() ([]entity.Booking, error) {
+	rows, err := br.db.Query(FindAllActive)
+	if err != nil {
+		return nil, fmt.Errorf("[find_all_active_bookings] query error: %w", err)
+	}
+	defer rows.Close()
+
+	var bookings []entity.Booking
+	for rows.Next() {
+		var booking entity.Booking
+		if err = rows.Scan(
+			&booking.ID,
+			&booking.ChatID,
+			&booking.UserPhone,
+			&booking.Date,
+			&booking.Time,
+			&booking.Service,
+			&booking.RimRadius,
+			&booking.TotalPrice,
+			&booking.Status,
+			&booking.IsActive,
+			&booking.CreatedAt,
+			&booking.UpdatedAt,
+			&booking.ConfirmedBy,
+			&booking.CancelledBy,
+			&booking.Notes,
+		); err != nil {
+			return nil, fmt.Errorf("[find_all_active_bookings] rows scan error: %w", err)
+		}
+		bookings = append(bookings, booking)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("[find_all_active_bookings] rows error: %w", err)
+	}
+
+	return bookings, nil
+}
+
+func (br *bookingRepo) Find(bookingID int64) (*entity.Booking, error) {
+	var booking entity.Booking
+	if err := br.db.QueryRow(FindByID, bookingID).Scan(
+		&booking.ID,
+		&booking.ChatID,
+		&booking.UserPhone,
+		&booking.Date,
+		&booking.Time,
+		&booking.Service,
+		&booking.RimRadius,
+		&booking.TotalPrice,
+		&booking.Status,
+		&booking.IsActive,
+		&booking.CreatedAt,
+		&booking.UpdatedAt,
+		&booking.ConfirmedBy,
+		&booking.CancelledBy,
+		&booking.Notes,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("[find_booking] booking %d not founded", bookingID)
+		}
+		return nil, utils.WrapError(err)
+	}
+	return &booking, nil
 }

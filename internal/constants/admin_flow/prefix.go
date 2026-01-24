@@ -7,7 +7,16 @@ const (
 	FlowPrefix      = "FLOW::"
 	MenuPrefix      = "MENU::"
 
-	PrefixBooking    = "BOOKINGS::"
-	PrefixStatistics = "STATISTICS::"
-	PrefixSettings   = "SETTINGS::"
+	PrefixBooking    = "BOOKING::"
+	PrefixStatistics = "STAT::"
+	PrefixSettings   = "STNG::"
+	PrefixReject     = "REJECT:"
+
+	PrefixComplete           = "CMP:"
+	PrefixPreCompleteBooking = PrefixComplete + "1:"
+	PrefixCompleteBooking    = PrefixComplete + "2:"
+
+	PrefixNoShow           = "NS:"
+	PrefixPreNoShowBooking = PrefixNoShow + "1:"
+	PrefixNoShowBooking    = PrefixNoShow + "2:"
 )

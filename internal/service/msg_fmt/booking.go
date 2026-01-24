@@ -5,10 +5,11 @@ import (
 	"fmt"
 
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	msg_fmt2 "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/msg_fmt"
+	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/fmt"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -16,16 +17,16 @@ type bookingMessageFormattingService struct {
 	dateTime isvc.DateTimeService
 }
 
-func NewBookingMessageFormattingService(dateTime isvc.DateTimeService) msg_fmt2.BookingMessageFormatterService {
+func NewBookingMessageFormattingService(dateTime isvc.DateTimeService) ifmt.BookingMessageFormatterService {
 	return &bookingMessageFormattingService{dateTime: dateTime}
 }
 
-func (b *bookingMessageFormattingService) Confirm(date, startTime string) string {
+func (bmfs *bookingMessageFormattingService) Confirm(date, startTime string) string {
 	return fmt.Sprintf(usflow.ConfirmMsg, date, startTime)
 }
 
-func (b *bookingMessageFormattingService) PreConfirm(booking *entity.Booking) (string, error) {
-	date, err := b.dateTime.FormatDate(booking.Date, "2006-01-02", "02.01.2006")
+func (bmfs *bookingMessageFormattingService) PreConfirm(booking *entity.Booking) (string, error) {
+	date, err := bmfs.dateTime.FormatDate(booking.Date, "2006-01-02", "02.01.2006")
 	if err != nil {
 		return "", utils.WrapError(err)
 	}
@@ -41,8 +42,8 @@ func (b *bookingMessageFormattingService) PreConfirm(booking *entity.Booking) (s
 	), nil
 }
 
-func (b *bookingMessageFormattingService) My(booking *entity.Booking) (string, error) {
-	view, err := b.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+func (bmfs *bookingMessageFormattingService) My(booking *entity.Booking) (string, error) {
+	view, err := bmfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
 	if err != nil {
 		return "", err
 	}
@@ -55,8 +56,8 @@ func (b *bookingMessageFormattingService) My(booking *entity.Booking) (string, e
 	), nil
 }
 
-func (b *bookingMessageFormattingService) Restriction(booking *entity.Booking) (string, error) {
-	view, err := b.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+func (bmfs *bookingMessageFormattingService) Restriction(booking *entity.Booking) (string, error) {
+	view, err := bmfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
 	if err != nil {
 		return "", utils.WrapError(err)
 	}
@@ -64,13 +65,29 @@ func (b *bookingMessageFormattingService) Restriction(booking *entity.Booking) (
 	return fmt.Sprintf(usflow.BookingRestriction, view), nil
 }
 
-func (b *bookingMessageFormattingService) PreCancel(date, time string) (string, error) {
-	view, err := b.dateTime.FormatDateTimeToShortView(date, time, "2006-01-02")
+func (bmfs *bookingMessageFormattingService) PreCancel(date, time string) (string, error) {
+	view, err := bmfs.dateTime.FormatDateTimeToShortView(date, time, "2006-01-02")
 	if err != nil {
 		return "", utils.WrapError(err)
 	}
 
 	return fmt.Sprintf(usflow.BookingPreCancellation, view), nil
+}
+
+func (bmfs *bookingMessageFormattingService) BookingPreview(booking *entity.Booking) (string, error) {
+	view, err := bmfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+	if err != nil {
+		return "", utils.WrapError(err)
+	}
+
+	return fmt.Sprintf(
+		admflow.BookingInfo,
+		view,
+		booking.RimRadius,
+		consts.ServiceNames[booking.Service],
+		SQLNullIntToInt64(booking.TotalPrice),
+		SQLNullString(booking.UserPhone),
+	), nil
 }
 
 func SQLNullIntToInt64(nullable sql.NullInt64) int64 {

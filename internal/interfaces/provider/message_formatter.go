@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/msg_fmt"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/fmt"
 )
 
 type MessageFormatterProvider interface {
-	Booking() msg_fmt.BookingMessageFormatterService
-	Admin() msg_fmt.AdminMessageFormatterService
+	Booking() fmt.BookingMessageFormatterService
+	Admin() fmt.AdminMessageFormatterService
 }

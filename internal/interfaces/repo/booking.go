@@ -15,4 +15,6 @@ type BookingRepo interface {
 	AutoConfirm(chatID int64) error
 	Cancel(chatID int64) error
 	UpdateService(chatID int64, service string) error
+	FindAllActive() ([]entity.Booking, error)
+	Find(bookingID int64) (*entity.Booking, error)
 }
