@@ -59,3 +59,7 @@ func (sp *svcProvider) SlotLocker() isvc.SlotLocker {
 func (sp *svcProvider) Phone() isvc.PhoneService {
 	return service.NewPhoneNormalizingService()
 }
+
+func (sp *svcProvider) Statistics() isvc.StatisticService {
+	return service.NewStatisticService()
+}

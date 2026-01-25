@@ -8,6 +8,7 @@ import (
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -20,57 +21,25 @@ func NewBookingRepo(db *sql.DB) irepo.BookingRepo {
 }
 
 func (br *bookingRepo) FindActiveNotPending(chatID int64) (*entity.Booking, error) {
-	var booking entity.Booking
-	if err := br.db.QueryRow(FindActiveNotPending, chatID).Scan(
-		&booking.ID,
-		&booking.ChatID,
-		&booking.UserPhone,
-		&booking.Date,
-		&booking.Time,
-		&booking.Service,
-		&booking.RimRadius,
-		&booking.TotalPrice,
-		&booking.Status,
-		&booking.IsActive,
-		&booking.CreatedAt,
-		&booking.UpdatedAt,
-		&booking.ConfirmedBy,
-		&booking.CancelledBy,
-		&booking.Notes,
-	); err != nil {
+	booking, err := scanBooking(br.db.QueryRow(FindActiveNotPending, chatID))
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("[find_booking_by_chat_id] failed for %d: %v", chatID, err)
 	}
-	return &booking, nil
+	return booking, nil
 }
 
 func (br *bookingRepo) FindPending(chatID int64) (*entity.Booking, error) {
-	var booking entity.Booking
-	if err := br.db.QueryRow(FindActivePending, chatID).Scan(
-		&booking.ID,
-		&booking.ChatID,
-		&booking.UserPhone,
-		&booking.Date,
-		&booking.Time,
-		&booking.Service,
-		&booking.RimRadius,
-		&booking.TotalPrice,
-		&booking.Status,
-		&booking.IsActive,
-		&booking.CreatedAt,
-		&booking.UpdatedAt,
-		&booking.ConfirmedBy,
-		&booking.CancelledBy,
-		&booking.Notes,
-	); err != nil {
+	booking, err := scanBooking(br.db.QueryRow(FindActivePending, chatID))
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("[find_booking_by_chat_id] failed for %d: %v", chatID, err)
 	}
-	return &booking, nil
+	return booking, nil
 }
 
 func (br *bookingRepo) Exists(chatID int64) bool {
@@ -174,29 +143,12 @@ func (br *bookingRepo) FindAllActive() ([]entity.Booking, error) {
 
 	var bookings []entity.Booking
 	for rows.Next() {
-		var booking entity.Booking
-		if err = rows.Scan(
-			&booking.ID,
-			&booking.ChatID,
-			&booking.UserPhone,
-			&booking.Date,
-			&booking.Time,
-			&booking.Service,
-			&booking.RimRadius,
-			&booking.TotalPrice,
-			&booking.Status,
-			&booking.IsActive,
-			&booking.CreatedAt,
-			&booking.UpdatedAt,
-			&booking.ConfirmedBy,
-			&booking.CancelledBy,
-			&booking.Notes,
-		); err != nil {
+		booking, err := scanBooking(rows)
+		if err != nil {
 			return nil, fmt.Errorf("[find_all_active_bookings] rows scan error: %w", err)
 		}
-		bookings = append(bookings, booking)
+		bookings = append(bookings, *booking)
 	}
-
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("[find_all_active_bookings] rows error: %w", err)
 	}
@@ -205,8 +157,35 @@ func (br *bookingRepo) FindAllActive() ([]entity.Booking, error) {
 }
 
 func (br *bookingRepo) Find(bookingID int64) (*entity.Booking, error) {
+	booking, err := scanBooking(br.db.QueryRow(FindByID, bookingID))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("[find_booking] booking %d not founded", bookingID)
+		}
+		return nil, utils.WrapError(err)
+	}
+
+	return booking, nil
+}
+
+func (br *bookingRepo) Close(info *model.BookingInfo) (*entity.Booking, error) {
+	booking, err := scanBooking(br.db.QueryRow(Close, info.Status, info.UserChatID, info.BookingID))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("[close_booking] booking %d not founded", info.BookingID)
+		}
+		return nil, utils.WrapError(err)
+	}
+
+	return booking, nil
+}
+
+func scanBooking(scanner interface {
+	Scan(dest ...any) error
+}) (*entity.Booking, error) {
 	var booking entity.Booking
-	if err := br.db.QueryRow(FindByID, bookingID).Scan(
+
+	if err := scanner.Scan(
 		&booking.ID,
 		&booking.ChatID,
 		&booking.UserPhone,
@@ -223,10 +202,8 @@ func (br *bookingRepo) Find(bookingID int64) (*entity.Booking, error) {
 		&booking.CancelledBy,
 		&booking.Notes,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("[find_booking] booking %d not founded", bookingID)
-		}
-		return nil, utils.WrapError(err)
+		return nil, err
 	}
+
 	return &booking, nil
 }

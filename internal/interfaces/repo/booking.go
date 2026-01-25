@@ -1,6 +1,9 @@
 package interfaces
 
-import "github.com/pan-asovsky/brandd-tg-bot/internal/entity"
+import (
+	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+)
 
 type BookingRepo interface {
 	FindActiveNotPending(chatID int64) (*entity.Booking, error)
@@ -17,4 +20,5 @@ type BookingRepo interface {
 	UpdateService(chatID int64, service string) error
 	FindAllActive() ([]entity.Booking, error)
 	Find(bookingID int64) (*entity.Booking, error)
+	Close(info *model.BookingInfo) (*entity.Booking, error)
 }

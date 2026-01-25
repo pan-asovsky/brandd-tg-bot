@@ -46,11 +46,33 @@ func NewNoShowBookingInfo(details []string) (*BookingInfo, error) {
 	return &BookingInfo{UserChatID: userChatID, BookingID: bookingID, Status: status}, nil
 }
 
+func NewCompleteBookingInfo(details []string) (*BookingInfo, error) {
+	var status Status
+	switch details[0] {
+	case "1":
+		status = PreCompleted
+	case "2":
+		status = Completed
+	}
+
+	userChatID, err := strconv.ParseInt(details[1], 10, 64)
+	if err != nil {
+		return nil, utils.WrapError(err)
+	}
+
+	bookingID, err := strconv.ParseInt(details[2], 10, 64)
+	if err != nil {
+		return nil, utils.WrapError(err)
+	}
+
+	return &BookingInfo{UserChatID: userChatID, BookingID: bookingID, Status: status}, nil
+}
+
 type Status string
 
 const (
-	PreNoShow   Status = "PreNoShow"
-	NoShow      Status = "NoShow"
-	PreComplete Status = "PreComplete"
-	Complete    Status = "Complete"
+	PreNoShow    Status = "PRE_NO_SHOW"
+	NoShow       Status = "NO_SHOW"
+	PreCompleted Status = "PRE_COMPLETED"
+	Completed    Status = "COMPLETED"
 )

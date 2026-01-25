@@ -50,8 +50,14 @@ func (ats *adminTelegramService) BookingPreview(chatID int64, booking *entity.Bo
 	})
 }
 
-func (ats *adminTelegramService) ConfirmNoShow(chatID int64, info *model.BookingInfo) error {
+func (ats *adminTelegramService) ConfirmAction(chatID int64, info *model.BookingInfo) error {
 	return utils.WrapFunctionError(func() error {
-		return ats.tgCommon.SendKeyboardMessage(chatID, admflow.ClientNoShow, ats.kb.ConfirmationKeyboard(info))
+		return ats.tgCommon.SendKeyboardMessage(chatID, admflow.ConfirmTerminateBooking, ats.kb.ConfirmationKeyboard(info))
+	})
+}
+
+func (ats *adminTelegramService) RejectAction(chatID int64, backDirection string) error {
+	return utils.WrapFunctionError(func() error {
+		return ats.tgCommon.SendKeyboardMessage(chatID, admflow.ActionRejected, ats.kb.BackKeyboard(backDirection))
 	})
 }

@@ -70,7 +70,7 @@ func (acbs *adminCallbackBuilderService) PreNoShow(userChatID int64, bookingID i
 func (acbs *adminCallbackBuilderService) Confirm(info *model.BookingInfo) string {
 	var statusPart string
 	switch info.Status {
-	case model.PreComplete:
+	case model.PreCompleted:
 		statusPart = admflow.PrefixCompleteBooking
 	case model.PreNoShow:
 		statusPart = admflow.PrefixNoShowBooking
@@ -86,5 +86,5 @@ func (acbs *adminCallbackBuilderService) Confirm(info *model.BookingInfo) string
 }
 
 func (acbs *adminCallbackBuilderService) Reject(info *model.BookingInfo) string {
-	return admflow.RejectActionCbk + "::" + string(info.Status)
+	return admflow.RejectActionCbk + string(info.Status)
 }

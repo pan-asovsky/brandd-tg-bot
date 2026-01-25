@@ -15,7 +15,7 @@ type adminCallbackHandler struct {
 	repoProvider     iprovider.RepoProvider
 	tgProvider       iprovider.TelegramProvider
 	callbackProvider iprovider.CallbackProvider
-	keyboardProvider iprovider.KeyboardProvider
+	kbProvider       iprovider.KeyboardProvider
 	handlers         map[string]CallbackFunc
 }
 
@@ -25,7 +25,7 @@ func NewAdminCallbackHandler(container provider.Container) ihandler.CallbackHand
 		repoProvider:     container.RepoProvider,
 		tgProvider:       container.TelegramProvider,
 		callbackProvider: container.CallbackProvider,
-		keyboardProvider: container.KeyboardProvider,
+		kbProvider:       container.KeyboardProvider,
 		handlers:         map[string]CallbackFunc{},
 	}
 

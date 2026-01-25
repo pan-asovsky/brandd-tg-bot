@@ -10,7 +10,7 @@ const (
 	BookingsBtn        = "📒 Записи"
 	StatisticsBtn      = "📊 Статистика"
 	SettingsBtn        = "⚙️ Настройки"
-	StartChatBtn       = "✒ Сообщение"
-	CompleteBookingBtn = "✅ Подтверждение"
-	NoShowBtn          = "❌ Отсутствие"
+	StartChatBtn       = "✒ Написать"
+	CompleteBookingBtn = "🟢 Завершить"
+	NoShowBtn          = "🟠 Не явился"
 )

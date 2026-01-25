@@ -57,6 +57,11 @@ const (
 
 	CancelBooking = `UPDATE bookings SET status = $1, is_active = false WHERE chat_id = $2`
 
+	Close = `UPDATE bookings SET status = $1, is_active = false 
+                WHERE chat_id = $2 AND id = $3
+                RETURNING id, chat_id,user_phone, date, time, service, rim_radius, total_price, 
+                    status, is_active, created_at, updated_at, confirmed_by, cancelled_by, notes;`
+
 	GetPricePerSet = `SELECT price_per_set FROM prices WHERE service_type_code = $1 AND rim_size = $2 AND is_active = true`
 
 	FreeUpSlot = `UPDATE available_slots SET is_available = true WHERE date = $1 AND start_time = $2`

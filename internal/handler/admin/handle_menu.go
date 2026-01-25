@@ -34,6 +34,12 @@ func (ach *adminCallbackHandler) menuBookings(query *tgapi.CallbackQuery) error 
 		return utils.WrapError(err)
 	}
 
+	if bookings == nil || len(bookings) == 0 {
+		return utils.WrapFunctionError(func() error {
+			return ach.tgProvider.Common().SendMessage(query.Message.Chat.ID, "Потом выйдем")
+		})
+	}
+
 	sort.Slice(bookings, func(i, j int) bool {
 		if bookings[i].Date != bookings[j].Date {
 			return bookings[i].Date < bookings[j].Date
@@ -42,19 +48,19 @@ func (ach *adminCallbackHandler) menuBookings(query *tgapi.CallbackQuery) error 
 	})
 
 	return utils.WrapFunctionError(func() error {
-		kb := ach.keyboardProvider.AdminKeyboard().Bookings(bookings)
+		kb := ach.kbProvider.AdminKeyboard().Bookings(bookings)
 		return ach.tgProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, admflow.FutureBookings, kb)
 	})
 }
 
 func (ach *adminCallbackHandler) menuStatistics(query *tgapi.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return ach.tgProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, "Тут какая-нибудь статистика", ach.keyboardProvider.AdminKeyboard().Statistics())
+		return ach.tgProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, "Тут какая-нибудь статистика", ach.kbProvider.AdminKeyboard().Statistics())
 	})
 }
 
 func (ach *adminCallbackHandler) menuSettings(query *tgapi.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return ach.tgProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, "Тут настройки", ach.keyboardProvider.AdminKeyboard().Settings())
+		return ach.tgProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, "Тут настройки", ach.kbProvider.AdminKeyboard().Settings())
 	})
 }

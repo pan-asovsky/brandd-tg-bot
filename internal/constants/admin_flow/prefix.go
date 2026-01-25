@@ -10,7 +10,7 @@ const (
 	PrefixBooking    = "BOOKING::"
 	PrefixStatistics = "STAT::"
 	PrefixSettings   = "STNG::"
-	PrefixReject     = "REJECT:"
+	PrefixReject     = "REJECT::"
 
 	PrefixComplete           = "CMP:"
 	PrefixPreCompleteBooking = PrefixComplete + "1:"

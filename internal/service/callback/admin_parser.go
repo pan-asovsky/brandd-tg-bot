@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
 	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
@@ -22,9 +23,9 @@ func (acps *adminCallbackParserService) Parse(query *tgapi.CallbackQuery) (strin
 }
 
 func (acps *adminCallbackParserService) ParseNoShow(query *tgapi.CallbackQuery) (*model.BookingInfo, error) {
-	info, ok := strings.CutPrefix(query.Data, "NS:")
+	info, ok := strings.CutPrefix(query.Data, admflow.PrefixNoShow)
 	if !ok {
-		return nil, errors.New("[parse_no_show] prefix NS: not found: " + query.Data)
+		return nil, errors.New("[parse_no_show] prefix NS not found: " + query.Data)
 	}
 
 	details := strings.Split(info, ":")
@@ -36,5 +37,15 @@ func (acps *adminCallbackParserService) ParseNoShow(query *tgapi.CallbackQuery) 
 }
 
 func (acps *adminCallbackParserService) ParseComplete(query *tgapi.CallbackQuery) (*model.BookingInfo, error) {
-	return nil, nil
+	info, ok := strings.CutPrefix(query.Data, admflow.PrefixComplete)
+	if !ok {
+		return nil, errors.New("[parse_complete] prefix CMP not found: " + query.Data)
+	}
+
+	details := strings.Split(info, ":")
+	if len(details) != 3 {
+		return nil, errors.New(fmt.Sprintf("[parse_complete] size: %d. info: %s", len(details), info))
+	}
+
+	return model.NewCompleteBookingInfo(details)
 }

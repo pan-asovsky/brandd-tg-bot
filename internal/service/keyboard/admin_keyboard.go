@@ -108,6 +108,12 @@ func (aks *adminKeyboardService) ConfirmationKeyboard(info *model.BookingInfo) t
 	)
 }
 
+func (aks *adminKeyboardService) BackKeyboard(backDirection string) tgapi.InlineKeyboardMarkup {
+	return tgapi.NewInlineKeyboardMarkup(
+		aks.backKeyboardRow(admflow.AdminPrefix + backDirection),
+	)
+}
+
 func (aks *adminKeyboardService) backKeyboardRow(callback string) []tgapi.InlineKeyboardButton {
 	return tgapi.NewInlineKeyboardRow(
 		tgapi.NewInlineKeyboardButtonData(admflow.BackBtn, callback),

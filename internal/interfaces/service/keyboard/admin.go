@@ -14,4 +14,5 @@ type AdminKeyboardService interface {
 	Settings() tgapi.InlineKeyboardMarkup
 	BookingInfo(userChatID int64, bookingID int64) tgapi.InlineKeyboardMarkup
 	ConfirmationKeyboard(info *model.BookingInfo) tgapi.InlineKeyboardMarkup
+	BackKeyboard(backDirection string) tgapi.InlineKeyboardMarkup
 }

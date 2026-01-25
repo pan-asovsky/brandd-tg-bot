@@ -14,4 +14,5 @@ type ServiceProvider interface {
 	User() isvc.UserService
 	SlotLocker() isvc.SlotLocker
 	Phone() isvc.PhoneService
+	Statistics() isvc.StatisticService
 }
