@@ -6,7 +6,6 @@ import (
 )
 
 type AdminCallbackParserService interface {
-	Parse(query *tgapi.CallbackQuery) (string, error)
 	ParseNoShow(query *tgapi.CallbackQuery) (*model.BookingInfo, error)
 	ParseComplete(query *tgapi.CallbackQuery) (*model.BookingInfo, error)
 }
