@@ -7,21 +7,21 @@ import (
 
 func (uch *userCallbackHandler) handleZone(query *tg.CallbackQuery) error {
 
-	info, err := uch.callbackProvider.UserCallbackParser().Parse(query)
+	info, err := uch.callback.UserCallbackParser().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err = uch.serviceProvider.Lock().Clean(info.ChatID); err != nil {
+	if err = uch.service.Lock().Clean(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
-	zones, err := uch.serviceProvider.Slot().GetAvailableZones(info.Date)
+	zones, err := uch.service.Slot().GetAvailableZones(info.Date)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().RequestTime(zones[info.Zone], info)
+		return uch.telegram.User().RequestTime(zones[info.Zone], info)
 	})
 }

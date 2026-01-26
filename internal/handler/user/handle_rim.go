@@ -7,14 +7,14 @@ import (
 )
 
 func (uch *userCallbackHandler) handleRim(query *tg.CallbackQuery) error {
-	provider := uch.serviceProvider
+	provider := uch.service
 
-	info, err := uch.callbackProvider.UserCallbackParser().Parse(query)
+	info, err := uch.callback.UserCallbackParser().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err = uch.cacheProvider.ServiceType().Clean(info.ChatID); err != nil {
+	if err = uch.cache.ServiceType().Clean(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
@@ -52,6 +52,6 @@ func (uch *userCallbackHandler) handleRim(query *tg.CallbackQuery) error {
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().RequestPreConfirm(booking, info)
+		return uch.telegram.User().RequestPreConfirm(booking, info)
 	})
 }

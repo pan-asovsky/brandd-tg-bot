@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interface/cache"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )

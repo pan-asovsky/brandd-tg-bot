@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -24,12 +24,12 @@ func (ach *adminCallbackHandler) handleBookings(query *tgapi.CallbackQuery) erro
 		return utils.WrapError(err)
 	}
 
-	booking, err := ach.serviceProvider.Booking().Find(bookingID)
+	booking, err := ach.service.Booking().Find(bookingID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return ach.tgProvider.Admin().BookingPreview(query.Message.Chat.ID, booking)
+		return ach.telegram.Admin().BookingPreview(query.Message.Chat.ID, booking)
 	})
 }

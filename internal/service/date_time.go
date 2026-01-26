@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 

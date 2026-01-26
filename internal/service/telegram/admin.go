@@ -1,12 +1,12 @@
 package telegram
 
 import (
-	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
-	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/keyboard"
+	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/telegram"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
@@ -59,5 +59,12 @@ func (ats *adminTelegramService) ConfirmAction(chatID int64, info *model.Booking
 func (ats *adminTelegramService) RejectAction(chatID int64, backDirection string) error {
 	return utils.WrapFunctionError(func() error {
 		return ats.tgCommon.SendKeyboardMessage(chatID, admflow.ActionRejected, ats.kb.BackKeyboard(backDirection))
+	})
+}
+
+func (ats *adminTelegramService) NoActiveBookings(chatID int64) error {
+	return utils.WrapFunctionError(func() error {
+		kb := ats.kb.BackKeyboard(admflow.AdminFlowCbk)
+		return ats.tgCommon.SendKeyboardMessage(chatID, admflow.NoActiveBookings, kb)
 	})
 }

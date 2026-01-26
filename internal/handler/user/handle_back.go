@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -18,7 +18,7 @@ func (uch *userCallbackHandler) handleBack(query *tgapi.CallbackQuery) error {
 	switch payload {
 	case consts.Menu:
 		return utils.WrapFunctionError(func() error {
-			return uch.telegramProvider.User().StartMenu(query.Message.Chat.ID)
+			return uch.telegram.User().StartMenu(query.Message.Chat.ID)
 		})
 	default:
 		return nil

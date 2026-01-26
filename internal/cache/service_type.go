@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/rules"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interface/cache"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/rule"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 	"github.com/redis/go-redis/v9"
 )
@@ -42,7 +42,7 @@ func (s *serviceTypeCache) Toggle(chatID int64, clickedService string) (map[stri
 
 	selectedMap[clickedService] = !selectedMap[clickedService]
 
-	serviceRules := &rules.ServiceRules{}
+	serviceRules := &rule.ServiceRules{}
 	finalMap := serviceRules.Apply(selectedMap, clickedService)
 
 	redisData := make(map[string]interface{})

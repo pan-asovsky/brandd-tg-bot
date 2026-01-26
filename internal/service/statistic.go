@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
 )
 
 type statisticService struct {

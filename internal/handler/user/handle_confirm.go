@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
@@ -33,7 +33,7 @@ func (uch *userCallbackHandler) handleYes(query *tgapi.CallbackQuery) error {
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().RequestUserPhone(info)
+		return uch.telegram.User().RequestUserPhone(info)
 	})
 }
 
@@ -44,21 +44,21 @@ func (uch *userCallbackHandler) handleNo(query *tgapi.CallbackQuery) error {
 		return utils.WrapError(err)
 	}
 
-	if err := uch.serviceProvider.Booking().Cancel(info.ChatID); err != nil {
+	if err := uch.service.Booking().Cancel(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().SendCancellationMessage(info.ChatID)
+		return uch.telegram.User().SendCancellationMessage(info.ChatID)
 	})
 }
 
 func (uch *userCallbackHandler) cleanSession(chatID int64) error {
-	if err := uch.cacheProvider.ServiceType().Clean(chatID); err != nil {
+	if err := uch.cache.ServiceType().Clean(chatID); err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.serviceProvider.Lock().Clean(chatID)
+		return uch.service.Lock().Clean(chatID)
 	})
 }

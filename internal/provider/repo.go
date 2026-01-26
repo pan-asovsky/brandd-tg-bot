@@ -3,9 +3,9 @@ package provider
 import (
 	"database/sql"
 
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
-	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/repository/postgres"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interface/repo"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/repository"
 )
 
 type repoProvider struct {
@@ -17,25 +17,25 @@ func NewRepoProvider(db *sql.DB) iprovider.RepoProvider {
 }
 
 func (p *repoProvider) Service() irepo.ServiceRepo {
-	return postgres.NewServiceRepo(p.db)
+	return repository.NewServiceRepo(p.db)
 }
 
 func (p *repoProvider) Price() irepo.PriceRepo {
-	return postgres.NewPriceRepo(p.db)
+	return repository.NewPriceRepo(p.db)
 }
 
 func (p *repoProvider) Config() irepo.ConfigRepo {
-	return postgres.NewConfigRepo(p.db)
+	return repository.NewConfigRepo(p.db)
 }
 
 func (p *repoProvider) Slot() irepo.SlotRepo {
-	return postgres.NewSlotRepo(p.db)
+	return repository.NewSlotRepo(p.db)
 }
 
 func (p *repoProvider) Booking() irepo.BookingRepo {
-	return postgres.NewBookingRepo(p.db)
+	return repository.NewBookingRepo(p.db)
 }
 
 func (p *repoProvider) User() irepo.UserRepo {
-	return postgres.NewUserRepo(p.db)
+	return repository.NewUserRepo(p.db)
 }

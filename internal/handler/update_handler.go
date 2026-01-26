@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
-	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
+	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/admin"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/user"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interface/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 )
 

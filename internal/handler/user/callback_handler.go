@@ -4,29 +4,31 @@ import (
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interface/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 )
 
 type userCallbackHandler struct {
-	serviceProvider  iprovider.ServiceProvider
-	repoProvider     iprovider.RepoProvider
-	cacheProvider    iprovider.CacheProvider
-	telegramProvider iprovider.TelegramProvider
-	callbackProvider iprovider.CallbackProvider
-	handlers         map[string]CallbackFunc
+	service      iprovider.ServiceProvider
+	repo         iprovider.RepoProvider
+	cache        iprovider.CacheProvider
+	telegram     iprovider.TelegramProvider
+	callback     iprovider.CallbackProvider
+	notification iprovider.NotificationProvider
+	handlers     map[string]CallbackFunc
 }
 
 func NewUserCallbackHandler(container provider.Container) ihandler.CallbackHandler {
 	uch := &userCallbackHandler{
-		serviceProvider:  container.ServiceProvider,
-		repoProvider:     container.RepoProvider,
-		cacheProvider:    container.CacheProvider,
-		telegramProvider: container.TelegramProvider,
-		callbackProvider: container.CallbackProvider,
-		handlers:         map[string]CallbackFunc{},
+		service:      container.ServiceProvider,
+		repo:         container.RepoProvider,
+		cache:        container.CacheProvider,
+		telegram:     container.TelegramProvider,
+		callback:     container.CallbackProvider,
+		notification: container.NotificationProvider,
+		handlers:     map[string]CallbackFunc{},
 	}
 
 	uch.register(usflow.PrefixDate, uch.handleDate)

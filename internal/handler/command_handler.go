@@ -2,9 +2,9 @@ package handler
 
 import (
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interface/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 

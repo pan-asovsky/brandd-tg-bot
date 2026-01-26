@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
-	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 

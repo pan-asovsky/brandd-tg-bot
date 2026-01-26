@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/mocks"
 	"github.com/stretchr/testify/assert"
 )

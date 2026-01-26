@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
@@ -61,7 +61,7 @@ func (bs *bookingService) FindActiveNotPending(chatID int64) (*entity.Booking, e
 }
 
 func (bs *bookingService) FindPending(chatID int64) (*entity.Booking, error) {
-	return bs.repoProvider.Booking().FindPending(chatID)
+	return bs.repoProvider.Booking().FindActivePending(chatID)
 }
 
 func (bs *bookingService) CancelOldIfExists(chatID int64) error {
@@ -114,6 +114,36 @@ func (bs *bookingService) RecalculatePrice(chatID int64) error {
 }
 
 func (bs *bookingService) Cancel(chatID int64) error {
+	//booking, err := bs.repoProvider.Booking().FindAnyActive(chatID)
+	//if err != nil || booking == nil {
+	//	return utils.WrapError(err)
+	//}
+
+	// 1.
+	// отменяет юзер из меню Мои записи
+	// status = confirmed
+	// is_active = true
+	// confirmed_by != null
+	// chatID = booking.ChatID
+	// cancelled_by = user(ChatID)
+
+	// 2.
+	// отменяют юзер на этапе подтверждения
+	// status = pending
+	// is_active = true
+	// confirmed_by == null
+	// chatID = booking.ChatID
+	// cancelled_by = user(ChatID)
+
+	//todo: закрывать надо тут в соответствии с логикой, а репой только сохранять результат
+	//if entity.Confirmed == booking.Status {
+	//	booking.CancelledBy = sql.NullString{
+	//		String: fmt.Sprintf("USER(%d)", booking.ChatID),
+	//		Valid:  true,
+	//	}
+	//}
+	//booking.Status = entity.Cancelled
+
 	return bs.repoProvider.Booking().Cancel(chatID)
 }
 

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
-	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
+	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 

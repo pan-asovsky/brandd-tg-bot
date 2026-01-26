@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
-	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 
@@ -15,11 +15,6 @@ type adminCallbackParserService struct{}
 
 func NewAdminCallbackParserService() icallback.AdminCallbackParserService {
 	return &adminCallbackParserService{}
-}
-
-func (acps *adminCallbackParserService) Parse(query *tgapi.CallbackQuery) (string, error) {
-
-	return "", nil
 }
 
 func (acps *adminCallbackParserService) ParseNoShow(query *tgapi.CallbackQuery) (*model.BookingInfo, error) {

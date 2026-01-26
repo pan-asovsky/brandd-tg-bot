@@ -3,7 +3,7 @@ package mocks
 import (
 	"fmt"
 
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
 )
 
 type slotLockerServiceMock struct {
@@ -25,7 +25,7 @@ func NewSlotLockerMock() isvc.SlotLocker {
 	}
 }
 
-func (m *slotLockerServiceMock) Lock(date, time string) (string, bool, error) {
+func (m *slotLockerServiceMock) Lock(_, _ string) (string, bool, error) {
 	m.LockCalled = true
 	if m.LockErr != nil {
 		return "", false, m.LockErr
@@ -33,7 +33,7 @@ func (m *slotLockerServiceMock) Lock(date, time string) (string, bool, error) {
 	return "mock-uid", m.LockOK, nil
 }
 
-func (m *slotLockerServiceMock) Unlock(key, u string) error {
+func (m *slotLockerServiceMock) Unlock(_, _ string) error {
 	m.UnlockCalled = true
 	return m.UnlockErr
 }
@@ -47,7 +47,7 @@ func (m *slotLockerServiceMock) IsLocked(date, time string) (bool, error) {
 	return locked, nil
 }
 
-func (m *slotLockerServiceMock) RefreshTTL(key string) error {
+func (m *slotLockerServiceMock) RefreshTTL(_ string) error {
 	m.RefreshCalled = true
 	return m.RefreshErr
 }

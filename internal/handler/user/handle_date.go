@@ -6,17 +6,17 @@ import (
 )
 
 func (uch *userCallbackHandler) handleDate(query *tg.CallbackQuery) error {
-	info, err := uch.callbackProvider.UserCallbackParser().Parse(query)
+	info, err := uch.callback.UserCallbackParser().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	zones, err := uch.serviceProvider.Slot().GetAvailableZones(info.Date)
+	zones, err := uch.service.Slot().GetAvailableZones(info.Date)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().RequestZone(zones, info)
+		return uch.telegram.User().RequestZone(zones, info)
 	})
 }

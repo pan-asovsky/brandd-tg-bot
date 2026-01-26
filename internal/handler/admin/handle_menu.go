@@ -2,11 +2,12 @@ package admin
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -29,14 +30,14 @@ func (ach *adminCallbackHandler) handleMenu(query *tgapi.CallbackQuery) error {
 }
 
 func (ach *adminCallbackHandler) menuBookings(query *tgapi.CallbackQuery) error {
-	bookings, err := ach.serviceProvider.Booking().FindAllActive()
+	bookings, err := ach.service.Booking().FindAllActive()
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	if bookings == nil || len(bookings) == 0 {
 		return utils.WrapFunctionError(func() error {
-			return ach.tgProvider.Common().SendMessage(query.Message.Chat.ID, "Потом выйдем")
+			return ach.telegram.Admin().NoActiveBookings(query.Message.Chat.ID)
 		})
 	}
 
@@ -48,19 +49,30 @@ func (ach *adminCallbackHandler) menuBookings(query *tgapi.CallbackQuery) error 
 	})
 
 	return utils.WrapFunctionError(func() error {
-		kb := ach.kbProvider.AdminKeyboard().Bookings(bookings)
-		return ach.tgProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, admflow.FutureBookings, kb)
+		return ach.telegram.Common().SendKeyboardMessageHTMLMode(
+			query.Message.Chat.ID,
+			fmt.Sprintf(admflow.FutureBookings, len(bookings)),
+			ach.keyboard.AdminKeyboard().Bookings(bookings),
+		)
 	})
 }
 
 func (ach *adminCallbackHandler) menuStatistics(query *tgapi.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return ach.tgProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, "Тут какая-нибудь статистика", ach.kbProvider.AdminKeyboard().Statistics())
+		return ach.telegram.Common().SendKeyboardMessage(
+			query.Message.Chat.ID,
+			"Тут какая-нибудь статистика",
+			ach.keyboard.AdminKeyboard().Statistics(),
+		)
 	})
 }
 
 func (ach *adminCallbackHandler) menuSettings(query *tgapi.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return ach.tgProvider.Common().SendKeyboardMessage(query.Message.Chat.ID, "Тут настройки", ach.kbProvider.AdminKeyboard().Settings())
+		return ach.telegram.Common().SendKeyboardMessage(
+			query.Message.Chat.ID,
+			"Тут настройки",
+			ach.keyboard.AdminKeyboard().Settings(),
+		)
 	})
 }

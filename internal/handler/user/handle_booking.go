@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	notif "github.com/pan-asovsky/brandd-tg-bot/internal/model/notification"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -36,60 +37,67 @@ func (uch *userCallbackHandler) handleBooking(query *tg.CallbackQuery) error {
 func (uch *userCallbackHandler) handleNew(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
 
-	if err := uch.serviceProvider.Booking().CancelOldIfExists(q.Message.Chat.ID); err != nil {
+	if err := uch.service.Booking().CancelOldIfExists(q.Message.Chat.ID); err != nil {
 		return utils.WrapError(err)
 	}
 
-	booking, err := uch.serviceProvider.Booking().FindActiveNotPending(info.ChatID)
+	booking, err := uch.service.Booking().FindActiveNotPending(info.ChatID)
 	if booking != nil && err == nil {
-		return uch.telegramProvider.User().SendBookingRestrictionMessage(info.ChatID, booking)
+		return uch.telegram.User().SendBookingRestrictionMessage(info.ChatID, booking)
 	}
 
-	bookings := uch.serviceProvider.Slot().GetAvailableDates()
+	bookings := uch.service.Slot().GetAvailableDates()
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().RequestDate(bookings, info)
+		return uch.telegram.User().RequestDate(bookings, info)
 	})
 }
 
 func (uch *userCallbackHandler) handleMy(q *tg.CallbackQuery) error {
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().SendMyBookingsMessage(q.Message.Chat.ID, func() (*entity.Booking, error) {
-			return uch.serviceProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
+		return uch.telegram.User().SendMyBookingsMessage(q.Message.Chat.ID, func() (*entity.Booking, error) {
+			return uch.service.Booking().FindActiveNotPending(q.Message.Chat.ID)
 		})
 	})
 }
 
 func (uch *userCallbackHandler) handlePreCancel(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
-	booking, err := uch.serviceProvider.Booking().FindActiveNotPending(q.Message.Chat.ID)
+	booking, err := uch.service.Booking().FindActiveNotPending(q.Message.Chat.ID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().SendPreCancelBookingMessage(info.ChatID, booking.Date, booking.Time)
+		return uch.telegram.User().SendPreCancelBookingMessage(info.ChatID, booking.Date, booking.Time)
 	})
 }
 
 func (uch *userCallbackHandler) handleCancel(q *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: q.Message.Chat.ID}
 
-	booking, err := uch.serviceProvider.Booking().FindActiveNotPending(info.ChatID)
+	booking, err := uch.service.Booking().FindActiveNotPending(info.ChatID)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	err = uch.serviceProvider.Slot().FreeUp(booking.Date, booking.Time)
+	err = uch.service.Slot().FreeUp(booking.Date, booking.Time)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err = uch.serviceProvider.Booking().Cancel(info.ChatID); err != nil {
+	if err = uch.service.Booking().Cancel(info.ChatID); err != nil {
+		return utils.WrapError(err)
+	}
+
+	if err = uch.notification.Service().Notify(notif.Event{
+		Type: notif.BookingCancelled,
+		Data: booking,
+	}); err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().SendCancellationMessage(info.ChatID)
+		return uch.telegram.User().SendCancellationMessage(info.ChatID)
 	})
 }
 
@@ -97,6 +105,6 @@ func (uch *userCallbackHandler) handleNoCancel(query *tg.CallbackQuery) error {
 	info := &model.UserSessionInfo{ChatID: query.Message.Chat.ID}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().SendCancelDenyMessage(info.ChatID)
+		return uch.telegram.User().SendCancelDenyMessage(info.ChatID)
 	})
 }

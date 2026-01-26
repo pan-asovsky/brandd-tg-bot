@@ -15,7 +15,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interface/handler"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 	"github.com/redis/go-redis/v9"
@@ -80,9 +80,19 @@ func (a *App) Init() error {
 	msgFmtProvider := provider.NewMessageFormatterProvider(serviceProvider.DateTime())
 	keyboardProvider := provider.NewKeyboardProvider(serviceProvider.DateTime(), callbackProvider)
 	telegramProvider := provider.NewTelegramProvider(a.BotAPI, serviceProvider, keyboardProvider, msgFmtProvider)
+	notifProvider := provider.NewNotificationProvider(serviceProvider.User(), telegramProvider.Common(), msgFmtProvider)
 
 	// container
-	a.ProviderContainer = *provider.NewContainer(repoProvider, serviceProvider, cacheProvider, telegramProvider, callbackProvider, msgFmtProvider, keyboardProvider)
+	a.ProviderContainer = *provider.NewContainer(
+		repoProvider,
+		serviceProvider,
+		cacheProvider,
+		telegramProvider,
+		callbackProvider,
+		msgFmtProvider,
+		keyboardProvider,
+		notifProvider,
+	)
 
 	// handler
 	a.UpdateHandler = handler.NewUpdateHandler(a.ProviderContainer)

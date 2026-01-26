@@ -7,25 +7,25 @@ import (
 
 func (uch *userCallbackHandler) handleTime(query *tg.CallbackQuery) error {
 
-	info, err := uch.callbackProvider.UserCallbackParser().Parse(query)
+	info, err := uch.callback.UserCallbackParser().Parse(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err = uch.cacheProvider.ServiceType().Clean(info.ChatID); err != nil {
+	if err = uch.cache.ServiceType().Clean(info.ChatID); err != nil {
 		return utils.WrapError(err)
 	}
 
-	if err := uch.serviceProvider.Lock().Toggle(info); err != nil {
+	if err := uch.service.Lock().Toggle(info); err != nil {
 		return utils.WrapError(err)
 	}
 
-	types, err := uch.repoProvider.Service().GetServiceTypes()
+	types, err := uch.repo.Service().GetServiceTypes()
 	if err != nil {
 		return utils.WrapError(err)
 	}
 
 	return utils.WrapFunctionError(func() error {
-		return uch.telegramProvider.User().RequestServiceTypes(types, info)
+		return uch.telegram.User().RequestServiceTypes(types, info)
 	})
 }

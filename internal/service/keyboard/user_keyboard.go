@@ -5,14 +5,14 @@ import (
 	"sort"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/user_flow"
+	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
-	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
-	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/callback"
+	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/keyboard"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 
-	"github.com/pan-asovsky/brandd-tg-bot/internal/rules"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/rule"
 )
 
 type userKeyboardService struct {
@@ -147,7 +147,7 @@ func (uks *userKeyboardService) ServiceKeyboard(types []entity.ServiceType, info
 
 		sort.Strings(selectedTrue)
 
-		serviceRules := rules.ServiceRules{}
+		serviceRules := rule.ServiceRules{}
 		service := serviceRules.MapServices(selectedTrue)
 		info.Service = service
 

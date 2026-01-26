@@ -1,8 +1,8 @@
 package provider
 
 import (
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
 )
 

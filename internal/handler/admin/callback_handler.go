@@ -4,29 +4,31 @@ import (
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constants/admin_flow"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interface/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 )
 
 type adminCallbackHandler struct {
-	serviceProvider  iprovider.ServiceProvider
-	repoProvider     iprovider.RepoProvider
-	tgProvider       iprovider.TelegramProvider
-	callbackProvider iprovider.CallbackProvider
-	kbProvider       iprovider.KeyboardProvider
-	handlers         map[string]CallbackFunc
+	service      iprovider.ServiceProvider
+	repo         iprovider.RepoProvider
+	telegram     iprovider.TelegramProvider
+	callback     iprovider.CallbackProvider
+	keyboard     iprovider.KeyboardProvider
+	notification iprovider.NotificationProvider
+	handlers     map[string]CallbackFunc
 }
 
 func NewAdminCallbackHandler(container provider.Container) ihandler.CallbackHandler {
 	ach := &adminCallbackHandler{
-		serviceProvider:  container.ServiceProvider,
-		repoProvider:     container.RepoProvider,
-		tgProvider:       container.TelegramProvider,
-		callbackProvider: container.CallbackProvider,
-		kbProvider:       container.KeyboardProvider,
-		handlers:         map[string]CallbackFunc{},
+		service:      container.ServiceProvider,
+		repo:         container.RepoProvider,
+		telegram:     container.TelegramProvider,
+		callback:     container.CallbackProvider,
+		keyboard:     container.KeyboardProvider,
+		notification: container.NotificationProvider,
+		handlers:     map[string]CallbackFunc{},
 	}
 
 	ach.register(admflow.MenuPrefix, ach.handleMenu)

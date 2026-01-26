@@ -1,15 +1,16 @@
 package provider
 
-import iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+import iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
 
 type Container struct {
-	RepoProvider     iprovider.RepoProvider
-	ServiceProvider  iprovider.ServiceProvider
-	CacheProvider    iprovider.CacheProvider
-	TelegramProvider iprovider.TelegramProvider
-	CallbackProvider iprovider.CallbackProvider
-	MsgFmtProvider   iprovider.MessageFormatterProvider
-	KeyboardProvider iprovider.KeyboardProvider
+	RepoProvider         iprovider.RepoProvider
+	ServiceProvider      iprovider.ServiceProvider
+	CacheProvider        iprovider.CacheProvider
+	TelegramProvider     iprovider.TelegramProvider
+	CallbackProvider     iprovider.CallbackProvider
+	MsgFmtProvider       iprovider.MessageFormatterProvider
+	KeyboardProvider     iprovider.KeyboardProvider
+	NotificationProvider iprovider.NotificationProvider
 }
 
 func NewContainer(
@@ -19,15 +20,17 @@ func NewContainer(
 	telegram iprovider.TelegramProvider,
 	callback iprovider.CallbackProvider,
 	msgFmt iprovider.MessageFormatterProvider,
-	keyboardProvider iprovider.KeyboardProvider,
+	keyboard iprovider.KeyboardProvider,
+	notification iprovider.NotificationProvider,
 ) *Container {
 	return &Container{
-		RepoProvider:     repo,
-		ServiceProvider:  service,
-		CacheProvider:    cache,
-		TelegramProvider: telegram,
-		CallbackProvider: callback,
-		MsgFmtProvider:   msgFmt,
-		KeyboardProvider: keyboardProvider,
+		RepoProvider:         repo,
+		ServiceProvider:      service,
+		CacheProvider:        cache,
+		TelegramProvider:     telegram,
+		CallbackProvider:     callback,
+		MsgFmtProvider:       msgFmt,
+		KeyboardProvider:     keyboard,
+		NotificationProvider: notification,
 	}
 }

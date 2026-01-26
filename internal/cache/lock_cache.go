@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interface/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 	"github.com/redis/go-redis/v9"

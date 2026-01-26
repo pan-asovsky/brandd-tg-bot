@@ -11,7 +11,7 @@ import (
 func (ach *adminCallbackHandler) handleComplete(query *tgapi.CallbackQuery) error {
 	log.Printf("[handle_complete] callback: %s", query.Data)
 
-	bookingInfo, err := ach.callbackProvider.AdminCallbackParser().ParseComplete(query)
+	bookingInfo, err := ach.callback.AdminCallbackParser().ParseComplete(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
@@ -31,6 +31,6 @@ func (ach *adminCallbackHandler) handleComplete(query *tgapi.CallbackQuery) erro
 func (ach *adminCallbackHandler) handlePreComplete(chatID int64, info *model.BookingInfo) error {
 	log.Printf("[handle_pre_complete] info: %v", info)
 	return utils.WrapFunctionError(func() error {
-		return ach.tgProvider.Admin().ConfirmAction(chatID, info)
+		return ach.telegram.Admin().ConfirmAction(chatID, info)
 	})
 }

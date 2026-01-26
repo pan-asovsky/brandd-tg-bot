@@ -4,8 +4,8 @@ import (
 	"log"
 	"strings"
 
-	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interface/repo"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
