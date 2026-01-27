@@ -34,6 +34,8 @@ const (
 	FindAnyActive        = `SELECT * FROM bookings WHERE chat_id = $1 and is_active = true`
 	FindAllActive        = `SELECT * FROM bookings WHERE is_active = true`
 
+	FindByPeriod = `SELECT * FROM bookings where date >= $1 and date < $2`
+
 	FindByID = `SELECT * FROM bookings WHERE id = $1`
 
 	BookingExists = `SELECT EXISTS(SELECT 1 FROM bookings WHERE chat_id = $1 AND is_active = true AND status NOT IN ('CANCELLED', 'NO_SHOW'))`

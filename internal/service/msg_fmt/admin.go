@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant"
-	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/constant/notification"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
 	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/fmt"
@@ -26,7 +26,7 @@ func (amfs *adminMessageFormatterService) BookingCreated(booking *entity.Booking
 	}
 
 	return fmt.Sprintf(
-		admflow.NewBookingNotification,
+		notification.NewBooking,
 		view,
 		booking.RimRadius,
 		consts.ServiceNames[booking.Service],
@@ -42,12 +42,12 @@ func (amfs *adminMessageFormatterService) BookingCancelled(booking *entity.Booki
 	}
 
 	return fmt.Sprintf(
-		admflow.CancelBookingNotification,
+		notification.CancelBooking,
 		view,
 		SQLNullString(booking.UserPhone),
 	), nil
 }
 
 func (amfs *adminMessageFormatterService) BookingCompleted(_ *entity.Booking) (string, error) {
-	return admflow.CompleteBookingNotification, nil
+	return notification.CompleteBooking, nil
 }

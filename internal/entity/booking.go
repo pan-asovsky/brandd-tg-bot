@@ -11,14 +11,13 @@ type AvailableDate struct {
 }
 type BookingStatus string
 
-// todo: statuses!
 const (
 	Pending      BookingStatus = "PENDING"
 	NotConfirmed BookingStatus = "NOT_CONFIRMED"
 	Confirmed    BookingStatus = "CONFIRMED"
-	Completed    BookingStatus = "COMPLETED"
+	_            BookingStatus = "COMPLETED"
 	Cancelled    BookingStatus = "CANCELLED"
-	NoShow       BookingStatus = "NO_SHOW"
+	_            BookingStatus = "NO_SHOW"
 )
 
 type Booking struct {

@@ -1,25 +1,11 @@
 package admin_flow
 
 const (
-	NewBookingNotification = "🟢 <b>Новая запись!</b>\n\n" +
-		"📆 %s\n" +
-		"🛞 Радиус: %s\n" +
-		"🔧 Тип работ: %s\n" +
-		"💰 Ориентировочная цена: %d\n" +
-		"📞 Номер телефона: <code>%s</code>"
-
-	CancelBookingNotification = "🔴 <b>Клиент отменил запись!</b>\n\n" +
-		"📆 %s\n" +
-		"📞 Номер телефона: <code>%s</code>"
-
-	// CompleteBookingNotification todo: на своём ли он месте?
-	CompleteBookingNotification = "Спасибо!"
-
 	ChoiceContinueFlow = "⚙️ У вас есть права администратора." +
 		"\nМожете выбрать дальнейший сценарий." +
 		"\n\nХотите продолжить как:"
 
-	AnyMsg = "Тут что-то напишем"
+	AnyMsg = "Меню администратора Bandd"
 
 	BookingInfo = "📆 %s\n" +
 		"🛞 Радиус: %s\n" +
@@ -42,5 +28,5 @@ const (
 
 	ActionRejected = "Действие отменено"
 
-	NoActiveBookings = "Нет активных записей"
+	NoActiveBookings = "Нет активных записей 💬"
 )

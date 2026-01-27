@@ -3,6 +3,7 @@ package interfaces
 import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
 )
 
 type BookingRepo interface {
@@ -22,4 +23,6 @@ type BookingRepo interface {
 	FindAllActive() ([]entity.Booking, error)
 	Find(bookingID int64) (*entity.Booking, error)
 	Close(info *model.BookingInfo) (*entity.Booking, error)
+
+	FindByPeriod(period stat.Period) ([]entity.Booking, error)
 }

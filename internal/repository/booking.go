@@ -9,6 +9,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interface/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -21,59 +22,36 @@ func NewBookingRepo(db *sql.DB) irepo.BookingRepo {
 }
 
 func (br *bookingRepo) FindActiveNotPending(chatID int64) (*entity.Booking, error) {
-	return br.findOneByAnyID(FindActiveNotPending, "find_active_not_pending", chatID)
+	return br.findOne(FindActiveNotPending, "find_active_not_pending", chatID)
 }
 
 func (br *bookingRepo) FindActivePending(chatID int64) (*entity.Booking, error) {
-	return br.findOneByAnyID(FindActivePending, "find_active_pending", chatID)
+	return br.findOne(FindActivePending, "find_active_pending", chatID)
 }
 
 func (br *bookingRepo) FindAnyActive(chatID int64) (*entity.Booking, error) {
-	return br.findOneByAnyID(FindAnyActive, "find_any_active", chatID)
+	return br.findOne(FindAnyActive, "find_any_active", chatID)
 }
 
 func (br *bookingRepo) Exists(chatID int64) bool {
-	var exists bool
-	if err := br.db.QueryRow(BookingExists, chatID).Scan(&exists); err != nil {
-		return false
-	}
-	return exists
+	ok, err := br.exists(BookingExists, chatID)
+	return err == nil && ok
 }
 
 func (br *bookingRepo) UpdateRimRadius(chatID int64, rimRadius string) error {
-	_, err := br.db.Exec(UpdateRimRadius, rimRadius, chatID)
-	if err != nil {
-		return utils.WrapError(err)
-	}
-
-	return nil
+	return br.exec(UpdateRimRadius, "update_rim_radius", rimRadius, chatID)
 }
 
 func (br *bookingRepo) UpdateStatus(chatID int64, status entity.BookingStatus) error {
-	_, err := br.db.Exec(UpdateStatus, status, chatID)
-	if err != nil {
-		return utils.WrapError(err)
-	}
-
-	return nil
+	return br.exec(UpdateStatus, "update_status", status, chatID)
 }
 
 func (br *bookingRepo) UpdatePrice(chatID int64, price int64) error {
-	_, err := br.db.Exec(UpdatePrice, price, chatID)
-	if err != nil {
-		return utils.WrapError(err)
-	}
-
-	return nil
+	return br.exec(UpdatePrice, "update_price", price, chatID)
 }
 
 func (br *bookingRepo) UpdateService(chatID int64, service string) error {
-	_, err := br.db.Exec(UpdateService, service, chatID)
-	if err != nil {
-		return utils.WrapError(err)
-	}
-
-	return nil
+	return br.exec(UpdateService, "update_service", service, chatID)
 }
 
 func (br *bookingRepo) Save(booking *entity.Booking) (*entity.Booking, error) {
@@ -97,69 +75,35 @@ func (br *bookingRepo) Save(booking *entity.Booking) (*entity.Booking, error) {
 }
 
 func (br *bookingRepo) SetPhone(phone string, chatID int64) error {
-	if _, err := br.db.Exec(SetPhone, phone, chatID); err != nil {
-		return fmt.Errorf("[set_phone_by_chat_id] query error: %w", err)
-	}
-	return nil
+	return br.exec(SetPhone, "set_phone", phone, chatID)
 }
 
 func (br *bookingRepo) Confirm(chatID int64) error {
-	if _, err := br.db.Exec(ConfirmBooking, entity.Confirmed, "an_user", chatID); err != nil {
-		return fmt.Errorf("[confirm_booking] error: %w", err)
-	}
-	return nil
+	return br.confirm(chatID, "user")
 }
 
 func (br *bookingRepo) AutoConfirm(chatID int64) error {
-	if _, err := br.db.Exec(ConfirmBooking, entity.Confirmed, "system", chatID); err != nil {
-		return fmt.Errorf("[confirm_booking] error: %w", err)
-	}
-	return nil
+	return br.confirm(chatID, "system")
 }
 
 func (br *bookingRepo) Cancel(chatID int64) error {
-	if _, err := br.db.Exec(CancelBooking, entity.Cancelled, chatID); err != nil {
-		return fmt.Errorf("[cancel_booking] error: %w", err)
-	}
-	return nil
+	return br.exec(CancelBooking, "cancel", entity.Cancelled, chatID)
 }
 
 func (br *bookingRepo) FindAllActive() ([]entity.Booking, error) {
-	rows, err := br.db.Query(FindAllActive)
-	if err != nil {
-		return nil, fmt.Errorf("[find_all_active_bookings] query error: %w", err)
-	}
-	defer rows.Close()
-
-	var bookings []entity.Booking
-	for rows.Next() {
-		booking, err := scanBooking(rows)
-		if err != nil {
-			return nil, fmt.Errorf("[find_all_active_bookings] rows scan error: %w", err)
-		}
-		bookings = append(bookings, *booking)
-	}
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("[find_all_active_bookings] rows error: %w", err)
-	}
-
-	return bookings, nil
+	return br.findMany(FindAllActive, "find_all_active")
 }
 
 func (br *bookingRepo) Find(bookingID int64) (*entity.Booking, error) {
-	booking, err := scanBooking(br.db.QueryRow(FindByID, bookingID))
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("[find_booking] booking %d not founded", bookingID)
-		}
-		return nil, utils.WrapError(err)
+	booking, err := br.findOne(FindByID, "find_by_id", bookingID)
+	if booking == nil && err != nil {
+		return nil, fmt.Errorf("[find_booking] booking %d not founded", bookingID)
 	}
-
 	return booking, nil
 }
 
 func (br *bookingRepo) Close(info *model.BookingInfo) (*entity.Booking, error) {
-	booking, err := scanBooking(br.db.QueryRow(Close, entity.BookingStatus(info.Status), info.UserChatID, info.BookingID))
+	booking, err := scan(br.db.QueryRow(Close, entity.BookingStatus(info.Status), info.UserChatID, info.BookingID))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("[close_booking] booking %d not founded", info.BookingID)
@@ -170,18 +114,45 @@ func (br *bookingRepo) Close(info *model.BookingInfo) (*entity.Booking, error) {
 	return booking, nil
 }
 
-func (br *bookingRepo) findOneByAnyID(query string, tag string, id int64) (*entity.Booking, error) {
-	booking, err := scanBooking(br.db.QueryRow(query, id))
+func (br *bookingRepo) FindByPeriod(period stat.Period) ([]entity.Booking, error) {
+	return br.findMany(FindByPeriod, "find_by_period", period.From, period.To)
+}
+
+func (br *bookingRepo) findOne(query, tag string, args ...any) (*entity.Booking, error) {
+	booking, err := scan(br.db.QueryRow(query, args...))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("[%s] failed for %d: %w", tag, id, err)
+		return nil, fmt.Errorf("[%s] query error: %w", tag, err)
 	}
 	return booking, nil
 }
 
-func scanBooking(scanner interface {
+func (br *bookingRepo) findMany(query, tag string, args ...any) ([]entity.Booking, error) {
+	rows, err := br.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("[%s] query error: %w", tag, err)
+	}
+	defer rows.Close()
+
+	var bookings []entity.Booking
+	for rows.Next() {
+		booking, err := scan(rows)
+		if err != nil {
+			return nil, fmt.Errorf("[%s] rows scan error: %w", tag, err)
+		}
+		bookings = append(bookings, *booking)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("[%s] rows error: %w", tag, err)
+	}
+
+	return bookings, nil
+}
+
+func scan(scanner interface {
 	Scan(dest ...any) error
 }) (*entity.Booking, error) {
 	var booking entity.Booking
@@ -207,4 +178,24 @@ func scanBooking(scanner interface {
 	}
 
 	return &booking, nil
+}
+
+func (br *bookingRepo) exec(query, tag string, args ...any) error {
+	if _, err := br.db.Exec(query, args...); err != nil {
+		return fmt.Errorf("[%s] exec error: %w", tag, err)
+	}
+	return nil
+}
+
+func (br *bookingRepo) confirm(chatID int64, confirmedBy string) error {
+	return br.exec(ConfirmBooking, "confirm_booking", entity.Confirmed, confirmedBy, chatID)
+}
+
+func (br *bookingRepo) exists(query string, args ...any) (bool, error) {
+	var exists bool
+	err := br.db.QueryRow(query, args...).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
