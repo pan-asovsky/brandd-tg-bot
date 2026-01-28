@@ -5,7 +5,7 @@ import (
 	"time"
 
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/mocks"
 	"github.com/stretchr/testify/assert"
 )

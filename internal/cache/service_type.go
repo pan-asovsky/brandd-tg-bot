@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interface/cache"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/rule"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 	"github.com/redis/go-redis/v9"

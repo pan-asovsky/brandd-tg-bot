@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/callback"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 

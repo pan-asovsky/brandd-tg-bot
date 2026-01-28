@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
-	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/callback"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 

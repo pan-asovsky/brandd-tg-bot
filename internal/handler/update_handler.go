@@ -11,8 +11,8 @@ import (
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/admin"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler/user"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interface/handler"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 )
 
@@ -24,12 +24,12 @@ type updateHandler struct {
 
 func NewUpdateHandler(container provider.Container) ihandler.UpdateHandler {
 	return &updateHandler{
-		telegramProvider: container.TelegramProvider,
-		command:          NewCommandHandler(container.TelegramProvider, container.ServiceProvider),
+		telegramProvider: container.Telegram,
+		command:          NewCommandHandler(container.Telegram, container.Service),
 		userCallback:     user.NewUserCallbackHandler(container),
 		adminCallback:    admin.NewAdminCallbackHandler(container),
 		userMessage:      user.NewUserMessageHandler(container),
-		adminMessage:     admin.NewAdminMessageHandler(container.TelegramProvider, container.ServiceProvider),
+		adminMessage:     admin.NewAdminMessageHandler(container.Telegram, container.Service),
 	}
 }
 

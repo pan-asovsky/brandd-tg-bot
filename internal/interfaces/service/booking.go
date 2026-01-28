@@ -20,6 +20,6 @@ type BookingService interface {
 	RecalculatePrice(chatID int64) error
 	Cancel(chatID int64) error
 	FindAllActive() ([]entity.Booking, error)
-	Find(bookingID int64) (*entity.Booking, error)
+	FindById(bookingID int64) (*entity.Booking, error)
 	Close(info *model.BookingInfo) (*entity.Booking, error)
 }

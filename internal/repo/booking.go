@@ -1,4 +1,4 @@
-package repository
+package repo
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interface/repo"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
@@ -114,8 +114,8 @@ func (br *bookingRepo) Close(info *model.BookingInfo) (*entity.Booking, error) {
 	return booking, nil
 }
 
-func (br *bookingRepo) FindByPeriod(period stat.Period) ([]entity.Booking, error) {
-	return br.findMany(FindByPeriod, "find_by_period", period.From, period.To)
+func (br *bookingRepo) ListByPeriod(period stat.Period) ([]entity.Booking, error) {
+	return br.findMany(ListByPeriod, "list_by_period", period.From, period.To)
 }
 
 func (br *bookingRepo) findOne(query, tag string, args ...any) (*entity.Booking, error) {
@@ -167,7 +167,7 @@ func scan(scanner interface {
 		&booking.RimRadius,
 		&booking.TotalPrice,
 		&booking.Status,
-		&booking.IsActive,
+		&booking.Active,
 		&booking.CreatedAt,
 		&booking.UpdatedAt,
 		&booking.ConfirmedBy,

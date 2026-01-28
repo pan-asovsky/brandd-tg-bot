@@ -5,8 +5,8 @@ import (
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interface/handler"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 )
 
@@ -17,17 +17,19 @@ type adminCallbackHandler struct {
 	callback     iprovider.CallbackProvider
 	keyboard     iprovider.KeyboardProvider
 	notification iprovider.NotificationProvider
+	statistics   iprovider.StatisticsProvider
 	handlers     map[string]CallbackFunc
 }
 
 func NewAdminCallbackHandler(container provider.Container) ihandler.CallbackHandler {
 	ach := &adminCallbackHandler{
-		service:      container.ServiceProvider,
-		repo:         container.RepoProvider,
-		telegram:     container.TelegramProvider,
-		callback:     container.CallbackProvider,
-		keyboard:     container.KeyboardProvider,
-		notification: container.NotificationProvider,
+		service:      container.Service,
+		repo:         container.Repo,
+		telegram:     container.Telegram,
+		callback:     container.Callback,
+		keyboard:     container.Keyboard,
+		notification: container.Notification,
+		statistics:   container.Statistics,
 		handlers:     map[string]CallbackFunc{},
 	}
 

@@ -6,8 +6,9 @@ import (
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/constant/notification"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
-	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/fmt"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/fmt"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -50,4 +51,17 @@ func (amfs *adminMessageFormatterService) BookingCancelled(booking *entity.Booki
 
 func (amfs *adminMessageFormatterService) BookingCompleted(_ *entity.Booking) (string, error) {
 	return notification.CompleteBooking, nil
+}
+
+func (amfs *adminMessageFormatterService) Statistics(s stat.Stats, p stat.Period) string {
+	from, to := p.Format()
+	return fmt.Sprintf(
+		consts.StatShortMessage,
+		from, to,
+		s.ActiveCount,
+		s.CompletedCount,
+		s.PendingCount,
+		s.NoShowCount,
+		s.CanceledCount,
+	)
 }

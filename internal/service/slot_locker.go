@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/redis/go-redis/v9"
 )
 

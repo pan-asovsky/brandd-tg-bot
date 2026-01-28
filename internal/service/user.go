@@ -2,8 +2,8 @@ package service
 
 import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interface/repo"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 )
 
 type userService struct {

@@ -1,9 +1,9 @@
-package repository
+package repo
 
 import (
 	"database/sql"
 
-	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interface/repo"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 

@@ -15,9 +15,9 @@ const (
 	Pending      BookingStatus = "PENDING"
 	NotConfirmed BookingStatus = "NOT_CONFIRMED"
 	Confirmed    BookingStatus = "CONFIRMED"
-	_            BookingStatus = "COMPLETED"
+	Completed    BookingStatus = "COMPLETED"
 	Cancelled    BookingStatus = "CANCELLED"
-	_            BookingStatus = "NO_SHOW"
+	NoShow       BookingStatus = "NO_SHOW"
 )
 
 type Booking struct {
@@ -33,7 +33,27 @@ type Booking struct {
 	ConfirmedBy sql.NullString `db:"confirmed_by"`
 	CancelledBy sql.NullString `db:"cancelled_by"`
 	Notes       sql.NullString `db:"notes"`
-	IsActive    bool           `db:"is_active"`
+	Active      bool           `db:"is_active"`
 	CreatedAt   time.Time      `db:"created_at"`
 	UpdatedAt   time.Time      `db:"updated_at"`
+}
+
+func (b *Booking) IsActive() bool {
+	return b.Status == Confirmed
+}
+
+func (b *Booking) IsCancelled() bool {
+	return b.Status == Cancelled
+}
+
+func (b *Booking) IsCompleted() bool {
+	return b.Status == Completed
+}
+
+func (b *Booking) IsNoShow() bool {
+	return b.Status == NoShow
+}
+
+func (b *Booking) IsPending() bool {
+	return b.Status == Pending || b.Status == NotConfirmed
 }

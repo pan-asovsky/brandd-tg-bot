@@ -1,7 +1,7 @@
 package provider
 
 import (
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 )
 
 type ServiceProvider interface {
@@ -14,5 +14,4 @@ type ServiceProvider interface {
 	User() isvc.UserService
 	SlotLocker() isvc.SlotLocker
 	Phone() isvc.PhoneService
-	Statistics() isvc.StatisticService
 }

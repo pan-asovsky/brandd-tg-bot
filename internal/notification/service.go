@@ -3,7 +3,7 @@ package notification
 import (
 	"log"
 
-	inotif "github.com/pan-asovsky/brandd-tg-bot/internal/interface/notification"
+	inotif "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/notification"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model/notification"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )

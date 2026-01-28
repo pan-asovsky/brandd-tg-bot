@@ -1,43 +1,43 @@
 package provider
 
 import (
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service"
 )
 
 type svcProvider struct {
-	repoProvider     iprovider.RepoProvider
-	cacheProvider    iprovider.CacheProvider
-	callbackProvider iprovider.CallbackProvider
+	repo     iprovider.RepoProvider
+	cache    iprovider.CacheProvider
+	callback iprovider.CallbackProvider
 }
 
 func NewServiceProvider(
-	repoProvider iprovider.RepoProvider,
-	cacheProvider iprovider.CacheProvider,
-	callbackProvider iprovider.CallbackProvider,
+	repo iprovider.RepoProvider,
+	cache iprovider.CacheProvider,
+	callback iprovider.CallbackProvider,
 ) iprovider.ServiceProvider {
-	return &svcProvider{repoProvider: repoProvider, cacheProvider: cacheProvider, callbackProvider: callbackProvider}
+	return &svcProvider{repo: repo, cache: cache, callback: callback}
 }
 
 func (sp *svcProvider) Slot() isvc.SlotService {
-	return service.NewSlotService(sp.repoProvider.Slot(), sp.SlotLocker())
+	return service.NewSlotService(sp.repo.Slot(), sp.SlotLocker())
 }
 
 func (sp *svcProvider) Lock() isvc.LockService {
-	return service.NewLockService(sp.SlotLocker(), sp.cacheProvider.SlotLock())
+	return service.NewLockService(sp.SlotLocker(), sp.cache.SlotLock())
 }
 
 func (sp *svcProvider) Booking() isvc.BookingService {
-	return service.NewBookingService(sp.repoProvider, sp.Slot(), sp.Price(), sp.DateTime())
+	return service.NewBookingService(sp.repo, sp.Slot(), sp.Price(), sp.DateTime())
 }
 
 func (sp *svcProvider) Price() isvc.PriceService {
-	return service.NewPriceService(sp.repoProvider.Price())
+	return service.NewPriceService(sp.repo.Price())
 }
 
 func (sp *svcProvider) Config() isvc.ConfigService {
-	return service.NewConfigService(sp.repoProvider.Config())
+	return service.NewConfigService(sp.repo.Config())
 }
 
 func (sp *svcProvider) DateTime() isvc.DateTimeService {
@@ -45,11 +45,11 @@ func (sp *svcProvider) DateTime() isvc.DateTimeService {
 }
 
 func (sp *svcProvider) User() isvc.UserService {
-	return service.NewUserService(sp.repoProvider.User())
+	return service.NewUserService(sp.repo.User())
 }
 
 func (sp *svcProvider) SlotLocker() isvc.SlotLocker {
-	slotLock, err := service.NewSlotLockerService(sp.cacheProvider.RedisClient(), sp.cacheProvider.TTL())
+	slotLock, err := service.NewSlotLockerService(sp.cache.RedisClient(), sp.cache.TTL())
 	if err != nil {
 		panic(err)
 	}
@@ -58,8 +58,4 @@ func (sp *svcProvider) SlotLocker() isvc.SlotLocker {
 
 func (sp *svcProvider) Phone() isvc.PhoneService {
 	return service.NewPhoneNormalizingService()
-}
-
-func (sp *svcProvider) Statistics() isvc.StatisticService {
-	return service.NewStatisticService()
 }

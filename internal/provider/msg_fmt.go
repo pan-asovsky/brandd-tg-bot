@@ -1,9 +1,9 @@
 package provider
 
 import (
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
-	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/fmt"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/fmt"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service/msg_fmt"
 )
 

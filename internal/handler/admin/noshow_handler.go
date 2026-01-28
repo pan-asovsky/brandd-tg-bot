@@ -39,10 +39,6 @@ func (ach *adminCallbackHandler) handleConfirmClose(chatID int64, info *model.Bo
 		return utils.WrapError(err)
 	}
 
-	if err = ach.service.Statistics().Add(booking); err != nil {
-		return utils.WrapError(err)
-	}
-
 	switch info.Status {
 	case model.Completed:
 		if err = ach.notification.Service().Notify(notif.Event{

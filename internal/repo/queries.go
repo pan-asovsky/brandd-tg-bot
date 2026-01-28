@@ -1,4 +1,4 @@
-package repository
+package repo
 
 const (
 	IsTodayAvailable = `
@@ -34,7 +34,7 @@ const (
 	FindAnyActive        = `SELECT * FROM bookings WHERE chat_id = $1 and is_active = true`
 	FindAllActive        = `SELECT * FROM bookings WHERE is_active = true`
 
-	FindByPeriod = `SELECT * FROM bookings where date >= $1 and date < $2`
+	ListByPeriod = `SELECT * FROM bookings where date >= $1 and date < $2`
 
 	FindByID = `SELECT * FROM bookings WHERE id = $1`
 

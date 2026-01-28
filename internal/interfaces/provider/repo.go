@@ -1,6 +1,6 @@
 package provider
 
-import irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interface/repo"
+import irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 
 type RepoProvider interface {
 	Price() irepo.PriceRepo

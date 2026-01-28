@@ -1,7 +1,7 @@
 package provider
 
 import (
-	ikb "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/keyboard"
+	ikb "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 )
 
 type KeyboardProvider interface {

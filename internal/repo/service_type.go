@@ -1,11 +1,11 @@
-package repository
+package repo
 
 import (
 	"database/sql"
 	"fmt"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interface/repo"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 )
 
 type serviceRepo struct {

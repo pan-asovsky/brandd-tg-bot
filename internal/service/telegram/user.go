@@ -3,10 +3,10 @@ package telegram
 import (
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/keyboard"
-	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/telegram"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
+	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"

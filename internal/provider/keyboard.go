@@ -1,9 +1,9 @@
 package provider
 
 import (
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
-	ikb "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/keyboard"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	ikb "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service/keyboard"
 )
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	inotif "github.com/pan-asovsky/brandd-tg-bot/internal/interface/notification"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	inotif "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/notification"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model/notification"
 )
 

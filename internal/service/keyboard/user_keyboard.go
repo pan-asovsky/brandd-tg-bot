@@ -7,9 +7,9 @@ import (
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
-	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/callback"
-	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/keyboard"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
+	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/rule"

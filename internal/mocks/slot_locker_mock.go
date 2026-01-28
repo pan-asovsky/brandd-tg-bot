@@ -3,7 +3,7 @@ package mocks
 import (
 	"fmt"
 
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 )
 
 type slotLockerServiceMock struct {

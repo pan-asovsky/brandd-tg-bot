@@ -7,8 +7,8 @@ import (
 
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interface/repo"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 

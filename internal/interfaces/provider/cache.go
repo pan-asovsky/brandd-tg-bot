@@ -3,7 +3,7 @@ package provider
 import (
 	"time"
 
-	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interface/cache"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
 	"github.com/redis/go-redis/v9"
 )
 

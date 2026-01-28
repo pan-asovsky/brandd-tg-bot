@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 )
 
 type phoneService struct {

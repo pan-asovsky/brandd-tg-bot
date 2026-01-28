@@ -4,8 +4,8 @@ import (
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interface/handler"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	notif "github.com/pan-asovsky/brandd-tg-bot/internal/model/notification"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
@@ -20,10 +20,10 @@ type userMessageHandler struct {
 
 func NewUserMessageHandler(container provider.Container) ihandler.MessageHandler {
 	return &userMessageHandler{
-		service:      container.ServiceProvider,
-		cache:        container.CacheProvider,
-		telegram:     container.TelegramProvider,
-		notification: container.NotificationProvider,
+		service:      container.Service,
+		cache:        container.Cache,
+		telegram:     container.Telegram,
+		notification: container.Notification,
 	}
 }
 

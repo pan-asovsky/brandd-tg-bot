@@ -4,9 +4,9 @@ import (
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
-	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/callback"
-	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/keyboard"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
+	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
 

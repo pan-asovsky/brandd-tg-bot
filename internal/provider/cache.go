@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
-	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interface/cache"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
+	icache "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/cache"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
 	"github.com/redis/go-redis/v9"
 )
 

@@ -1,7 +1,7 @@
 package provider
 
 import (
-	itelegram "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/telegram"
+	itelegram "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
 )
 
 type TelegramProvider interface {

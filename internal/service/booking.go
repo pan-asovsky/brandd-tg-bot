@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
@@ -151,7 +151,7 @@ func (bs *bookingService) FindAllActive() ([]entity.Booking, error) {
 	return bs.repoProvider.Booking().FindAllActive()
 }
 
-func (bs *bookingService) Find(bookingID int64) (*entity.Booking, error) {
+func (bs *bookingService) FindById(bookingID int64) (*entity.Booking, error) {
 	return bs.repoProvider.Booking().Find(bookingID)
 }
 

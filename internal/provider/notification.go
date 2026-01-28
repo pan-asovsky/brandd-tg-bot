@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	inotif "github.com/pan-asovsky/brandd-tg-bot/internal/interface/notification"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
-	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/telegram"
+	inotif "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/notification"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model/notification"
 	notif "github.com/pan-asovsky/brandd-tg-bot/internal/notification"
 )

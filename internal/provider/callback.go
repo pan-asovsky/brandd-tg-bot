@@ -1,8 +1,8 @@
 package provider
 
 import (
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
-	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/callback"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service/callback"
 )
 

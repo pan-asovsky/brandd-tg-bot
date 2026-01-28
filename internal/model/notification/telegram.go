@@ -1,7 +1,7 @@
 package notification
 
 import (
-	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/telegram"
+	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 

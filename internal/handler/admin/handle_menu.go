@@ -2,9 +2,9 @@ package admin
 
 import (
 	"errors"
-	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
@@ -51,19 +51,24 @@ func (ach *adminCallbackHandler) menuBookings(query *tgapi.CallbackQuery) error 
 	return utils.WrapFunctionError(func() error {
 		return ach.telegram.Common().SendKeyboardMessageHTMLMode(
 			query.Message.Chat.ID,
-			fmt.Sprintf(admflow.FutureBookings, len(bookings)),
+			admflow.FutureBookings,
 			ach.keyboard.AdminKeyboard().Bookings(bookings),
 		)
 	})
 }
 
 func (ach *adminCallbackHandler) menuStatistics(query *tgapi.CallbackQuery) error {
+	pf := ach.statistics.PeriodFactory()
+
+	//todo: day по умолчанию, но надо проверять callback
+	period := pf.Day(time.Now())
+	stats, err := ach.statistics.Service().Calculate(period)
+	if err != nil {
+		return utils.WrapError(err)
+	}
+
 	return utils.WrapFunctionError(func() error {
-		return ach.telegram.Common().SendKeyboardMessage(
-			query.Message.Chat.ID,
-			"Тут какая-нибудь статистика",
-			ach.keyboard.AdminKeyboard().Statistics(),
-		)
+		return ach.telegram.Admin().Statistics(query.Message.Chat.ID, stats, period)
 	})
 }
 

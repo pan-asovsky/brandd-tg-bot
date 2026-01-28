@@ -15,7 +15,7 @@ import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
-	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interface/handler"
+	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 	"github.com/redis/go-redis/v9"
@@ -73,25 +73,21 @@ func (a *App) Init() error {
 	a.BotAPI = tgbot
 
 	// provider
-	callbackProvider := provider.NewCallbackProvider()
-	repoProvider := provider.NewRepoProvider(a.Postgres)
-	cacheProvider := provider.NewCacheProvider(a.Cache, a.Config.CacheTTL)
-	serviceProvider := provider.NewServiceProvider(repoProvider, cacheProvider, callbackProvider)
-	msgFmtProvider := provider.NewMessageFormatterProvider(serviceProvider.DateTime())
-	keyboardProvider := provider.NewKeyboardProvider(serviceProvider.DateTime(), callbackProvider)
-	telegramProvider := provider.NewTelegramProvider(a.BotAPI, serviceProvider, keyboardProvider, msgFmtProvider)
-	notifProvider := provider.NewNotificationProvider(serviceProvider.User(), telegramProvider.Common(), msgFmtProvider)
+	callback := provider.NewCallbackProvider()
+	repo := provider.NewRepoProvider(a.Postgres)
+	cachep := provider.NewCacheProvider(a.Cache, a.Config.CacheTTL)
+	service := provider.NewServiceProvider(repo, cachep, callback)
+	formatter := provider.NewMessageFormatterProvider(service.DateTime())
+	keyboard := provider.NewKeyboardProvider(service.DateTime(), callback)
+	telegram := provider.NewTelegramProvider(a.BotAPI, service, keyboard, formatter)
+	notification := provider.NewNotificationProvider(service.User(), telegram.Common(), formatter)
+	statistics := provider.NewStatisticsProvider(repo)
 
 	// container
 	a.ProviderContainer = *provider.NewContainer(
-		repoProvider,
-		serviceProvider,
-		cacheProvider,
-		telegramProvider,
-		callbackProvider,
-		msgFmtProvider,
-		keyboardProvider,
-		notifProvider,
+		repo, service, cachep,
+		telegram, callback, formatter,
+		keyboard, notification, statistics,
 	)
 
 	// handler

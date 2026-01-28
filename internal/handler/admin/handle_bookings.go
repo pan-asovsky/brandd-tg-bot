@@ -24,7 +24,7 @@ func (ach *adminCallbackHandler) handleBookings(query *tgapi.CallbackQuery) erro
 		return utils.WrapError(err)
 	}
 
-	booking, err := ach.service.Booking().Find(bookingID)
+	booking, err := ach.service.Booking().FindById(bookingID)
 	if err != nil {
 		return utils.WrapError(err)
 	}

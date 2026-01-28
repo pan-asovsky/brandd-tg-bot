@@ -8,8 +8,8 @@ import (
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
-	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service"
-	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/fmt"
+	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
+	ifmt "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/fmt"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 

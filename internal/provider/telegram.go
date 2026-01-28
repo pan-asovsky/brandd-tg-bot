@@ -2,8 +2,8 @@ package provider
 
 import (
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interface/provider"
-	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/telegram"
+	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
+	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/service/telegram"
 )
 

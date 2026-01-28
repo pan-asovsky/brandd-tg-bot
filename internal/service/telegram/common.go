@@ -4,7 +4,7 @@ import (
 	"log"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interface/service/telegram"
+	itg "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/telegram"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
