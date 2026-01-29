@@ -71,7 +71,7 @@ func (ats *adminTelegramService) NoActiveBookings(chatID int64) error {
 }
 
 func (ats *adminTelegramService) Statistics(chatID int64, stats stat.Stats, p stat.Period) error {
-	kb := ats.kb.Statistics()
+	kb := ats.kb.Statistics(p.Label)
 	msg := ats.formatter.Admin().Statistics(stats, p)
 	return utils.WrapFunctionError(func() error {
 		return ats.tgCommon.SendKeyboardMessageHTMLMode(chatID, msg, kb)

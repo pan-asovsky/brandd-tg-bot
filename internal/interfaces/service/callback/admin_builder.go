@@ -2,6 +2,7 @@ package callback
 
 import (
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
 )
 
 type AdminCallbackBuilderService interface {
@@ -9,7 +10,7 @@ type AdminCallbackBuilderService interface {
 	StartAdmin() string
 	BookingsMenu() string
 	Booking(bookingID int64) string
-	Statistics() string
+	Statistics(l stat.Label) string
 	Settings() string
 	Back(direction string) string
 	Chat(userChatID int64) string

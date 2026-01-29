@@ -7,6 +7,7 @@ import (
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
 	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
 )
 
 type adminCallbackBuilderService struct{}
@@ -31,8 +32,8 @@ func (acbs *adminCallbackBuilderService) Booking(bookingID int64) string {
 	return admflow.AdminPrefix + admflow.PrefixBooking + strconv.FormatInt(bookingID, 10)
 }
 
-func (acbs *adminCallbackBuilderService) Statistics() string {
-	return admflow.StatisticsCbk
+func (acbs *adminCallbackBuilderService) Statistics(l stat.Label) string {
+	return fmt.Sprintf("%s%s", admflow.StatisticsCbk, l)
 }
 
 func (acbs *adminCallbackBuilderService) Settings() string {

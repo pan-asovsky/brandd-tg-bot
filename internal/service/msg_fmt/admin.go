@@ -54,13 +54,10 @@ func (amfs *adminMessageFormatterService) BookingCompleted(_ *entity.Booking) (s
 }
 
 func (amfs *adminMessageFormatterService) Statistics(s stat.Stats, p stat.Period) string {
-	from, to := p.Format()
 	return fmt.Sprintf(
 		consts.StatShortMessage,
-		from, to,
-		s.ActiveCount,
+		consts.PeriodLabels[p.Label], p.Format(),
 		s.CompletedCount,
-		s.PendingCount,
 		s.NoShowCount,
 		s.CanceledCount,
 	)

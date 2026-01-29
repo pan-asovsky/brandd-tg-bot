@@ -2,12 +2,13 @@ package admin
 
 import (
 	"errors"
+	"log"
 	"sort"
 	"strings"
-	"time"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
@@ -17,12 +18,14 @@ func (ach *adminCallbackHandler) handleMenu(query *tgapi.CallbackQuery) error {
 		return errors.New("[handle_menu]: invalid callback: " + query.Data)
 	}
 
-	switch payload {
-	case admflow.Bookings:
+	//todo: how to improve?
+	if admflow.Bookings == payload {
 		return ach.menuBookings(query)
-	case admflow.Statistics:
+	} else if strings.Contains(payload, admflow.PrefixStatistics) {
+		parts := strings.Split(payload, "::")
+		query.Data = parts[len(parts)-1]
 		return ach.menuStatistics(query)
-	case admflow.Settings:
+	} else if admflow.Settings == payload {
 		return ach.menuSettings(query)
 	}
 
@@ -58,10 +61,11 @@ func (ach *adminCallbackHandler) menuBookings(query *tgapi.CallbackQuery) error 
 }
 
 func (ach *adminCallbackHandler) menuStatistics(query *tgapi.CallbackQuery) error {
+	log.Printf("[handle_statistics] callback: %s", query.Data)
 	pf := ach.statistics.PeriodFactory()
+	period := pf.FromLabel(stat.Label(query.Data))
+	log.Printf("[handle_statistics] query.Data: %s, period: %s", query.Data, period.Label)
 
-	//todo: day по умолчанию, но надо проверять callback
-	period := pf.Day(time.Now())
 	stats, err := ach.statistics.Service().Calculate(period)
 	if err != nil {
 		return utils.WrapError(err)

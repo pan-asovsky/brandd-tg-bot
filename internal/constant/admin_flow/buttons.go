@@ -13,4 +13,9 @@ const (
 	StartChatBtn       = "✒ Написать"
 	CompleteBookingBtn = "🟢 Завершить"
 	NoShowBtn          = "🟠 Не явился"
+
+	TodayBtn     = "Сегодня"
+	YesterdayBtn = "Вчера"
+	WeekBtn      = "Неделя"
+	MonthBtn     = "Месяц"
 )

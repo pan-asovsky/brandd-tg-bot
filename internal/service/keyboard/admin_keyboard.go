@@ -8,6 +8,7 @@ import (
 	icallback "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/callback"
 	ikeyboard "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service/keyboard"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
 )
 
 type adminKeyboardService struct {
@@ -32,7 +33,7 @@ func (aks *adminKeyboardService) MainMenu() tgapi.InlineKeyboardMarkup {
 	return tgapi.NewInlineKeyboardMarkup(
 		tgapi.NewInlineKeyboardRow(
 			tgapi.NewInlineKeyboardButtonData(admflow.BookingsBtn, aks.cbBuilder.BookingsMenu()),
-			tgapi.NewInlineKeyboardButtonData(admflow.StatisticsBtn, aks.cbBuilder.Statistics()),
+			tgapi.NewInlineKeyboardButtonData(admflow.StatisticsBtn, aks.cbBuilder.Statistics(stat.Today)),
 		),
 		tgapi.NewInlineKeyboardRow(
 			tgapi.NewInlineKeyboardButtonData(admflow.SettingsBtn, aks.cbBuilder.Settings()),
@@ -68,12 +69,35 @@ func (aks *adminKeyboardService) Bookings(bookings []entity.Booking) tgapi.Inlin
 	return tgapi.NewInlineKeyboardMarkup(rows...)
 }
 
-func (aks *adminKeyboardService) Statistics() tgapi.InlineKeyboardMarkup {
-	return tgapi.NewInlineKeyboardMarkup(
-		tgapi.NewInlineKeyboardRow(
-			tgapi.NewInlineKeyboardButtonData(admflow.BackBtn, aks.cbBuilder.Back(admflow.Menu)),
-		),
-	)
+func (aks *adminKeyboardService) Statistics(label stat.Label) tgapi.InlineKeyboardMarkup {
+	//todo: keyboard [Сегодня], [Вчера], [Неделя], [Месяц]
+	// по умолчанию выбрано [Сегодня], эта кнопка не видна
+	// далее по callback кнопки меняются, исключая текущую
+
+	todayBtn := tgapi.NewInlineKeyboardButtonData(admflow.TodayBtn, aks.cbBuilder.Statistics(stat.Today))
+	yesterdayBtn := tgapi.NewInlineKeyboardButtonData(admflow.YesterdayBtn, aks.cbBuilder.Statistics(stat.Yesterday))
+	weekBtn := tgapi.NewInlineKeyboardButtonData(admflow.WeekBtn, aks.cbBuilder.Statistics(stat.Week))
+	monthBtn := tgapi.NewInlineKeyboardButtonData(admflow.MonthBtn, aks.cbBuilder.Statistics(stat.Month))
+
+	var buttons = map[stat.Label]tgapi.InlineKeyboardButton{
+		stat.Today:     todayBtn,
+		stat.Yesterday: yesterdayBtn,
+		stat.Week:      weekBtn,
+		stat.Month:     monthBtn,
+	}
+
+	var row []tgapi.InlineKeyboardButton
+	for l := range buttons {
+		if l != label {
+			row = append(row, buttons[l])
+		}
+	}
+
+	var rows [][]tgapi.InlineKeyboardButton
+	rows = append(rows, row)
+	rows = append(rows, aks.backKeyboardRow(aks.cbBuilder.Back(admflow.Menu)))
+
+	return tgapi.NewInlineKeyboardMarkup(rows...)
 }
 
 func (aks *adminKeyboardService) Settings() tgapi.InlineKeyboardMarkup {

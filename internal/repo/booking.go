@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
@@ -115,7 +116,12 @@ func (br *bookingRepo) Close(info *model.BookingInfo) (*entity.Booking, error) {
 }
 
 func (br *bookingRepo) ListByPeriod(period stat.Period) ([]entity.Booking, error) {
-	return br.findMany(ListByPeriod, "list_by_period", period.From, period.To)
+	bookings, err := br.findMany(ListByPeriod, "list_by_period", period.From, period.To)
+	if err != nil {
+		return nil, utils.WrapError(err)
+	}
+	log.Printf("[list_by_period] period: %s, founded bookings: %d", period.Format(), len(bookings))
+	return bookings, nil
 }
 
 func (br *bookingRepo) findOne(query, tag string, args ...any) (*entity.Booking, error) {

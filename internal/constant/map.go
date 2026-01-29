@@ -1,5 +1,9 @@
 package constant
 
+import (
+	stat "github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
+)
+
 var ServiceNames = map[string]string{
 	"TAKE_IT_OUT":        "Съём-установка",
 	"BALANCING":          "Балансировка",
@@ -23,4 +27,11 @@ var Time = map[string]string{
 	"18:00": "🕕",
 	"19:00": "🕖",
 	"20:00": "🕗",
+}
+
+var PeriodLabels = map[stat.Label]string{
+	stat.Today:     "сегодня",
+	stat.Yesterday: "вчера",
+	stat.Week:      "неделю",
+	stat.Month:     "месяц",
 }

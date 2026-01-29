@@ -1,14 +1,33 @@
 package stat
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Period struct {
 	From, To time.Time
+	Label    Label
 }
 
-func (p Period) Format() (from, to string) {
+type Label string
+
+const (
+	Today     Label = "T"
+	Yesterday Label = "Y"
+	Week      Label = "W"
+	Month     Label = "M"
+)
+
+func (p Period) Format() (view string) {
 	l := "02.01"
-	return p.From.Format(l), p.To.Format(l)
+
+	switch p.Label {
+	case Today, Yesterday:
+		return p.From.Format(l)
+	default:
+		return fmt.Sprintf("%s-%s", p.From.Format(l), p.To.Format(l))
+	}
 }
 
 type Stats struct {
