@@ -2,7 +2,6 @@ package admin
 
 import (
 	"errors"
-	"log"
 	"sort"
 	"strings"
 
@@ -61,10 +60,8 @@ func (ach *adminCallbackHandler) menuBookings(query *tgapi.CallbackQuery) error 
 }
 
 func (ach *adminCallbackHandler) menuStatistics(query *tgapi.CallbackQuery) error {
-	log.Printf("[handle_statistics] callback: %s", query.Data)
 	pf := ach.statistics.PeriodFactory()
 	period := pf.FromLabel(stat.Label(query.Data))
-	log.Printf("[handle_statistics] query.Data: %s, period: %s", query.Data, period.Label)
 
 	stats, err := ach.statistics.Service().Calculate(period)
 	if err != nil {

@@ -18,7 +18,7 @@ func NewStatisticService(br irepo.BookingRepo) isvc.StatisticService {
 }
 
 func (ss *statisticService) Calculate(p stat.Period) (stat.Stats, error) {
-	log.Printf("[calculate_statistics] period %s: %s", p.Label, p.Format())
+	log.Printf("[calculate_statistics] period %s: %s - %s", p.Label, p.From, p.To)
 
 	bookings, err := ss.bookingRepo.ListByPeriod(p)
 	if err != nil {

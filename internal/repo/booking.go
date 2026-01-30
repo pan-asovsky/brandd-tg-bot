@@ -124,6 +124,10 @@ func (br *bookingRepo) ListByPeriod(period stat.Period) ([]entity.Booking, error
 	return bookings, nil
 }
 
+func (br *bookingRepo) ListStatusByPeriod(period stat.Period) (stat.Stats, error) {
+	return stat.Stats{}, nil
+}
+
 func (br *bookingRepo) findOne(query, tag string, args ...any) (*entity.Booking, error) {
 	booking, err := scan(br.db.QueryRow(query, args...))
 	if err != nil {

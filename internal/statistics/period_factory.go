@@ -33,8 +33,9 @@ func (pf *PeriodFactory) Today(t time.Time) stat.Period {
 }
 
 func (pf *PeriodFactory) Yesterday(t time.Time) stat.Period {
-	to := pf.today(t)
-	from := to.AddDate(0, 0, -1)
+	today := pf.today(t)
+	to := time.Date(today.Year(), today.Month(), today.Day()-1, 23, 59, 59, 0, pf.loc)
+	from := time.Date(today.Year(), today.Month(), today.Day()-1, 0, 0, 0, 0, pf.loc)
 	return stat.Period{From: from, To: to, Label: stat.Yesterday}
 }
 
@@ -47,6 +48,8 @@ func (pf *PeriodFactory) Week(t time.Time) stat.Period {
 
 	sunday := today.AddDate(0, 0, -(weekday))
 	monday := sunday.AddDate(0, 0, -6)
+	sunday = time.Date(sunday.Year(), sunday.Month(), sunday.Day(), 23, 59, 59, 0, pf.loc)
+
 	return stat.Period{From: monday, To: sunday, Label: stat.Week}
 }
 
@@ -54,8 +57,8 @@ func (pf *PeriodFactory) Month(t time.Time) stat.Period {
 	today := pf.today(t)
 	y, m, _ := today.Date()
 
-	endMonth := time.Date(y, m-1, 31, 0, 0, 0, 0, pf.loc)
-	startMonth := endMonth.AddDate(0, -1, 0)
+	endMonth := time.Date(y, m-1, 31, 23, 59, 0, 0, pf.loc)
+	startMonth := time.Date(y, m-1, 1, 0, 0, 0, 0, pf.loc)
 	return stat.Period{From: startMonth, To: endMonth, Label: stat.Month}
 }
 

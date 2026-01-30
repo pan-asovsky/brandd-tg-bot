@@ -55,7 +55,6 @@ func (uh *updateHandler) Handle(update *tgapi.Update) error {
 
 func (uh *updateHandler) handleCallback(callback *tgapi.CallbackQuery) error {
 	uh.telegramProvider.Common().AfterCallbackCleanup(callback)
-	log.Printf("[handle_callback] callback received: %s", callback.Data)
 
 	data := callback.Data
 	switch {
@@ -68,7 +67,6 @@ func (uh *updateHandler) handleCallback(callback *tgapi.CallbackQuery) error {
 			return errors.New("[handle_callback] invalid prefix: " + data)
 		}
 		callback.Data = cut
-		log.Printf("[handle_admin] data: %s", callback.Data)
 		return uh.adminCallback.Handle(callback)
 
 	case strings.HasPrefix(data, usflow.UserPrefix):

@@ -5,16 +5,11 @@ go 1.25
 toolchain go1.25.0
 
 require (
-	// HTTP (для вебхуков)
 	github.com/gin-gonic/gin v1.9.1
-
-	// Telegram
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/golang-migrate/migrate/v4 v4.19.0
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.10.9
-
-	// Redis
 	github.com/redis/go-redis/v9 v9.17.0
 )
 

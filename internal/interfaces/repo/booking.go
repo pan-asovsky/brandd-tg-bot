@@ -24,4 +24,5 @@ type BookingRepo interface {
 	Find(bookingID int64) (*entity.Booking, error)
 	Close(info *model.BookingInfo) (*entity.Booking, error)
 	ListByPeriod(period stat.Period) ([]entity.Booking, error)
+	ListStatusByPeriod(period stat.Period) (stat.Stats, error)
 }
