@@ -9,14 +9,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/bot"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/handler"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/infrastructure/postgres"
+	"github.com/pan-asovsky/brandd-tg-bot/internal/infrastructure/web"
 	ihandler "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/handler"
-	"github.com/pan-asovsky/brandd-tg-bot/internal/postgres"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/provider"
 	"github.com/redis/go-redis/v9"
 )
@@ -31,7 +31,8 @@ type App struct {
 
 	BotAPI        *tgapi.BotAPI
 	UpdateHandler ihandler.UpdateHandler
-	httpServer    *http.Server
+	httpServer    *web.Server
+	//httpServer    *http.Server
 }
 
 func NewApp(ctx context.Context) *App {
@@ -39,21 +40,18 @@ func NewApp(ctx context.Context) *App {
 }
 
 func (a *App) Init() error {
-	// configuration load
 	cfg, err := config.Load()
 	if err != nil {
 		return err
 	}
 	a.Config = cfg
 
-	// cache client
 	redisClient, err := cache.NewRedis(cfg)
 	if err != nil {
 		return err
 	}
 	a.Cache = redisClient
 
-	// postgres client
 	db, err := postgres.NewPostgres(cfg)
 	if err != nil {
 		return err
@@ -72,7 +70,6 @@ func (a *App) Init() error {
 	}
 	a.BotAPI = tgbot
 
-	// provider
 	callback := provider.NewCallbackProvider()
 	repo := provider.NewRepoProvider(a.Postgres)
 	cachep := provider.NewCacheProvider(a.Cache, a.Config.CacheTTL)
@@ -83,45 +80,22 @@ func (a *App) Init() error {
 	notification := provider.NewNotificationProvider(service.User(), telegram.Common(), formatter)
 	statistics := provider.NewStatisticsProvider(repo)
 
-	// container
 	a.ProviderContainer = *provider.NewContainer(
 		repo, service, cachep,
 		telegram, callback, formatter,
 		keyboard, notification, statistics,
 	)
-
-	// handler
 	a.UpdateHandler = handler.NewUpdateHandler(a.ProviderContainer)
 
 	return nil
 }
 
 func (a *App) Run() error {
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.New()
-	router.Use(gin.Logger(), gin.Recovery())
-	_ = router.SetTrustedProxies([]string{"127.0.0.1"})
-
-	router.POST(a.Config.WebhookPath, func(c *gin.Context) {
-		var update tgapi.Update
-		if err := c.ShouldBindJSON(&update); err != nil {
-			c.Status(400)
-			log.Printf("Invalid update payload: %v", err)
-			return
-		}
-		if err := a.UpdateHandler.Handle(&update); err != nil {
-			log.Printf("[app] error handling update: %v", err)
-		}
-		c.Status(200)
-	})
-
-	a.httpServer = &http.Server{
-		Addr:    a.Config.HttpAddress,
-		Handler: router,
-	}
+	wh := web.NewWebhookHandler(a.UpdateHandler, a.Config.WebhookPath)
+	a.httpServer = web.NewServer(a.Config.HttpAddress, wh.Handler())
 	log.Printf("Started webhook server on %s, path %s", a.Config.HttpAddress, a.Config.WebhookPath)
 
-	if err := a.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err := a.httpServer.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("server error: %w", err)
 	}
 
