@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     chat_id BIGINT NOT NULL,
@@ -13,3 +14,11 @@ ALTER TABLE bookings
     ADD COLUMN confirmed_by VARCHAR(50),
     ADD COLUMN cancelled_by VARCHAR(50),
     ADD COLUMN notes TEXT;
+
+
+-- +goose Down
+DROP TABLE IF EXISTS users;
+ALTER TABLE bookings DROP COLUMN confirmed_by;
+ALTER TABLE bookings DROP COLUMN cancelled_by;
+ALTER TABLE bookings DROP COLUMN notes;
+

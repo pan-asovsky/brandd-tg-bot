@@ -1,8 +1,6 @@
 package statistics
 
 import (
-	"log"
-
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	isvc "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/service"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model/stat"
@@ -18,8 +16,6 @@ func NewStatisticService(br irepo.BookingRepo) isvc.StatisticService {
 }
 
 func (ss *statisticService) Calculate(p stat.Period) (stat.Stats, error) {
-	log.Printf("[calculate_statistics] period %s: %s - %s", p.Label, p.From, p.To)
-
 	bookings, err := ss.bookingRepo.ListByPeriod(p)
 	if err != nil {
 		return stat.Stats{}, utils.WrapError(err)

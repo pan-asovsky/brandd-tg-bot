@@ -60,13 +60,13 @@ func Load() (*Config, error) {
 	return cfg, nil
 }
 
-func (config *Config) validate() error {
+func (cfg *Config) validate() error {
 	var missing []string
 
-	if config.BotToken == "" {
+	if cfg.BotToken == "" {
 		missing = append(missing, "BOT_TOKEN")
 	}
-	if config.DBPassword == "" {
+	if cfg.DBPassword == "" {
 		missing = append(missing, "DB_PASSWORD")
 	}
 
@@ -75,4 +75,16 @@ func (config *Config) validate() error {
 	}
 
 	return nil
+}
+
+func (cfg *Config) DBDsn() string {
+	return fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.DBHost,
+		cfg.DBPort,
+		cfg.DBUser,
+		cfg.DBPassword,
+		cfg.DBName,
+		cfg.DBSSLMode,
+	)
 }

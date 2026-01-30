@@ -1,3 +1,4 @@
+-- +goose Up
 INSERT INTO service_types (service_code, service_name, is_composite) VALUES
     ('TAKE_IT_OUT', 'Съём-установка', true),
     ('TIRE_SERVICE', 'Шиномонтаж', true),
@@ -86,3 +87,9 @@ FROM
          (19, 980, 3550)
     ) AS prices(rim_size, price_per_wheel, price_per_set)
 WHERE st.service_code = 'COMPLEX';
+
+-- +goose Down
+DELETE FROM prices;
+DELETE FROM service_types;
+ALTER TABLE service_types AUTO_INCREMENT = 1;
+ALTER TABLE prices AUTO_INCREMENT = 1;
