@@ -1,23 +1,26 @@
 package repo
 
 import (
-	"database/sql"
 	"fmt"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 )
 
 type serviceRepo struct {
-	db *sql.DB
+	pool *pgxpool.Pool
 }
 
-func NewServiceRepo(db *sql.DB) irepo.ServiceRepo {
-	return &serviceRepo{db: db}
+func NewServiceRepo(p *pgxpool.Pool) irepo.ServiceRepo {
+	return &serviceRepo{pool: p}
 }
 
 func (sr *serviceRepo) GetServiceTypes() ([]entity.ServiceType, error) {
-	rows, err := sr.db.Query(GetCompositeServiceTypes)
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
+	rows, err := sr.pool.Query(ctx, GetCompositeServiceTypes)
 	if err != nil {
 		return nil, fmt.Errorf("[get_service_types] query error: %w", err)
 	}
@@ -26,7 +29,7 @@ func (sr *serviceRepo) GetServiceTypes() ([]entity.ServiceType, error) {
 	var types []entity.ServiceType
 	for rows.Next() {
 		var svc entity.ServiceType
-		if err := rows.Scan(
+		if err = rows.Scan(
 			&svc.ID,
 			&svc.ServiceCode,
 			&svc.ServiceName,
@@ -37,7 +40,7 @@ func (sr *serviceRepo) GetServiceTypes() ([]entity.ServiceType, error) {
 		types = append(types, svc)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("[get_service_types] rows error: %w", err)
 	}
 

@@ -2,41 +2,43 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5/pgxpool"
+	pgxw "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
 	"github.com/pressly/goose/v3"
 )
 
-func NewDBConn(cfg *config.Config, ctx context.Context) (*sql.DB, error) {
+func NewPGXPool(cfg *config.Config, ctx context.Context) (*pgxpool.Pool, error) {
 	dsn := cfg.DBDsn()
 
-	//todo: conn, err := pgx.Connect(ctx, dsn)
-	sqlDB, err := sql.Open("pgx", dsn)
+	pgxCfg, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to sql db: %w", err)
+		return nil, fmt.Errorf("failed to parse conn: %w", err)
+	}
+	pgxCfg.MaxConns = 10
+	pgxCfg.MaxConnLifetime = 10 * time.Minute
+	pgxCfg.MaxConnIdleTime = 15 * time.Minute
+
+	pool, err := pgxpool.NewWithConfig(ctx, pgxCfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create pgx pool: %w", err)
 	}
 
-	sqlDB.SetMaxOpenConns(10)
-	sqlDB.SetMaxIdleConns(5)
-	sqlDB.SetConnMaxLifetime(15 * time.Minute)
-
-	ping, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	if err = sqlDB.PingContext(ping); err != nil {
+	if err = pool.Ping(ctx); err != nil {
 		return nil, fmt.Errorf("failed to ping sql fb: %w", err)
 	}
 
-	goose.SetBaseFS(nil)
-	//todo: as cfg field
+	sqlDB := pgxw.OpenDBFromPool(pool)
 	if err = goose.Up(sqlDB, "migrations"); err != nil {
 		return nil, fmt.Errorf("failed to migrate sql db: %w", err)
 	}
-	log.Println("sql db migrations applied successfully")
+	log.Println("sql migrations applied successfully")
 
-	return sqlDB, nil
+	return pool, nil
 }

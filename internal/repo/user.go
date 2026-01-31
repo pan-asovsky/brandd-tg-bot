@@ -1,24 +1,27 @@
 package repo
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 )
 
 type userRepo struct {
-	db *sql.DB
+	pool *pgxpool.Pool
 }
 
-func NewUserRepo(db *sql.DB) irepo.UserRepo {
-	return &userRepo{db: db}
+func NewUserRepo(p *pgxpool.Pool) irepo.UserRepo {
+	return &userRepo{pool: p}
 }
 
 func (ur *userRepo) GetActiveAdmins() ([]entity.User, error) {
-	rows, err := ur.db.Query(GetActiveAdmins)
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
+	rows, err := ur.pool.Query(ctx, GetActiveAdmins)
 	if err != nil {
 		return nil, fmt.Errorf("[get_active_admins] query error: %w", err)
 	}
@@ -27,7 +30,7 @@ func (ur *userRepo) GetActiveAdmins() ([]entity.User, error) {
 	var users []entity.User
 	for rows.Next() {
 		var user entity.User
-		if err := rows.Scan(
+		if err = rows.Scan(
 			&user.ID,
 			&user.ChatID,
 			&user.Name,
@@ -36,10 +39,11 @@ func (ur *userRepo) GetActiveAdmins() ([]entity.User, error) {
 		); err != nil {
 			return nil, fmt.Errorf("[get_active_admins] row scan error: %w", err)
 		}
+
 		users = append(users, user)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("[get_active_admins] rows error: %w", err)
 	}
 
@@ -47,8 +51,11 @@ func (ur *userRepo) GetActiveAdmins() ([]entity.User, error) {
 }
 
 func (ur *userRepo) GetRole(chatID int64) (bool, string) {
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
 	var userRole string
-	err := ur.db.QueryRow(GetUserRole, chatID).Scan(&userRole)
+	err := ur.pool.QueryRow(ctx, GetUserRole, chatID).Scan(&userRole)
 	if err != nil {
 		log.Printf("[get_user_role] user not exists: %d", chatID)
 		return false, ""

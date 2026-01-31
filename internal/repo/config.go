@@ -1,23 +1,25 @@
 package repo
 
 import (
-	"database/sql"
-
+	"github.com/jackc/pgx/v5/pgxpool"
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type configRepo struct {
-	db *sql.DB
+	pool *pgxpool.Pool
 }
 
-func NewConfigRepo(db *sql.DB) irepo.ConfigRepo {
-	return &configRepo{db: db}
+func NewConfigRepo(p *pgxpool.Pool) irepo.ConfigRepo {
+	return &configRepo{pool: p}
 }
 
 func (c configRepo) IsAutoConfirm() (bool, error) {
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
 	var autoConfirm bool
-	if err := c.db.QueryRow(IsAutoConfirm).Scan(&autoConfirm); err != nil {
+	if err := c.pool.QueryRow(ctx, IsAutoConfirm).Scan(&autoConfirm); err != nil {
 		return false, utils.WrapError(err)
 	}
 

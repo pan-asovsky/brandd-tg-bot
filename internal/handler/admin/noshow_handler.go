@@ -39,6 +39,7 @@ func (ach *adminCallbackHandler) handleConfirmClose(chatID int64, info *model.Bo
 		return utils.WrapError(err)
 	}
 
+	//todo: что это делает в no_show?
 	switch info.Status {
 	case model.Completed:
 		if err = ach.notification.Service().Notify(notif.Event{

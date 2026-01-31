@@ -1,12 +1,14 @@
 package repo
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
@@ -15,11 +17,13 @@ import (
 )
 
 type bookingRepo struct {
-	db *sql.DB
+	pool *pgxpool.Pool
 }
 
-func NewBookingRepo(db *sql.DB) irepo.BookingRepo {
-	return &bookingRepo{db: db}
+const TwoSec = 2 * time.Second
+
+func NewBookingRepo(p *pgxpool.Pool) irepo.BookingRepo {
+	return &bookingRepo{pool: p}
 }
 
 func (br *bookingRepo) FindActiveNotPending(chatID int64) (*entity.Booking, error) {
@@ -57,7 +61,9 @@ func (br *bookingRepo) UpdateService(chatID int64, service string) error {
 
 func (br *bookingRepo) Save(booking *entity.Booking) (*entity.Booking, error) {
 	now := time.Now().UTC().Add(3 * time.Hour)
-	err := br.db.QueryRow(SaveBooking,
+	ctx, cancel := context.WithTimeout(context.Background(), TwoSec)
+	defer cancel()
+	if err := br.pool.QueryRow(ctx, SaveBooking,
 		booking.ChatID,
 		booking.Date,
 		booking.Time,
@@ -68,8 +74,7 @@ func (br *bookingRepo) Save(booking *entity.Booking) (*entity.Booking, error) {
 		booking.Status,
 		now,
 		now,
-	).Scan(&booking.ID)
-	if err != nil {
+	).Scan(&booking.ID); err != nil {
 		return nil, utils.WrapError(err)
 	}
 	return booking, nil
@@ -104,7 +109,11 @@ func (br *bookingRepo) Find(bookingID int64) (*entity.Booking, error) {
 }
 
 func (br *bookingRepo) Close(info *model.BookingInfo) (*entity.Booking, error) {
-	booking, err := scan(br.db.QueryRow(Close, entity.BookingStatus(info.Status), info.UserChatID, info.BookingID))
+	//booking, err := scan(br.db.QueryRow(Close, entity.BookingStatus(info.Status), info.UserChatID, info.BookingID))
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
+	booking, err := scan(br.pool.QueryRow(ctx, Close, entity.BookingStatus(info.Status), info.UserChatID, info.BookingID))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("[close_booking] booking %d not founded", info.BookingID)
@@ -129,18 +138,27 @@ func (br *bookingRepo) ListStatusByPeriod(period stat.Period) (stat.Stats, error
 }
 
 func (br *bookingRepo) findOne(query, tag string, args ...any) (*entity.Booking, error) {
-	booking, err := scan(br.db.QueryRow(query, args...))
+	//booking, err := scan(br.db.QueryRow(query, args...))
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
+	booking, err := scan(br.pool.QueryRow(ctx, query, args...))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("[%s] query error: %w", tag, err)
 	}
+
 	return booking, nil
 }
 
 func (br *bookingRepo) findMany(query, tag string, args ...any) ([]entity.Booking, error) {
-	rows, err := br.db.Query(query, args...)
+	//rows, err := br.db.Query(query, args...)
+
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+	rows, err := br.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("[%s] query error: %w", tag, err)
 	}
@@ -155,7 +173,7 @@ func (br *bookingRepo) findMany(query, tag string, args ...any) ([]entity.Bookin
 		bookings = append(bookings, *booking)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("[%s] rows error: %w", tag, err)
 	}
 
@@ -190,22 +208,38 @@ func scan(scanner interface {
 	return &booking, nil
 }
 
-func (br *bookingRepo) exec(query, tag string, args ...any) error {
-	if _, err := br.db.Exec(query, args...); err != nil {
-		return fmt.Errorf("[%s] exec error: %w", tag, err)
-	}
-	return nil
-}
-
 func (br *bookingRepo) confirm(chatID int64, confirmedBy string) error {
 	return br.exec(ConfirmBooking, "confirm_booking", entity.Confirmed, confirmedBy, chatID)
 }
 
+func (br *bookingRepo) exec(query, tag string, args ...any) error {
+	//if _, err := br.db.Exec(query, args...); err != nil {
+	//	return fmt.Errorf("[%s] exec error: %w", tag, err)
+	//}
+
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+	if _, err := br.pool.Exec(ctx, query, args...); err != nil {
+		return fmt.Errorf("[%s] exec error: %w", tag, err)
+	}
+
+	return nil
+}
+
 func (br *bookingRepo) exists(query string, args ...any) (bool, error) {
+	//err := br.db.QueryRow(query, args...).Scan(&exists)
+
 	var exists bool
-	err := br.db.QueryRow(query, args...).Scan(&exists)
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
+	err := br.pool.QueryRow(ctx, query, args...).Scan(&exists)
 	if err != nil {
 		return false, err
 	}
 	return exists, nil
+}
+
+func CtxWithTimeout(t time.Duration) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), t)
 }

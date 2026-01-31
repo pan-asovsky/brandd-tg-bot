@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/bot"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/cache"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/config"
@@ -26,14 +26,13 @@ type App struct {
 	Context context.Context
 	Config  *config.Config
 	Cache   *redis.Client
-	SqlDB   *sql.DB
+	PgxPool *pgxpool.Pool
 
 	ProviderContainer provider.Container
 
 	BotAPI        *tgapi.BotAPI
 	UpdateHandler ihandler.UpdateHandler
 	httpServer    *httpsrv.Server
-	//httpServer    *http.Server
 }
 
 func NewApp(ctx context.Context) *App {
@@ -53,11 +52,11 @@ func (a *App) Init() error {
 	}
 	a.Cache = redisClient
 
-	conn, err := db.NewDBConn(a.Config, a.Context)
+	pool, err := db.NewPGXPool(a.Config, a.Context)
 	if err != nil {
 		return utils.WrapError(err)
 	}
-	a.SqlDB = conn
+	a.PgxPool = pool
 
 	tgbot, err := bot.NewTelegramBot(a.Config.BotToken, a.Config.WebhookURL)
 	if err != nil {
@@ -66,7 +65,7 @@ func (a *App) Init() error {
 	a.BotAPI = tgbot
 
 	callback := provider.NewCallbackProvider()
-	repo := provider.NewRepoProvider(a.SqlDB)
+	repo := provider.NewRepoProvider(a.PgxPool)
 	cachep := provider.NewCacheProvider(a.Cache, a.Config.CacheTTL)
 	service := provider.NewServiceProvider(repo, cachep, callback)
 	formatter := provider.NewMessageFormatterProvider(service.DateTime())
@@ -106,12 +105,10 @@ func (a *App) Close() {
 		}
 	}
 
-	if a.SqlDB != nil {
-		err := a.SqlDB.Close()
-		if err != nil {
-			log.Printf("Error closing db connection: %s", err)
-		}
+	if a.PgxPool != nil {
+		a.PgxPool.Close()
 	}
+
 	if a.Cache != nil {
 		err := a.Cache.Close()
 		if err != nil {

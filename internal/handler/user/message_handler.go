@@ -87,7 +87,6 @@ func (umh *userMessageHandler) handleAutoConfirm(chatID int64) error {
 			Type: notif.BookingCreated,
 			Data: booking,
 		})
-		//return umh.notifyAdmins(booking)
 	})
 }
 

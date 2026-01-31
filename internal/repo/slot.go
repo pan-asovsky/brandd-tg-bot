@@ -6,27 +6,41 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	irepo "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/repo"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/utils"
 )
 
 type slotRepo struct {
-	db *sql.DB
+	pool *pgxpool.Pool
 }
 
-func NewSlotRepo(db *sql.DB) irepo.SlotRepo {
-	return &slotRepo{db: db}
+const (
+	timeLay     = "15:04"
+	dateLay     = "2006-01-02"
+	dateTimeLay = "2006-01-02 15:04:05"
+)
+
+func NewSlotRepo(p *pgxpool.Pool) irepo.SlotRepo {
+	return &slotRepo{pool: p}
 }
 
 func (sr *slotRepo) IsTodayAvailable() bool {
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
 	var available bool
-	err := sr.db.QueryRow(IsTodayAvailable).Scan(&available)
+	err := sr.pool.QueryRow(ctx, IsTodayAvailable).Scan(&available)
+
 	return err == nil && available
 }
 
 func (sr *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
-	rows, err := sr.db.Query(GetZonesByDate, date)
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+	rows, err := sr.pool.Query(ctx, GetZonesByDate, date)
+
 	if err != nil {
 		return nil, fmt.Errorf("[get_available_slots] query error: %w", err)
 	}
@@ -41,7 +55,7 @@ func (sr *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
 			end     time.Time
 			created time.Time
 		)
-		if err := rows.Scan(
+		if err = rows.Scan(
 			&slot.ID,
 			&sqlDate,
 			&start,
@@ -52,18 +66,17 @@ func (sr *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
 			return nil, fmt.Errorf("[get_available_slots] row scan error: %w", err)
 		}
 
-		slot.Date = sqlDate.Format("2006-01-02")
-		slot.StartTime = start.Format("15:04")
-		slot.EndTime = end.Format("15:04")
-		slot.CreatedAt = created.Format("2006-01-02 15:04")
+		slot.Date = sqlDate.Format(dateLay)
+		slot.StartTime = start.Format(timeLay)
+		slot.EndTime = end.Format(timeLay)
+		slot.CreatedAt = created.Format(dateTimeLay)
 
 		slots = append(slots, slot)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("[get_available_slots] rows error: %w", err)
 	}
-
 	return slots, nil
 }
 
@@ -76,7 +89,10 @@ func (sr *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) 
 		slot      entity.Slot
 	)
 
-	if err := sr.db.QueryRow(GetSlotByDateAndTime, date, start).Scan(
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
+	if err := sr.pool.QueryRow(ctx, GetZonesByDate, date).Scan(
 		&slot.ID,
 		&sqlDate,
 		&startTime,
@@ -90,29 +106,35 @@ func (sr *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) 
 		return nil, fmt.Errorf("[find_slot_by_date_time] failed: %w", err)
 	}
 
-	slot.Date = sqlDate.Format("2006-01-02")
-	slot.StartTime = startTime.Format("15:04")
-	slot.EndTime = endTime.Format("15:04")
-	slot.CreatedAt = created.Format("15:04 02-01-2006")
+	slot.Date = sqlDate.Format(dateLay)
+	slot.StartTime = startTime.Format(timeLay)
+	slot.EndTime = endTime.Format(timeLay)
+	slot.CreatedAt = created.Format(dateTimeLay)
 
 	return &slot, nil
 }
 
 func (sr *slotRepo) MarkUnavailable(date, startTime string) error {
-	if _, err := sr.db.Exec(MarkSlotUnavailable, date, startTime); err != nil {
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
+	if _, err := sr.pool.Exec(ctx, MarkSlotUnavailable, date, startTime); err != nil {
 		return utils.WrapError(err)
 	}
 	return nil
 }
 
 func (sr *slotRepo) FreeUp(date, startTime string) error {
-	result, err := sr.db.Exec(FreeUpSlot, date, startTime)
-	affected, err := result.RowsAffected()
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
+
+	result, err := sr.pool.Exec(ctx, FreeUpSlot, date, startTime)
 	if err != nil {
 		return utils.WrapError(err)
 	}
-	if affected == 0 {
-		return errors.New("[free_up_slot] no free up slot: " + date + " " + startTime)
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("[free_up_slot] no free up slot: %s - %s", date, startTime)
 	}
 
 	return nil
