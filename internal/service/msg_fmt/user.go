@@ -3,6 +3,7 @@ package msg_fmt
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	consts "github.com/pan-asovsky/brandd-tg-bot/internal/constant"
 	admflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/admin_flow"
@@ -27,10 +28,7 @@ func (umfs *userMessageFormatterService) Confirm(date, startTime string) string 
 }
 
 func (umfs *userMessageFormatterService) PreConfirm(booking *entity.Booking) (string, error) {
-	date, err := umfs.dateTime.FormatDate(booking.Date, "2006-01-02", "02.01.2006")
-	if err != nil {
-		return "", utils.WrapError(err)
-	}
+	date := umfs.dateTime.FormatDate(booking.Date, "02.01.2006")
 
 	return fmt.Sprintf(
 		usflow.PreConfirmMsg,
@@ -44,7 +42,7 @@ func (umfs *userMessageFormatterService) PreConfirm(booking *entity.Booking) (st
 }
 
 func (umfs *userMessageFormatterService) My(booking *entity.Booking) (string, error) {
-	view, err := umfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+	view, err := umfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time)
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +56,7 @@ func (umfs *userMessageFormatterService) My(booking *entity.Booking) (string, er
 }
 
 func (umfs *userMessageFormatterService) Restriction(booking *entity.Booking) (string, error) {
-	view, err := umfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+	view, err := umfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time)
 	if err != nil {
 		return "", utils.WrapError(err)
 	}
@@ -66,8 +64,8 @@ func (umfs *userMessageFormatterService) Restriction(booking *entity.Booking) (s
 	return fmt.Sprintf(usflow.BookingRestriction, view), nil
 }
 
-func (umfs *userMessageFormatterService) PreCancel(date, time string) (string, error) {
-	view, err := umfs.dateTime.FormatDateTimeToShortView(date, time, "2006-01-02")
+func (umfs *userMessageFormatterService) PreCancel(date time.Time, time string) (string, error) {
+	view, err := umfs.dateTime.FormatDateTimeToShortView(date, time)
 	if err != nil {
 		return "", utils.WrapError(err)
 	}
@@ -76,7 +74,7 @@ func (umfs *userMessageFormatterService) PreCancel(date, time string) (string, e
 }
 
 func (umfs *userMessageFormatterService) BookingPreview(booking *entity.Booking) (string, error) {
-	view, err := umfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+	view, err := umfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time)
 	if err != nil {
 		return "", utils.WrapError(err)
 	}

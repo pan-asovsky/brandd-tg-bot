@@ -16,12 +16,12 @@ type adminMessageFormatterService struct {
 	dateTime isvc.DateTimeService
 }
 
-func NewAdminMessageFormatterService(dateTime isvc.DateTimeService) ifmt.AdminMessageFormatterService {
-	return &adminMessageFormatterService{dateTime: dateTime}
+func NewAdminMessageFormatterService(dt isvc.DateTimeService) ifmt.AdminMessageFormatterService {
+	return &adminMessageFormatterService{dateTime: dt}
 }
 
 func (amfs *adminMessageFormatterService) BookingCreated(booking *entity.Booking) (string, error) {
-	view, err := amfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+	view, err := amfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time)
 	if err != nil {
 		return "", utils.WrapError(err)
 	}
@@ -37,7 +37,7 @@ func (amfs *adminMessageFormatterService) BookingCreated(booking *entity.Booking
 }
 
 func (amfs *adminMessageFormatterService) BookingCancelled(booking *entity.Booking) (string, error) {
-	view, err := amfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+	view, err := amfs.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time)
 	if err != nil {
 		return "", utils.WrapError(err)
 	}

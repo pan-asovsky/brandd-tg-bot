@@ -49,7 +49,7 @@ func (aks *adminKeyboardService) Bookings(bookings []entity.Booking) tgapi.Inlin
 	var currentRow []tgapi.InlineKeyboardButton
 
 	for x, booking := range bookings {
-		view, err := aks.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time, "2006-01-02")
+		view, err := aks.dateTime.FormatDateTimeToShortView(booking.Date, booking.Time)
 		if err != nil {
 			continue
 		}
@@ -70,10 +70,7 @@ func (aks *adminKeyboardService) Bookings(bookings []entity.Booking) tgapi.Inlin
 }
 
 func (aks *adminKeyboardService) Statistics(label stat.Label) tgapi.InlineKeyboardMarkup {
-	//todo: keyboard [Сегодня], [Вчера], [Неделя], [Месяц]
-	// по умолчанию выбрано [Сегодня], эта кнопка не видна
-	// далее по callback кнопки меняются, исключая текущую
-
+	//todo: можно сделать проще?
 	todayBtn := tgapi.NewInlineKeyboardButtonData(admflow.TodayBtn, aks.cbBuilder.Statistics(stat.Today))
 	yesterdayBtn := tgapi.NewInlineKeyboardButtonData(admflow.YesterdayBtn, aks.cbBuilder.Statistics(stat.Yesterday))
 	weekBtn := tgapi.NewInlineKeyboardButtonData(admflow.WeekBtn, aks.cbBuilder.Statistics(stat.Week))

@@ -15,40 +15,24 @@ func NewDateTimeService() isvc.DateTimeService {
 	return &dateTimeService{}
 }
 
-func (dts *dateTimeService) FormatDateTimeToShortView(d, t, inLayout string) (string, error) {
-	date, err := time.Parse(inLayout, d)
-	if err != nil {
-		return "", utils.WrapError(err)
-	}
-
+func (dts *dateTimeService) FormatDateTimeToShortView(date time.Time, time string) (string, error) {
 	day := fmt.Sprintf("%02d", date.Day())
 	monthNumber := fmt.Sprintf("%02d", int(date.Month()))
 	weekDayRu := daysOfWeekShortRu[date.Weekday().String()]
 
-	return fmt.Sprintf("%s.%s (%s), %s", day, monthNumber, weekDayRu, t), nil
+	return fmt.Sprintf("%s.%s (%s), %s", day, monthNumber, weekDayRu, time), nil
 }
 
-func (dts *dateTimeService) FormatDateTimeToExtendedView(d, t, inLayout string) (string, error) {
-	date, err := time.Parse(inLayout, d)
-	if err != nil {
-		return "", utils.WrapError(err)
-	}
-
+func (dts *dateTimeService) formatDateTimeToExtendedView(date time.Time, time string) (string, error) {
 	day := fmt.Sprintf("%02d", date.Day())
 	monthRuName := monthNamesRu[int(date.Month())]
 	weekDayRu := daysOfWeekFullRu[date.Weekday().String()]
 
-	return fmt.Sprintf("%s.%s (%s), %s", day, monthRuName, weekDayRu, t), nil
+	return fmt.Sprintf("%s.%s (%s), %s", day, monthRuName, weekDayRu, time), nil
 }
 
-func (dts *dateTimeService) FormatDate(date, inLayout, outLayout string) (string, error) {
-	t, err := time.Parse(inLayout, date)
-	if err != nil {
-		return date, utils.WrapError(err)
-	}
-
-	formatted := t.Format(outLayout)
-	return formatted, nil
+func (dts *dateTimeService) FormatDate(date time.Time, outLayout string) string {
+	return date.Format(outLayout)
 }
 
 func (dts *dateTimeService) ParseDate(date, inLayout string) (time.Time, error) {

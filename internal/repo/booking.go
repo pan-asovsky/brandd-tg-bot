@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -77,6 +76,7 @@ func (br *bookingRepo) Save(booking *entity.Booking) (*entity.Booking, error) {
 	).Scan(&booking.ID); err != nil {
 		return nil, utils.WrapError(err)
 	}
+
 	return booking, nil
 }
 
@@ -109,7 +109,6 @@ func (br *bookingRepo) Find(bookingID int64) (*entity.Booking, error) {
 }
 
 func (br *bookingRepo) Close(info *model.BookingInfo) (*entity.Booking, error) {
-	//booking, err := scan(br.db.QueryRow(Close, entity.BookingStatus(info.Status), info.UserChatID, info.BookingID))
 	ctx, cancel := CtxWithTimeout(TwoSec)
 	defer cancel()
 
@@ -124,21 +123,27 @@ func (br *bookingRepo) Close(info *model.BookingInfo) (*entity.Booking, error) {
 	return booking, nil
 }
 
-func (br *bookingRepo) ListByPeriod(period stat.Period) ([]entity.Booking, error) {
-	bookings, err := br.findMany(ListByPeriod, "list_by_period", period.From, period.To)
-	if err != nil {
-		return nil, utils.WrapError(err)
-	}
-	log.Printf("[list_by_period] period: %s, founded bookings: %d", period.Format(), len(bookings))
-	return bookings, nil
-}
+func (br *bookingRepo) StatusesByPeriod(period stat.Period) (stat.Stats, error) {
+	ctx, cancel := CtxWithTimeout(TwoSec)
+	defer cancel()
 
-func (br *bookingRepo) ListStatusByPeriod(period stat.Period) (stat.Stats, error) {
-	return stat.Stats{}, nil
+	var stats stat.Stats
+	row := br.pool.QueryRow(ctx, StatusesByPeriod, period.From, period.To)
+
+	if err := row.Scan(
+		&stats.ActiveCount,
+		&stats.CanceledCount,
+		&stats.CompletedCount,
+		&stats.NoShowCount,
+		&stats.PendingCount,
+	); err != nil {
+		return stats, utils.WrapError(err)
+	}
+
+	return stats, nil
 }
 
 func (br *bookingRepo) findOne(query, tag string, args ...any) (*entity.Booking, error) {
-	//booking, err := scan(br.db.QueryRow(query, args...))
 	ctx, cancel := CtxWithTimeout(TwoSec)
 	defer cancel()
 
@@ -154,10 +159,9 @@ func (br *bookingRepo) findOne(query, tag string, args ...any) (*entity.Booking,
 }
 
 func (br *bookingRepo) findMany(query, tag string, args ...any) ([]entity.Booking, error) {
-	//rows, err := br.db.Query(query, args...)
-
 	ctx, cancel := CtxWithTimeout(TwoSec)
 	defer cancel()
+
 	rows, err := br.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("[%s] query error: %w", tag, err)
@@ -170,6 +174,7 @@ func (br *bookingRepo) findMany(query, tag string, args ...any) ([]entity.Bookin
 		if err != nil {
 			return nil, fmt.Errorf("[%s] rows scan error: %w", tag, err)
 		}
+
 		bookings = append(bookings, *booking)
 	}
 
@@ -213,12 +218,9 @@ func (br *bookingRepo) confirm(chatID int64, confirmedBy string) error {
 }
 
 func (br *bookingRepo) exec(query, tag string, args ...any) error {
-	//if _, err := br.db.Exec(query, args...); err != nil {
-	//	return fmt.Errorf("[%s] exec error: %w", tag, err)
-	//}
-
 	ctx, cancel := CtxWithTimeout(TwoSec)
 	defer cancel()
+
 	if _, err := br.pool.Exec(ctx, query, args...); err != nil {
 		return fmt.Errorf("[%s] exec error: %w", tag, err)
 	}
@@ -227,16 +229,15 @@ func (br *bookingRepo) exec(query, tag string, args ...any) error {
 }
 
 func (br *bookingRepo) exists(query string, args ...any) (bool, error) {
-	//err := br.db.QueryRow(query, args...).Scan(&exists)
-
-	var exists bool
 	ctx, cancel := CtxWithTimeout(TwoSec)
 	defer cancel()
 
+	var exists bool
 	err := br.pool.QueryRow(ctx, query, args...).Scan(&exists)
 	if err != nil {
 		return false, err
 	}
+
 	return exists, nil
 }
 

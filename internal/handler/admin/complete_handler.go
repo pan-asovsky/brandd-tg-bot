@@ -9,12 +9,11 @@ import (
 )
 
 func (ach *adminCallbackHandler) handleComplete(query *tgapi.CallbackQuery) error {
-	log.Printf("[handle_complete] callback: %s", query.Data)
-
 	bookingInfo, err := ach.callback.AdminCallbackParser().ParseComplete(query)
 	if err != nil {
 		return utils.WrapError(err)
 	}
+	log.Printf("[handle_complete] booking: %d", bookingInfo.BookingID)
 
 	return utils.WrapFunctionError(func() error {
 		switch bookingInfo.Status {
@@ -29,7 +28,7 @@ func (ach *adminCallbackHandler) handleComplete(query *tgapi.CallbackQuery) erro
 }
 
 func (ach *adminCallbackHandler) handlePreComplete(chatID int64, info *model.BookingInfo) error {
-	log.Printf("[handle_pre_complete] info: %v", info)
+	log.Printf("[handle_pre_complete] booking: %d", info.BookingID)
 	return utils.WrapFunctionError(func() error {
 		return ach.telegram.Admin().ConfirmAction(chatID, info)
 	})

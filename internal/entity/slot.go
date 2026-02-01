@@ -1,12 +1,14 @@
 package entity
 
+import "time"
+
 type Slot struct {
-	ID          int64  `db:"id"`
-	Date        string `db:"date"`
-	StartTime   string `db:"start_time"`
-	EndTime     string `db:"end_time"`
-	IsAvailable bool   `db:"is_available"`
-	CreatedAt   string `db:"created_at"`
+	ID          int64     `db:"id"`
+	Date        time.Time `db:"date"`
+	StartTime   string    `db:"start_time"`
+	EndTime     string    `db:"end_time"`
+	IsAvailable bool      `db:"is_available"`
+	CreatedAt   string    `db:"created_at"`
 }
 
 type Timeslot struct {

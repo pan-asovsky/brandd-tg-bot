@@ -23,6 +23,5 @@ type BookingRepo interface {
 	FindAllActive() ([]entity.Booking, error)
 	Find(bookingID int64) (*entity.Booking, error)
 	Close(info *model.BookingInfo) (*entity.Booking, error)
-	ListByPeriod(period stat.Period) ([]entity.Booking, error)
-	ListStatusByPeriod(period stat.Period) (stat.Stats, error)
+	StatusesByPeriod(period stat.Period) (stat.Stats, error)
 }

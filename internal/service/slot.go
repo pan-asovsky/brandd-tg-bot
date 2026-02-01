@@ -56,7 +56,7 @@ func (s *slotService) GetAvailableZones(date string) (entity.Zone, error) {
 
 	keys := make([]string, len(slots))
 	for x, slot := range slots {
-		keys[x] = s.slotLocker.FormatKey(slot.Date, fmt.Sprintf("%s-%s", slot.StartTime, slot.EndTime))
+		keys[x] = s.slotLocker.FormatKeyV2(slot.Date, fmt.Sprintf("%s-%s", slot.StartTime, slot.EndTime))
 	}
 
 	lockStatus, err := s.slotLocker.AreLocked(keys...)
@@ -75,19 +75,19 @@ func (s *slotService) GetAvailableZones(date string) (entity.Zone, error) {
 	return s.groupByZones(filtered), nil
 }
 
-func (s *slotService) FindByDateTime(date, start string) (*entity.Slot, error) {
+func (s *slotService) FindByDateTime(date time.Time, start string) (*entity.Slot, error) {
 	return utils.WrapFunction(func() (*entity.Slot, error) {
 		return s.slotRepo.FindByDateAndTime(date, start)
 	})
 }
 
-func (s *slotService) MarkUnavailable(date, startTime string) error {
+func (s *slotService) MarkUnavailable(date time.Time, startTime string) error {
 	return utils.WrapFunctionError(func() error {
 		return s.slotRepo.MarkUnavailable(date, startTime)
 	})
 }
 
-func (s *slotService) FreeUp(date, startTime string) error {
+func (s *slotService) FreeUp(date time.Time, startTime string) error {
 	return utils.WrapFunctionError(func() error {
 		return s.slotRepo.FreeUp(date, startTime)
 	})

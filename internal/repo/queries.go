@@ -6,14 +6,16 @@ const (
 		WHERE date = CURRENT_DATE
 		AND start_time > NOW()::time
 		AND is_available = true
-	`
+		`
+
 	GetZonesByDate = `
 		SELECT * FROM available_slots
 		WHERE date = $1
   		AND (date > CURRENT_DATE OR (date = CURRENT_DATE AND start_time > NOW()::time))
   		AND is_available = true
 		ORDER BY start_time
-	`
+		`
+
 	GetCompositeServiceTypes = `SELECT * FROM service_types WHERE is_composite = true`
 	GetAllRimSizes           = `SELECT DISTINCT rim_size FROM prices`
 	IsAutoConfirm            = `SELECT auto_confirm from config`
@@ -22,19 +24,24 @@ const (
 		UPDATE available_slots 
 		SET is_available = false 
 		WHERE date = $1 
-		AND start_time = $2`
-
-	GetSlotByDateAndTime = `
-		SELECT * FROM available_slots 
-		WHERE date = $1 
-		AND start_time = $2`
+		AND start_time = $2
+		`
 
 	FindActiveNotPending = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true AND status != 'PENDING'`
 	FindActivePending    = `SELECT * FROM bookings WHERE chat_id = $1 AND is_active = true AND status = 'PENDING'`
 	FindAnyActive        = `SELECT * FROM bookings WHERE chat_id = $1 and is_active = true`
 	FindAllActive        = `SELECT * FROM bookings WHERE is_active = true`
 
-	ListByPeriod = `SELECT * FROM bookings where CAST(date AS DATE) >= $1 and CAST(date AS DATE) <= $2`
+	StatusesByPeriod = `
+		SELECT
+			COUNT(*) FILTER (WHERE status = 'CONFIRMED') AS active_count,
+			COUNT(*) FILTER (WHERE status = 'CANCELLED') AS cancelled_count,
+			COUNT(*) FILTER (WHERE status = 'COMPLETED') AS completed_count,
+			COUNT(*) FILTER (WHERE status = 'NO_SHOW') AS no_show_count,
+			COUNT(*) FILTER (WHERE status = 'PENDING') AS pending_count
+		FROM bookings
+		WHERE date >= $1 AND date <= $2;
+`
 
 	FindByID = `SELECT * FROM bookings WHERE id = $1`
 
@@ -62,7 +69,8 @@ const (
 	Close = `UPDATE bookings SET status = $1, is_active = false 
                 WHERE chat_id = $2 AND id = $3
                 RETURNING id, chat_id,user_phone, date, time, service, rim_radius, total_price, 
-                    status, is_active, created_at, updated_at, confirmed_by, cancelled_by, notes;`
+                    status, is_active, created_at, updated_at, confirmed_by, cancelled_by, notes;
+	`
 
 	GetPricePerSet = `SELECT price_per_set FROM prices WHERE service_type_code = $1 AND rim_size = $2 AND is_active = true`
 

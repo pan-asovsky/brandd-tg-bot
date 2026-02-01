@@ -2,8 +2,10 @@ package service
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
@@ -29,9 +31,14 @@ func NewBookingService(
 }
 
 func (bs *bookingService) Create(info *model.UserSessionInfo) (*entity.Booking, error) {
+	date, err := time.Parse("2006-01-02", info.Date)
+	if err != nil {
+		return nil, fmt.Errorf("[create_booking] error parsing date: %v", err)
+	}
+
 	booking := &entity.Booking{
 		ChatID:     info.ChatID,
-		Date:       info.Date,
+		Date:       date,
 		Service:    info.Service,
 		RimRadius:  info.RimRadius,
 		TotalPrice: sql.NullInt64{Int64: info.TotalPrice, Valid: true},

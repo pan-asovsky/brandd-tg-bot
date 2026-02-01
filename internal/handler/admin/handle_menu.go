@@ -17,15 +17,18 @@ func (ach *adminCallbackHandler) handleMenu(query *tgapi.CallbackQuery) error {
 		return errors.New("[handle_menu]: invalid callback: " + query.Data)
 	}
 
-	//todo: how to improve?
-	if admflow.Bookings == payload {
-		return ach.menuBookings(query)
-	} else if strings.Contains(payload, admflow.PrefixStatistics) {
-		parts := strings.Split(payload, "::")
-		query.Data = parts[len(parts)-1]
+	handlers := map[string]func(q *tgapi.CallbackQuery) error{
+		admflow.Bookings: ach.menuBookings,
+		admflow.Settings: ach.menuSettings,
+	}
+
+	if h, ok := handlers[payload]; ok {
+		return h(query)
+	}
+
+	if strings.HasPrefix(payload, admflow.PrefixStatistics) {
+		query.Data = strings.TrimPrefix(payload, admflow.PrefixStatistics)
 		return ach.menuStatistics(query)
-	} else if admflow.Settings == payload {
-		return ach.menuSettings(query)
 	}
 
 	return nil
@@ -45,7 +48,7 @@ func (ach *adminCallbackHandler) menuBookings(query *tgapi.CallbackQuery) error 
 
 	sort.Slice(bookings, func(i, j int) bool {
 		if bookings[i].Date != bookings[j].Date {
-			return bookings[i].Date < bookings[j].Date
+			return bookings[i].Date.Before(bookings[j].Date)
 		}
 		return bookings[i].Time < bookings[j].Time
 	})

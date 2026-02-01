@@ -3,8 +3,8 @@ package service
 import "time"
 
 type DateTimeService interface {
-	FormatDateTimeToShortView(d, t, inDateFormat string) (string, error)
-	FormatDate(date, inLayout, outLayout string) (string, error)
+	FormatDateTimeToShortView(date time.Time, time string) (string, error)
+	FormatDate(date time.Time, outLayout string) string
 	ParseDate(date, inLayout string) (time.Time, error)
 	ParseToStartEndTime(time string) (start, end string)
 }

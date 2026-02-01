@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -38,7 +37,6 @@ func NewPGXPool(cfg *config.Config, ctx context.Context) (*pgxpool.Pool, error) 
 	if err = goose.Up(sqlDB, "migrations"); err != nil {
 		return nil, fmt.Errorf("failed to migrate sql db: %w", err)
 	}
-	log.Println("sql migrations applied successfully")
 
 	return pool, nil
 }

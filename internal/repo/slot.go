@@ -18,7 +18,6 @@ type slotRepo struct {
 
 const (
 	timeLay     = "15:04"
-	dateLay     = "2006-01-02"
 	dateTimeLay = "2006-01-02 15:04:05"
 )
 
@@ -50,14 +49,14 @@ func (sr *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
 	for rows.Next() {
 		var slot entity.Slot
 		var (
-			sqlDate time.Time
+			//sqlDate time.Time
 			start   time.Time
 			end     time.Time
 			created time.Time
 		)
 		if err = rows.Scan(
 			&slot.ID,
-			&sqlDate,
+			&slot.Date,
 			&start,
 			&end,
 			&slot.IsAvailable,
@@ -66,7 +65,7 @@ func (sr *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
 			return nil, fmt.Errorf("[get_available_slots] row scan error: %w", err)
 		}
 
-		slot.Date = sqlDate.Format(dateLay)
+		//slot.Date = sqlDate.Format(dateLay)
 		slot.StartTime = start.Format(timeLay)
 		slot.EndTime = end.Format(timeLay)
 		slot.CreatedAt = created.Format(dateTimeLay)
@@ -80,9 +79,8 @@ func (sr *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
 	return slots, nil
 }
 
-func (sr *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) {
+func (sr *slotRepo) FindByDateAndTime(date time.Time, start string) (*entity.Slot, error) {
 	var (
-		sqlDate   time.Time
 		startTime time.Time
 		endTime   time.Time
 		created   time.Time
@@ -94,7 +92,7 @@ func (sr *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) 
 
 	if err := sr.pool.QueryRow(ctx, GetZonesByDate, date).Scan(
 		&slot.ID,
-		&sqlDate,
+		&slot.Date,
 		&startTime,
 		&endTime,
 		&slot.IsAvailable,
@@ -106,7 +104,6 @@ func (sr *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) 
 		return nil, fmt.Errorf("[find_slot_by_date_time] failed: %w", err)
 	}
 
-	slot.Date = sqlDate.Format(dateLay)
 	slot.StartTime = startTime.Format(timeLay)
 	slot.EndTime = endTime.Format(timeLay)
 	slot.CreatedAt = created.Format(dateTimeLay)
@@ -114,7 +111,7 @@ func (sr *slotRepo) FindByDateAndTime(date, start string) (*entity.Slot, error) 
 	return &slot, nil
 }
 
-func (sr *slotRepo) MarkUnavailable(date, startTime string) error {
+func (sr *slotRepo) MarkUnavailable(date time.Time, startTime string) error {
 	ctx, cancel := CtxWithTimeout(TwoSec)
 	defer cancel()
 
@@ -124,7 +121,7 @@ func (sr *slotRepo) MarkUnavailable(date, startTime string) error {
 	return nil
 }
 
-func (sr *slotRepo) FreeUp(date, startTime string) error {
+func (sr *slotRepo) FreeUp(date time.Time, startTime string) error {
 	ctx, cancel := CtxWithTimeout(TwoSec)
 	defer cancel()
 

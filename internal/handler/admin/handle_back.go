@@ -2,7 +2,6 @@ package admin
 
 import (
 	"errors"
-	"log"
 	"strings"
 
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -10,7 +9,6 @@ import (
 )
 
 func (ach *adminCallbackHandler) handleBack(query *tgapi.CallbackQuery) error {
-	log.Printf("[handle_back] callback: %s", query.Data)
 	_, payload, ok := strings.Cut(query.Data, "::")
 	if !ok {
 		return errors.New("[handle_back] invalid callback: " + query.Data)

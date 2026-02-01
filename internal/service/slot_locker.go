@@ -104,3 +104,7 @@ func (sl *slotLockerService) AreLocked(keys ...string) (map[string]bool, error) 
 func (sl *slotLockerService) FormatKey(date, time string) string {
 	return fmt.Sprintf("s_lock:%s_%s", date, time)
 }
+
+func (sl *slotLockerService) FormatKeyV2(date time.Time, time string) string {
+	return fmt.Sprintf("s_lock:%s_%s", date.Format("2006-01-02"), time)
+}

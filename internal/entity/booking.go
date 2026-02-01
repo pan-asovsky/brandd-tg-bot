@@ -24,7 +24,7 @@ type Booking struct {
 	ID          int64          `db:"id"`
 	ChatID      int64          `db:"chat_id"`
 	UserPhone   sql.NullString `db:"user_phone"`
-	Date        string         `db:"date"`
+	Date        time.Time      `db:"date"`
 	Time        string         `db:"time"`
 	Service     string         `db:"service"`
 	RimRadius   string         `db:"rim_radius"`

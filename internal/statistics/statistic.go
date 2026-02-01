@@ -16,26 +16,7 @@ func NewStatisticService(br irepo.BookingRepo) isvc.StatisticService {
 }
 
 func (ss *statisticService) Calculate(p stat.Period) (stat.Stats, error) {
-	bookings, err := ss.bookingRepo.ListByPeriod(p)
-	if err != nil {
-		return stat.Stats{}, utils.WrapError(err)
-	}
-
-	var stats stat.Stats
-	for _, booking := range bookings {
-		switch {
-		case booking.IsActive():
-			stats.ActiveCount++
-		case booking.IsCancelled():
-			stats.CanceledCount++
-		case booking.IsCompleted():
-			stats.CompletedCount++
-		case booking.IsNoShow():
-			stats.NoShowCount++
-		case booking.IsPending():
-			stats.PendingCount++
-		}
-	}
-
-	return stats, nil
+	return utils.WrapFunction(func() (stat.Stats, error) {
+		return ss.bookingRepo.StatusesByPeriod(p)
+	})
 }

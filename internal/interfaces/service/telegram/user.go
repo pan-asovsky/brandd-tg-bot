@@ -1,6 +1,8 @@
 package tg
 
 import (
+	"time"
+
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/model"
 )
@@ -21,7 +23,7 @@ type TelegramUserService interface {
 	SendMyBookingsMessage(chatID int64, fn func() (*entity.Booking, error)) error
 	StartMenu(chatID int64) error
 
-	SendPreCancelBookingMessage(chatID int64, date, time string) error
+	SendPreCancelBookingMessage(chatID int64, date time.Time, time string) error
 	SendCancellationMessage(chatID int64) error
 	SendCancelDenyMessage(chatID int64) error
 

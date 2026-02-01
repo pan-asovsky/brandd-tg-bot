@@ -1,6 +1,8 @@
 package telegram
 
 import (
+	"time"
+
 	usflow "github.com/pan-asovsky/brandd-tg-bot/internal/constant/user_flow"
 	"github.com/pan-asovsky/brandd-tg-bot/internal/entity"
 	iprovider "github.com/pan-asovsky/brandd-tg-bot/internal/interfaces/provider"
@@ -83,11 +85,7 @@ func (uts *userTelegramService) RequestUserPhone(info *model.UserSessionInfo) er
 }
 
 func (uts *userTelegramService) ProcessConfirm(chatID int64, slot *entity.Slot) error {
-	date, err := uts.dateTime.FormatDate(slot.Date, "2006-01-02", "02.01.2006")
-	if err != nil {
-		return utils.WrapError(err)
-	}
-
+	date := uts.dateTime.FormatDate(slot.Date, "02.01.2006")
 	msg := uts.msgFmtProvider.Booking().Confirm(date, slot.StartTime)
 	return utils.WrapFunctionError(func() error {
 		return uts.tgCommon.SendMessageHTMLMode(chatID, msg)
@@ -134,7 +132,7 @@ func (uts *userTelegramService) StartMenu(chatID int64) error {
 	})
 }
 
-func (uts *userTelegramService) SendPreCancelBookingMessage(chatID int64, date, time string) error {
+func (uts *userTelegramService) SendPreCancelBookingMessage(chatID int64, date time.Time, time string) error {
 	msg, err := uts.msgFmtProvider.Booking().PreCancel(date, time)
 	if err != nil {
 		return utils.WrapError(err)
