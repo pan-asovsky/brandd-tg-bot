@@ -36,8 +36,8 @@ CREATE TABLE bookings (
     chat_id BIGINT NOT NULL,
     user_phone VARCHAR,
 
-    date VARCHAR NOT NULL,
-    time VARCHAR NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
     service VARCHAR NOT NULL,
     rim_radius INTEGER NOT NULL,
     total_price BIGINT,

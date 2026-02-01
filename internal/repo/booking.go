@@ -189,13 +189,13 @@ func scan(scanner interface {
 	Scan(dest ...any) error
 }) (*entity.Booking, error) {
 	var booking entity.Booking
-
+	var t time.Time
 	if err := scanner.Scan(
 		&booking.ID,
 		&booking.ChatID,
 		&booking.UserPhone,
 		&booking.Date,
-		&booking.Time,
+		&t,
 		&booking.Service,
 		&booking.RimRadius,
 		&booking.TotalPrice,
@@ -209,6 +209,8 @@ func scan(scanner interface {
 	); err != nil {
 		return nil, err
 	}
+
+	booking.Time = t.Format(timeLay)
 
 	return &booking, nil
 }

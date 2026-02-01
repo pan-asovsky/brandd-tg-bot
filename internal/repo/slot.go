@@ -49,7 +49,6 @@ func (sr *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
 	for rows.Next() {
 		var slot entity.Slot
 		var (
-			//sqlDate time.Time
 			start   time.Time
 			end     time.Time
 			created time.Time
@@ -65,7 +64,6 @@ func (sr *slotRepo) GetAvailableSlots(date string) ([]entity.Slot, error) {
 			return nil, fmt.Errorf("[get_available_slots] row scan error: %w", err)
 		}
 
-		//slot.Date = sqlDate.Format(dateLay)
 		slot.StartTime = start.Format(timeLay)
 		slot.EndTime = end.Format(timeLay)
 		slot.CreatedAt = created.Format(dateTimeLay)
